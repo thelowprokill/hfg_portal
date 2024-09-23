@@ -11,8 +11,8 @@ import Config
 
 
 # Configure Mix tasks and generators
-config :bnw_portal,
-  ecto_repos: [BnwPortal.Repo]
+config :hull_family_games,
+  ecto_repos: [HullFamilyGames.Repo]
 
 # Configures the mailer
 #
@@ -21,20 +21,20 @@ config :bnw_portal,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :bnw_portal, BnwPortal.Mailer, adapter: Swoosh.Adapters.Local
+config :hull_family_games, HullFamilyGames.Mailer, adapter: Swoosh.Adapters.Local
 
-config :bnw_portal_web,
-  ecto_repos: [BnwPortal.Repo],
-  generators: [context_app: :bnw_portal]
+config :hull_family_games_web,
+  ecto_repos: [HullFamilyGames.Repo],
+  generators: [context_app: :hull_family_games]
 
 # Configures the endpoint
-config :bnw_portal_web, BnwPortalWeb.Endpoint,
+config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: BnwPortalWeb.ErrorHTML, json: BnwPortalWeb.ErrorJSON],
+    formats: [html: HullFamilyGamesWeb.ErrorHTML, json: HullFamilyGamesWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: BnwPortal.PubSub,
+  pubsub_server: HullFamilyGames.PubSub,
   live_view: [signing_salt: "1Qb4ZL3I"]
 
 # Configure esbuild (the version is required)
@@ -43,7 +43,7 @@ config :esbuild,
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
-    cd: Path.expand("../apps/bnw_portal_web/assets", __DIR__),
+    cd: Path.expand("../apps/hull_family_games_web/assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
@@ -56,7 +56,7 @@ config :tailwind,
       --input=css/app.css
       --output=../priv/static/assets/app.css
     ),
-    cd: Path.expand("../apps/bnw_portal_web/assets", __DIR__)
+    cd: Path.expand("../apps/hull_family_games_web/assets", __DIR__)
   ]
 
 # Configures Elixir's Logger

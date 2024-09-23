@@ -38,7 +38,7 @@ if config_env() == :prod do
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "bnw_portal_dev_team_timetracking",
+    database: "hull_family_games_dev_team_timetracking",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -48,7 +48,7 @@ if config_env() == :prod do
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "bnw_portal_admin_logs",
+    database: "hull_family_games_admin_logs",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -58,7 +58,7 @@ if config_env() == :prod do
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "bnw_portal_it_budget",
+    database: "hull_family_games_it_budget",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -70,11 +70,11 @@ if config_env() == :prod do
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "bnw_portal_budget",
+    database: "hull_family_games_budget",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
-  config :bnw_portal, BnwPortal.Repo,
+  config :hull_family_games, HullFamilyGames.Repo,
     # ssl: true,
     hostname: mysql_host,
     username: mysql_username,
@@ -96,9 +96,9 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  config :bnw_portal_web, :environment, System.get_env("ENVIRONMENT") || "production"
+  config :hull_family_games_web, :environment, System.get_env("ENVIRONMENT") || "production"
 
-  config :bnw_portal_web, BnwPortalWeb.Endpoint,
+  config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
     server: true,
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -114,7 +114,7 @@ if config_env() == :prod do
   # If you are doing OTP releases, you need to instruct Phoenix
   # to start each relevant endpoint:
   #
-  #     config :bnw_portal_web, BnwPortalWeb.Endpoint, server: true
+  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint, server: true
   #
   # Then you can assemble a release by calling `mix release`.
   # See `mix help release` for more information.
@@ -124,7 +124,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :bnw_portal_web, BnwPortalWeb.Endpoint,
+  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -146,7 +146,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your endpoint, ensuring
   # no data is ever sent via http, always redirecting to https:
   #
-  #     config :bnw_portal_web, BnwPortalWeb.Endpoint,
+  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -157,7 +157,7 @@ if config_env() == :prod do
   # Also, you may need to configure the Swoosh API client of your choice if you
   # are not using SMTP. Here is an example of the configuration:
   #
-  #     config :bnw_portal, BnwPortal.Mailer,
+  #     config :hull_family_games, HullFamilyGames.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")

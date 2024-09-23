@@ -34,8 +34,8 @@ RUN mix local.hex --force && \
     mix local.rebar --force
 
 # copy mix files for each app
-COPY apps/bnw_portal/mix.exs            apps/bnw_portal/ 
-COPY apps/bnw_portal_web/mix.exs        apps/bnw_portal_web/ 
+COPY apps/hull_family_games/mix.exs            apps/hull_family_games/ 
+COPY apps/hull_family_games_web/mix.exs        apps/hull_family_games_web/ 
 COPY apps/admin_logs/mix.exs            apps/admin_logs/ 
 COPY apps/budget/mix.exs                apps/budget/ 
 COPY apps/dev_team_timetracking/mix.exs apps/dev_team_timetracking/ 
@@ -58,8 +58,8 @@ RUN mix deps.compile
 COPY . /app/
 
 # compile assets
-WORKDIR /app/apps/bnw_portal_web
-RUN MIX_ENV=${MIX_ENV} mix cmd --app bnw_portal_web mix assets.deploy
+WORKDIR /app/apps/hull_family_games_web
+RUN MIX_ENV=${MIX_ENV} mix cmd --app hull_family_games_web mix assets.deploy
 
 # Compile the release
 RUN MIX_ENV=${MIX_ENV} mix compile
@@ -93,7 +93,7 @@ RUN chown -R nobody /app
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/bnw_portal_umbrella ./
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/hull_family_games_umbrella ./
 COPY --from=builder --chown=nobody:root app/bin/ ./bin
 
 RUN chmod +x /app/bin/*

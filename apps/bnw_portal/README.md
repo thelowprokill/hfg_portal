@@ -1,3 +1,0 @@
-# BnwPortal
-
-**TODO: Add description**

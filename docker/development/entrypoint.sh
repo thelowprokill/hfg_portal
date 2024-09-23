@@ -14,7 +14,7 @@ do
 done
 
 # All apps in umbrella
-apps="admin_logs bnw_portal budget it_budget dev_team_timetracking"
+apps="admin_logs hull_family_games budget it_budget dev_team_timetracking"
 
 # Create, migrate, and seed database if it doesn't exist.
 echo ""

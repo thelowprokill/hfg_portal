@@ -1,11 +1,11 @@
 import Config
 
 # Configure your database
-config :bnw_portal, BnwPortal.Repo,
+config :hull_family_games, HullFamilyGames.Repo,
   username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "#{System.get_env("LOCATION") || "bnw"}_portal_dev",
+  database: "hull_family_games_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -16,7 +16,7 @@ config :bnw_portal, BnwPortal.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :bnw_portal_web, BnwPortalWeb.Endpoint,
+config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   https: [
@@ -58,17 +58,17 @@ config :bnw_portal_web, BnwPortalWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :bnw_portal_web, BnwPortalWeb.Endpoint,
+config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/bnw_portal_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/hull_family_games_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :bnw_portal_web, dev_routes: true
+config :hull_family_games_web, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -83,4 +83,4 @@ config :swoosh, :api_client, false
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-config :bnw_portal,            env: :dev
+config :hull_family_games,            env: :dev
