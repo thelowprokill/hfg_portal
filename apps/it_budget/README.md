@@ -1,3 +1,0 @@
-# ItBudget
-
-**TODO: Add description**

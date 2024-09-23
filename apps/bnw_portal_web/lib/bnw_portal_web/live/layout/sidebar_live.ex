@@ -78,39 +78,44 @@ defmodule BnwPortalWeb.Layout.SidebarLive do
         id: "accounts",
         links: BnwPortal.Authorize.list_pages(current_user),
       },
-      %App{
-        name: "Admin Logs",
-        id: "admin_logs",
-        links: AdminLogs.Authorize.list_pages(current_user),
-      },
+      #%App{
+      #  name: "Admin Logs",
+      #  id: "admin_logs",
+      #  links: AdminLogs.Authorize.list_pages(current_user),
+      #},
       %App{
         name: "Dev Tools", 
         id: "dev_tools",
         links: list_dev_tools(current_user),
       }
     ]
-    apps = cond do
-      true ->
-        [
-          %App{
-            name: "Budget",
-            id: "budget",
-            links: Budget.Authorize.list_pages(current_user),
-            show_admin: Budget.Admins.is_admin(current_user.id),
-          },
-          %App{
-            name: "Dev Team Timetracking",
-            id:   "dev_team_timetracking",
-            links: DevTeamTimetracking.Authorize.list_pages(current_user),
-          },
-          %App{
-            name: "IT Budget",
-            id: "it_budget",
-            links: ItBudget.Authorize.list_pages(current_user),
-            show_admin: false,
-          },
-        ]
-    end
+
+    apps = [
+
+    ]
+    
+    #apps = cond do
+    #  true ->
+    #    [
+    #      %App{
+    #        name: "Budget",
+    #        id: "budget",
+    #        links: Budget.Authorize.list_pages(current_user),
+    #        show_admin: Budget.Admins.is_admin(current_user.id),
+    #      },
+    #      %App{
+    #        name: "Dev Team Timetracking",
+    #        id:   "dev_team_timetracking",
+    #        links: DevTeamTimetracking.Authorize.list_pages(current_user),
+    #      },
+    #      %App{
+    #        name: "IT Budget",
+    #        id: "it_budget",
+    #        links: ItBudget.Authorize.list_pages(current_user),
+    #        show_admin: false,
+    #      },
+    #    ]
+    #end
 
     assign(socket, :apps, system_apps ++ apps)
   end
@@ -204,13 +209,13 @@ defmodule BnwPortalWeb.Layout.SidebarLive do
   def mount(_session, session, socket) do
     if connected?(socket) do
       Accounts.subscribe()
-      ItBudget.UserRoles.subscribe()
-      Budget.Admins.subscribe()
-      Budget.UserRoles.subscribe()
-      Budget.Roles.subscribe()
-      Budget.CompanyPermissions.subscribe()
-      Budget.HomePermissions.subscribe()
-      DevTeamTimetracking.UserRoles.subscribe()
+      #ItBudget.UserRoles.subscribe()
+      #Budget.Admins.subscribe()
+      #Budget.UserRoles.subscribe()
+      #Budget.Roles.subscribe()
+      #Budget.CompanyPermissions.subscribe()
+      #Budget.HomePermissions.subscribe()
+      #DevTeamTimetracking.UserRoles.subscribe()
     end
 
     socket
@@ -287,39 +292,39 @@ defmodule BnwPortalWeb.Layout.SidebarLive do
     end
   end
 
-  @impl true
-  def handle_info({[:it_budget, :user_role, _], user_role}, socket) do 
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false) 
-      true -> socket
-    end
-    |> res()
-  end
+  #@impl true
+  #def handle_info({[:it_budget, :user_role, _], user_role}, socket) do 
+  #  cond do
+  #    user_role.user_id == socket.assigns.current_user.id ->
+  #      update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false) 
+  #    true -> socket
+  #  end
+  #  |> res()
+  #end
 
-  @impl true
-  def handle_info({[:budget, :user_role, _], user_role}, socket) do 
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) 
-      true -> socket
-    end
-    |> res()
-  end
-  @impl true
-  def handle_info({[:budget, _, _], _}, socket) do 
-    update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) |> res()
-  end
+  #@impl true
+  #def handle_info({[:budget, :user_role, _], user_role}, socket) do 
+  #  cond do
+  #    user_role.user_id == socket.assigns.current_user.id ->
+  #      update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) 
+  #    true -> socket
+  #  end
+  #  |> res()
+  #end
+  #@impl true
+  #def handle_info({[:budget, _, _], _}, socket) do 
+  #  update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) |> res()
+  #end
 
-  @impl true
-  def handle_info({[:dev_team_timetracking, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
+  #@impl true
+  #def handle_info({[:dev_team_timetracking, :user_role, _], user_role}, socket) do
+  #  cond do
+  #    user_role.user_id == socket.assigns.current_user.id ->
+  #      update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false)
+  #    true -> socket
+  #  end
+  #  |> res()
+  #end
 
   @impl true
   def handle_info({[:user, _], user}, socket) do

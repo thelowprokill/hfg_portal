@@ -1,7 +1,6 @@
 defmodule BnwPortalWeb.Home.HomeLive do
   use BnwPortalWeb, :live_view
 
-  alias BnwPortalWeb.Home.DataManagement.DataManagementLive
   alias BnwPortal.Accounts
 
   defp can_see_dm_page(socket) do

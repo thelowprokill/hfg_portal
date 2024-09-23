@@ -1,3 +1,0 @@
-# DevTeamTimetracking
-
-**TODO: Add description**

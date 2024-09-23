@@ -4,11 +4,7 @@ defmodule BnwPortal.Release do
   installed.
   """
   @apps [
-    :admin_logs,
     :bnw_portal,
-    :budget,
-    :it_budget,
-    :dev_team_timetracking,
   ]
 
   def migrate do

@@ -4,27 +4,27 @@ services:
       context: .
       dockerfile: ./docker/development/Dockerfile
     ports:
-      - "4000:4000"
+      - "5000:5000"
         #- "4000:4000"
     volumes:
       - .:/app
     depends_on:
-      - bnw-portal-db
+      - hull-family-games-db
     environment:
       - LOCATION=bnw
     env_file:
       - "./docker/development/.env"
-  bnw-portal-db:
-    container_name: bnw-portal-db
+  hull-family-games-db:
+    container_name: hull-family-games-db
     image: mysql:8.1
     environment:
       - MYSQL_ROOT_PASSWORD=sxkjad94
     command: --sql_mode="" --max_connections=200
     ports:
-      - "13306:3306"
+      - "13307:3306"
         #- "13307:3306"
     volumes:
-      - bnw-portal-db-data:/var/lib/mysql
+      - hull-family-games-db-data:/var/lib/mysql
 volumes:
-  bnw-portal-db-data:
+  hull-family-games-db-data:
     driver: local

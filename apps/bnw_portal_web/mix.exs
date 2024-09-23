@@ -54,11 +54,11 @@ defmodule BnwPortalWeb.MixProject do
       {:elixir_auth_google,     "~> 1.6.9"},
       {:qrcode_ex,              "~> 0.1.1"},
       {:jose,                   "~> 1.11"},
-      {:admin_logs,             in_umbrella: true},
       {:bnw_portal,             in_umbrella: true},
-      {:budget,                 in_umbrella: true},
-      {:dev_team_timetracking,  in_umbrella: true},
-      {:it_budget,              in_umbrella: true},
+      #{:admin_logs,             in_umbrella: true},
+      #{:budget,                 in_umbrella: true},
+      #{:dev_team_timetracking,  in_umbrella: true},
+      #{:it_budget,              in_umbrella: true},
     ]
   end
 

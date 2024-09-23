@@ -1,46 +1,6 @@
 import Config
 
 # Configure your database
-config :dev_team_timetracking, DevTeamTimetracking.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
-  password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "bnw_portal_dev_team_timetracking_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
-# Configure your database
-config :admin_logs, AdminLogs.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
-  password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "bnw_portal_admin_logs_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
-# Configure your database
-config :it_budget, ItBudget.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
-  password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "bnw_portal_it_budget_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
-# Configure your database
-config :budget, Budget.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
-  password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "bnw_portal_budget_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
-# Configure your database
 config :bnw_portal, BnwPortal.Repo,
   username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
@@ -60,7 +20,7 @@ config :bnw_portal_web, BnwPortalWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   https: [
-    port: 4000,
+    port: System.get_env("PORT", "4000") |> String.to_integer(),
     cipher_suite: :strong,
     keyfile: "priv/cert/selfsigned_key.pem",
     certfile: "priv/cert/selfsigned.pem"
@@ -123,8 +83,4 @@ config :swoosh, :api_client, false
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-config :admin_logs,            env: :dev
 config :bnw_portal,            env: :dev
-config :budget,                env: :dev
-config :it_budget,             env: :dev
-config :dev_team_timetracking, env: :dev

@@ -1,7 +1,4 @@
 <div>
   <h3 class="text-xl">Welcome to <%= (System.get_env("LOCATION") || "bnw") |> String.upcase() %> Portal</h3>
 
-  <%= if @can_see_dm_page do %>
-    <%= live_render(@socket, DataManagementLive, id: "data_management_page", session: @session) %>
-  <% end %>
 </div>

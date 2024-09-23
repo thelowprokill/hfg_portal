@@ -32,8 +32,6 @@ defmodule BnwPortal.Accounts.User do
     field :start_date,       :date
     field :end_date,         :date
 
-    belongs_to :location, BnwPortal.Accounts.Location
-
     timestamps()
   end
 
@@ -66,7 +64,6 @@ defmodule BnwPortal.Accounts.User do
       :first_name, 
       :middle_name, 
       :last_name, 
-      :location_id,
       :active,
       :portal_admin,
       :dev_admin,
@@ -183,7 +180,6 @@ defmodule BnwPortal.Accounts.User do
       :end_date,
       :password,
       :password_confirm,
-      :location_id,
     ])
     |> validate_email(opts)
     |> validate_password(opts)

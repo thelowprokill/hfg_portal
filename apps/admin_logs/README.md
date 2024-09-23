@@ -1,3 +1,0 @@
-# AdminLogs
-
-**TODO: Add description**
