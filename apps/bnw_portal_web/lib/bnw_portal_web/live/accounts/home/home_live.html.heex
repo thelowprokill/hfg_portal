@@ -1,0 +1,50 @@
+<div class="w-full">
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+
+  <div class="py-3 flex">
+    <div class="w-1/5"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+  </div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table>
+      <:header>
+        <.bnw_th sticky={1} pos={1}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:id}>          ID          </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th sticky={1} pos={2}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:username}>    Username    </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th sticky={1} pos={3}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:email}>       Email       </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>        Name        </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:location}>    Location    </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:active}>      Active      </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:portal_admin}>Portal Admin</.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:dev_admin}>   Dev Admin   </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:test_user}>   Test User   </.bnw_table_header_filter></.bnw_th>
+        <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:generic_user}>Generic User</.bnw_table_header_filter></.bnw_th>
+        <.bnw_th sticky={1} right={1} pos={2}></.bnw_th>
+        <.bnw_th sticky={1} right={1} pos={1}></.bnw_th>
+      </:header>
+      <%= for account <- @accounts do %>
+        <tr>
+          <.bnw_td sticky={1} pos={1}><%= account.id %></.bnw_td>
+          <.bnw_td sticky={1} pos={2}><%= account.username %></.bnw_td>
+          <.bnw_td sticky={1} pos={3}><%= account.email %></.bnw_td>
+          <.bnw_td><%= account.first_name %> <%= account.last_name %></.bnw_td>
+          <.bnw_td><%= if account.location_id && account.location, do: account.location.name %></.bnw_td>
+          <.bnw_td><.bnw_button_toggle_active active={account.active}       phx-value-id={account.id} phx-value-key={:active}       /></.bnw_td>
+          <.bnw_td><.bnw_button_toggle_active active={account.portal_admin} phx-value-id={account.id} phx-value-key={:portal_admin} /></.bnw_td>
+          <.bnw_td><.bnw_button_toggle_active active={account.dev_admin}    phx-value-id={account.id} phx-value-key={:dev_admin}    /></.bnw_td>
+          <.bnw_td><.bnw_button_toggle_active active={account.test_user}    phx-value-id={account.id} phx-value-key={:test_user}    /></.bnw_td>
+          <.bnw_td><.bnw_button_toggle_active active={account.generic_user} phx-value-id={account.id} phx-value-key={:generic_user} /></.bnw_td>
+          <.bnw_td sticky={1} right={1} pos={2}><.bnw_button_edit   phx-value-id={account.id}>Edit  </.bnw_button_edit></.bnw_td>
+          <.bnw_td sticky={1} right={1} pos={1}><.bnw_button_delete phx-value-id={account.id}>Delete</.bnw_button_delete></.bnw_td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

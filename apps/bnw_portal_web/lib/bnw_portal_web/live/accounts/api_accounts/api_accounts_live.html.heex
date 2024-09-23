@@ -1,0 +1,36 @@
+<div class="w-full">
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+
+  <div class="py-3 flex">
+    <div class="w-1/5"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+  </div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table>
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:id}>          ID          </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:username}>    Username    </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:active}>      Active      </.bnw_table_header_filter></th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for account <- @accounts do %>
+        <tr>
+          <td class="px-2"><%= account.id %></td>
+          <td class="px-2"><%= account.username %></td>
+          <td class="px-2"><.bnw_button_toggle_active active={account.active} phx-value-id={account.id} /></td>
+          <td class="px-2"><.bnw_button_edit   phx-value-id={account.id}>Edit  </.bnw_button_edit></td>
+          <td class="px-2"><.bnw_button_delete phx-value-id={account.id}>Delete</.bnw_button_delete></td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

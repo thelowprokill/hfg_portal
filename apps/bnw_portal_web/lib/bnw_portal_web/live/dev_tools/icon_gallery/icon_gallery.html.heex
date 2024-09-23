@@ -1,0 +1,18 @@
+<h3>Icon Gallery</h3>
+
+<.icon name="hero-trash" class="ml-1 w-6 h-6 animate-spin" />
+
+<.bnw_table id="icon_table" load_more={false}>
+  <:header>
+    <th class="p-2">Name</th>
+    <th class="p-2">Icon</th>
+    <th class="p-2">Button</th>
+  </:header>
+  <%= for icon <- @icons do %>
+    <tr>
+      <td><%= icon %></td>
+      <td><.bnw_icon bnw_icon={icon} /></td>
+      <td><.bnw_button_icon bnw_icon={icon} /></td>
+    </tr>
+  <% end %>
+</.bnw_table>

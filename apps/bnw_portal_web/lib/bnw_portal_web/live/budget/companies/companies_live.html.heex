@@ -1,0 +1,46 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <%= if @current_user.admin_mode && (@current_user.dev_admin || @current_user.portal_admin || @admin) do %>
+    <div class="py-6"><.bnw_button_new /></div>
+  <% end %>
+
+  <div class="py-3"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+  <.form :let={s}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table id="company_table">
+      <:header>
+        <th class="p-2 w-5/6" colspan="4"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>Name</.bnw_table_header_filter></th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for company <- @companies do %>
+        <% sections = Enum.filter(@sections, &(length(check_perm(@company_permissions, company.id, &1.section, @current_user, @admin)) > 0)) %>
+        <% grouped_sections = Enum.group_by(sections, &(&1.row)) %>
+        <%= if length(sections) > 0 do %>
+          <tr id={"company_#{company.id}"}>
+            <td class="px-2 w-5/6 cursor-pointer" colspan="4" phx-click="show" phx-value-id={company.id}><%= company.name %></td>
+            <td class="px-2"><.bnw_button_edit   phx-value-id={company.id} /></td>
+            <td class="px-2"><.bnw_button_delete phx-value-id={company.id} /></td>
+          </tr>
+          <%= if @selected_company && company.id == @selected_company do %>
+            <%= for {_row_number, row} <- grouped_sections do %>
+              <%= if length(row) > 0 do %>
+                <tr>
+                  <%= for button <- row do %>
+                    <td class="p-2"><.bnw_button_primary phx_click={button.section} phx-value-id={company.id}><%= button.label %></.bnw_button_primary></td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

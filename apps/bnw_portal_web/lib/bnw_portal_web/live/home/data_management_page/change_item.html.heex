@@ -1,0 +1,30 @@
+<div>
+  <.bnw_modal id="change_item_modal">
+    <.bnw_modal_header>Change Item</.bnw_modal_header>
+
+    <!-- Modal body -->
+    <.bnw_modal_body>
+      <.form :let={f}
+         for={@modal.changeset}
+         id="edit_lot_number"
+         phx-window-keydown="save"
+         phx-key="enter"
+         phx-target={@myself}
+         phx-change="validate"
+         phx-submit="do_nothing">
+
+         <.bnw_input_hidden f={f} field={:order}    value={@modal.opts.order} />
+         <.bnw_input_hidden f={f} field={:group_id} value={@modal.opts.group_id} />
+
+         <.bnw_input       f={f} type="text"     field={:name}    display_name="Name" />
+         <.bnw_input       f={f} type="text"     field={:link}    display_name="Link" />
+         <.bnw_input_naked f={f} type="checkbox" field={:new_tab} display_name="New Tab" />
+
+      </.form>
+    </.bnw_modal_body>
+
+    <!-- Modal footer -->
+    <.bnw_modal_footer><.bnw_button_cancel /><.bnw_button_save phx-target={@myself} /></.bnw_modal_footer>
+
+  </.bnw_modal>
+</div>

@@ -1,0 +1,72 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <%= if @user_role.edit do %>
+    <div class="py-6"><.bnw_button_new /></div>
+
+    <div class="py-3">
+      <.form :let={f}
+        for={@transfer_form}
+        as={:transfer_ytd}
+        class="w-full flex justify-end"
+        phx-submit="transfer_ytd"
+        phx-change="transfer_ytd_validate"
+        >
+
+        <.bnw_input f={f} field={:budget} display_name="Budget Year" type="select" list={@budgets |> Enum.map(&([key: &1.year, value: &1.id]))}/>
+        <.bnw_input f={f} field={:period} display_name="Period"      type="month" starting_month={10} offset={0} />
+
+        <div>
+          <.bnw_button_submit data={[
+          confirm: "This will overwrite data for #{get_month_name(Map.get(@transfer_form, "period") |> String.to_integer(), 10, 0)}, #{Enum.find(@budgets, %{year: nil}, &(&1.id == Map.get(@transfer_form, "budget") |> String.to_integer())).year}."
+          ]}>transfer YTD</.bnw_button_submit>
+        </div>
+      </.form>
+    </div>
+  <% end %>
+
+  <div class="py-3 flex">
+    <div class="w-1/5"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+    <div class="w-full"></div>
+    <div><.bnw_button_primary phx_click="reports">Report</.bnw_button_primary></div>
+  </div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table height={if @user_role.edit, do: "60vh", else: "70vh"}>
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:budget}>     Budget Year          </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:period} type="month" starting_month={10} offset={0}>Period</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:account}>    Account              </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:amount}>     Amount               </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:trx_date}>   Date                 </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:description}>Description          </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:detail_reference}>Detail Reference</.bnw_table_header_filter></th>
+        <%= if @user_role.edit do %>
+          <th class="p-2"></th>
+          <th class="p-2"></th>
+        <% end %>
+      </:header>
+      <%= for detail <- @details do %>
+        <tr class={if is_nil(detail.account_id), do: "bg-red-400 dark:bg-red-800"}>
+          <td class="px-2"><%= detail.budget.year %></td>
+          <td class="px-2"><%= get_month_name(detail.period, 10, 0) %></td>
+          <td class="px-2"><%= if is_nil(detail.account_id), do: "No Account", else: detail.account.name %></td>
+          <td class="px-2"><%= detail.amount %></td>
+          <td class="px-2"><%= detail.trx_date %></td>
+          <td class="px-2"><%= detail.description %></td>
+          <td class="px-2"><%= detail.detail_reference %></td>
+          <%= if @user_role.edit do %>
+            <td class="px-2"><.bnw_button_edit   phx-value-id={detail.id}>Edit   </.bnw_button_edit></td>
+            <td class="px-2"><.bnw_button_delete phx-value-id={detail.id}>Delete </.bnw_button_delete></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} reports={@reports} />
+</div>

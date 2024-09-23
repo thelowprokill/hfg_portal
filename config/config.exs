@@ -1,0 +1,128 @@
+# This file is responsible for configuring your umbrella
+# and **all applications** and their dependencies with the
+# help of the Config module.
+#
+# Note that all applications in your umbrella share the
+# same configuration and dependencies, which is why they
+# all use the same configuration file. If you want different
+# configurations or dependencies per app, it is best to
+# move said applications out of the umbrella.
+import Config
+
+# Configure Mix tasks and generators
+config :dev_team_timetracking,
+  ecto_repos: [DevTeamTimetracking.Repo]
+
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :dev_team_timetracking, DevTeamTimetracking.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure Mix tasks and generators
+config :admin_logs,
+  ecto_repos: [AdminLogs.Repo]
+
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :admin_logs, AdminLogs.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure Mix tasks and generators
+config :it_budget,
+  ecto_repos: [ItBudget.Repo]
+
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :it_budget, ItBudget.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure Mix tasks and generators
+config :budget,
+  ecto_repos: [Budget.Repo]
+
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :budget, Budget.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure Mix tasks and generators
+config :bnw_portal,
+  ecto_repos: [BnwPortal.Repo]
+
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :bnw_portal, BnwPortal.Mailer, adapter: Swoosh.Adapters.Local
+
+config :bnw_portal_web,
+  ecto_repos: [BnwPortal.Repo],
+  generators: [context_app: :bnw_portal]
+
+# Configures the endpoint
+config :bnw_portal_web, BnwPortalWeb.Endpoint,
+  url: [host: "localhost"],
+  render_errors: [
+    formats: [html: BnwPortalWeb.ErrorHTML, json: BnwPortalWeb.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: BnwPortal.PubSub,
+  live_view: [signing_salt: "1Qb4ZL3I"]
+
+# Configure esbuild (the version is required)
+config :esbuild,
+  version: "0.17.11",
+  default: [
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    cd: Path.expand("../apps/bnw_portal_web/assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.3.2",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../apps/bnw_portal_web/assets", __DIR__)
+  ]
+
+# Configures Elixir's Logger
+config :logger, :console,
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id]
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
+# Configure Google Auth
+config :elixir_auth_google,
+  client_id: System.get_env("GOOGLE_CLIENT_ID"),
+  client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
+
+# Import environment specific config. This must remain at the bottom
+# of this file so it overrides the configuration defined above.
+import_config "#{config_env()}.exs"

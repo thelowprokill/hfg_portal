@@ -1,0 +1,100 @@
+<div class="">
+  <h3>Input Gallery</h3>
+
+
+  <div class="p-5">
+    <.bnw_button_new />
+  </div>
+
+
+  <hr/>
+  <br/>
+
+  This page shows off the input types available and how to use them. 
+  Click on the Add new button to see the modal.
+  Any HTML input can be given each has its own set of attributes.
+  The core attributes are:
+  <ul class="ml-5">
+    <li>type: The type of input. Required</li>
+    <li>name: The name of the input. Required</li>
+    <li>min: The minimum value of the input</li>
+    <li>max: The maximum value of the input</li>
+    <li>step: The step value of the input</li>
+  </ul>
+  Any input can be given as either .bnw_input or .bnw_input_naked to remove the outer label
+
+
+  <br/>
+  <br/>
+
+  <div>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dui ut ornare lectus sit. Cras pulvinar mattis nunc sed blandit libero volutpat. Sagittis aliquam malesuada bibendum arcu vitae. Lobortis elementum nibh tellus molestie. Facilisis volutpat est velit egestas dui id ornare arcu. Hendrerit gravida rutrum quisque non tellus orci ac. Sem integer vitae justo eget magna fermentum iaculis. Sit amet est placerat in egestas erat imperdiet sed. Est pellentesque elit ullamcorper dignissim cras.
+    <br/>
+    Tempor id eu nisl nunc mi. Facilisis gravida neque convallis a cras semper auctor neque vitae. Dignissim convallis aenean et tortor at. Elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at. Arcu dictum varius duis at consectetur lorem. Quisque sagittis purus sit amet volutpat consequat mauris. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Fusce id velit ut tortor pretium viverra suspendisse. Id venenatis a condimentum vitae sapien pellentesque habitant morbi. Nec ullamcorper sit amet risus nullam eget felis. Interdum velit laoreet id donec ultrices tincidunt arcu non. A cras semper auctor neque vitae tempus quam. Orci phasellus egestas tellus rutrum tellus. Id interdum velit laoreet id. Vestibulum mattis ullamcorper velit sed ullamcorper morbi. Sed turpis tincidunt id aliquet risus feugiat in. Molestie at elementum eu facilisis sed odio morbi quis.
+    
+    <br/>
+    Euismod lacinia at quis risus sed. Diam vulputate ut pharetra sit amet aliquam. Mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa. Nulla posuere sollicitudin aliquam ultrices sagittis. Mattis enim ut tellus elementum sagittis vitae. Odio morbi quis commodo odio. Sagittis purus sit amet volutpat consequat mauris nunc congue nisi. Quis ipsum suspendisse ultrices gravida dictum fusce. Sit amet nulla facilisi morbi tempus iaculis. Pellentesque dignissim enim sit amet venenatis urna cursus eget. Ut tellus elementum sagittis vitae et leo. Accumsan sit amet nulla facilisi. Eros in cursus turpis massa tincidunt dui ut. Hendrerit gravida rutrum quisque non tellus orci. Egestas integer eget aliquet nibh praesent. Amet purus gravida quis blandit turpis cursus in hac. Massa tincidunt nunc pulvinar sapien. Cum sociis natoque penatibus et. Adipiscing at in tellus integer feugiat scelerisque. Neque gravida in fermentum et sollicitudin ac orci.
+    
+    <br/>
+    Donec adipiscing tristique risus nec feugiat in fermentum posuere urna. Lobortis feugiat vivamus at augue. Nisl nisi scelerisque eu ultrices vitae auctor. Purus gravida quis blandit turpis cursus in hac habitasse. Sapien faucibus et molestie ac feugiat sed. In tellus integer feugiat scelerisque varius morbi enim. Sed velit dignissim sodales ut. Quam id leo in vitae turpis massa sed elementum. Habitasse platea dictumst vestibulum rhoncus. Consectetur adipiscing elit duis tristique sollicitudin.
+    
+    <br/>
+    Auctor augue mauris augue neque gravida. Accumsan lacus vel facilisis volutpat est. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Porttitor rhoncus dolor purus non enim. Nec feugiat nisl pretium fusce id. Purus viverra accumsan in nisl nisi scelerisque eu ultrices. Lacus suspendisse faucibus interdum posuere lorem ipsum. Arcu risus quis varius quam. Hac habitasse platea dictumst quisque sagittis. Elementum tempus egestas sed sed risus pretium quam. Egestas pretium aenean pharetra magna ac.
+  </div>
+
+</div>
+
+<%= if @modal do %>
+  <.bnw_modal id="modal">
+    <.bnw_modal_header>Sample Inputs</.bnw_modal_header>
+    <!-- Modal body -->
+    <.bnw_modal_body >
+      <.form :let={f}
+        for={@form}
+        as={:form_search}
+        phx-submit="search"
+        phx-change="search">
+  
+        <div class="flex">
+        <.bnw_input_naked f={f} type="checkbox" field={:checkbox}    display_name="Checkbox" />
+        <.bnw_input_naked f={f} type="checkbox" field={:checkbox2}   display_name="Checkbox2" />
+        </div>
+        <div class="flex">
+        <.bnw_input_naked f={f} type="checkbox" field={:checkbox3}    display_name="Checkbox3" />
+        <.bnw_input_naked f={f} type="checkbox" field={:checkbox4}    display_name="Checkbox4" />
+        </div>
+        <.bnw_input f={f} type="color"    field={:color}       display_name="Color" />
+        <.bnw_input f={f} type="date"     field={:date}        display_name="Date" />
+        <.bnw_input f={f} type="datetime-local" field={:datetime}    display_name="Date Time" />
+        <.bnw_input f={f} type="email"    field={:email}       display_name="Email" />
+        <.bnw_input f={f} type="file"     field={:file}        display_name="File" />
+        <.bnw_input f={f} type="image"    field={:image}       display_name="Image" />
+        <.bnw_input f={f} type="month"    field={:month}       display_name="Month" />
+        <.bnw_input f={f} type="number"   field={:number}      display_name="Number" />
+        <.bnw_input f={f} type="number"   field={:number_l}    display_name="Limited" min={1} max={10} />
+        <.bnw_input f={f} type="number"   field={:decimal}     display_name="Decimal" min={1} max={10} step={0.1}/>
+        <.bnw_input f={f} type="password" field={:password}    display_name="Password" />
+        <div class="flex">
+        <.bnw_input_naked f={f} type="radio"    field={:radio}       display_name="Radio" />
+        <.bnw_input_naked f={f} type="radio"    field={:radio_2}     display_name="Radio_2" />
+        </div>
+        <.bnw_input f={f} type="range"    field={:range}       display_name="Range" min={10} max={88} />
+        <.bnw_input f={f} type="reset"    field={:reset}       display_name="Reset" />
+        <.bnw_input f={f} type="select"   field={:select}      display_name="Select" 
+                                                               list={[
+                                                                [value: 1, key: "One"],
+                                                                [value: 2, key: "Two"],
+                                                                [value: 3, key: "Three"],
+                                                                [value: 4, key: "Four"],
+                                                               ]}
+        />
+        <.bnw_input f={f} type="text"     field={:text}        display_name="Text" />
+        <.bnw_input f={f} type="textarea" field={:text_area}   display_name="Textarea" />
+  
+      </.form>
+    </.bnw_modal_body>
+
+    <!-- Modal footer -->
+    <.bnw_modal_footer><.bnw_button_cancel /><.bnw_button_save /></.bnw_modal_footer>
+  </.bnw_modal>
+<% end %>

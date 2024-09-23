@@ -1,0 +1,147 @@
+<div class="flex w-screen">
+  <%= if @current_user.active do %>
+    <%= if @show_sidebar do %>
+      <nav id="sidebar"
+             class="
+               transition
+               transition-translate-x-full
+               z-40
+               w-64
+               h-screen"
+             aria-label="Sidebar">
+        <div class={"h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 #{if @current_user.admin_mode && (@current_user.portal_admin || @current_user.dev_admin || Enum.any?(@apps, &(&1.show_admin))), do: "bg-red-300 dark:bg-red-800"}"}>
+          <!-- sidebar toggle -->
+          <div class="flex justify-end">
+            <.bnw_button_icon bnw_icon="hamburger" phx_click="hide_sidebar" />
+          </div>
+
+          <!-- Logo -->
+          <div class="p-3">
+            <.link navigate={~p"/"}>
+              <!-- this is apps/bnd_portal_web/priv/static/images/bnw_logo.svg -->
+              <img src={"/images/#{System.get_env("LOCATION") || "bnw"}_logo.svg"} width="200" />
+            </.link>
+          </div>
+
+          <hr>
+
+          <!-- User -->
+          <div class="flex p-3 text-gray-900 dark:text-white">
+            <.dark_mode_button />
+            <.bnw_button phx_click="edit_user_settings" class="w-full">
+              <%= @current_user.first_name %>
+              <%= @current_user.last_name %>
+            </.bnw_button>
+            <.link
+              href={~p"/users/log_out"}
+              method="delete"
+              class="p-2"
+            >
+              <.bnw_icon bnw_icon="sign-out" />
+            </.link>
+          </div>
+
+          <hr>
+
+          <%= if @current_user.portal_admin || @current_user.dev_admin || Enum.any?(@apps, &(&1.show_admin)) do %>
+            <!-- Admin Mode -->
+            <div class="flex p-3 text-gray-900 dark:text-white">
+              <lablel class="flex cursor-pointer" phx-click="toggle_admin_mode">
+                <.input type="checkbox" name={:admin_mode} phx-click="toggle_admin_mode" value={@current_user.admin_mode} style="color: #1e87f0;" />
+                <div class="pl-3">Admin Mode</div>
+              </lablel>
+            </div>
+
+            <hr>
+          <% end %>
+
+          <!-- Apps -->
+          <div class="pt-2">
+            <ul class="space-y-2 font-medium">
+              <%= for app <- @apps do %>
+                <li>
+                  <%= cond do %>
+                    <% Map.get(app, :module) -> %>
+                      <.link 
+                         class="
+                           flex
+                           items-center
+                           p-2
+                           text-gray-900
+                           rounded-lg
+                           dark:text-white
+                           hover:bg-gray-100
+                           dark:hover:bg-gray-700"
+                        navigate={"/?app=#{app.id}#{if @current_user.admin_mode, do: "&admin=true"}"}>
+                        <%= app.name %>
+                      </.link>
+                    <% length(Map.get(app, :links, [])) > 0 -> %>
+                      <a phx-click="select_app"
+                         phx-value-app={app.id}
+                         class="
+                           flex
+                           items-center
+                           p-2
+                           text-gray-900
+                           rounded-lg
+                           dark:text-white
+                           hover:bg-gray-100
+                           dark:hover:bg-gray-700
+                         ">
+                        <%= app.name %>
+                      </a>
+                        <%= if app.id == @selected_app do %>
+                          <ul>
+                            <%= for link <- app.links do %>
+                              <li>
+                                <.link 
+                                  class="
+                                    flex
+                                    items-center
+                                    p-2
+                                    pl-8
+                                    text-gray-900
+                                    rounded-lg
+                                    dark:text-white
+                                    hover:bg-gray-100
+                                    dark:hover:bg-gray-700"
+                                  navigate={"/?app=#{app.id}&page=#{link.id}#{if @current_user.admin_mode, do: "&admin=true"}"}>
+                                  <%= link.name %>
+                                </.link>
+                              </li>
+                            <% end %>
+                          </ul>
+                        <% end %>
+                      <% true -> %><%= nil %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+    <% else %>
+      <div id="sidebar"
+             class="z-40 pl-2 py-2"
+             aria-label="Sidebar">
+        <.bnw_button_icon bnw_icon="hamburger" phx_click="show_sidebar" />
+      </div>
+    <% end %>
+    <main class="px-4 py-10 sm:px-6 lg:px-8 h-screen" style={"width: calc(100vw - #{if @show_sidebar, do: "256px", else: "32px"});"}>
+      <%= live_render(@socket, @module, id: "root", session: @session) %>
+    </main>
+  <% else %>
+    <!--
+      This is here because the calling redirect to the logout page did not worki.
+      Instead I am uing a link that is clicked automatically to force a log out.
+    -->
+    <.link
+      href={~p"/users/log_out"}
+      method="delete"
+      class="p-2"
+      phx-hook="self_press_button"
+      id="force_log_out_button"
+    >Sign Out</.link>
+  <% end %>
+</div>

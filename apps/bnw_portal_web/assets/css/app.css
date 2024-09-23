@@ -1,0 +1,31 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* This file is for your main application CSS */
+
+.table-sticky-head {
+  position: sticky !important;
+  z-index: 40;
+}
+.table-sticky-head-full-page {
+  position: -webkit-sticky;
+  position: sticky;
+  top: -15px;
+  z-index: 40;
+}
+.table-sticky-body {
+  position: sticky !important;
+  z-index: 30;
+}
+
+.table-sticky tbody tr:nth-child(even)     {background-color: #edf2f7;}
+.table-sticky tbody tr:hover               {background-color: #ffd;}
+.table-sticky tbody tr .table-sticky-body  {background-color: inherit;}
+
+.sticky-col-left-1 {
+    left: 0;
+}
+.sticky-col-right-1 {
+    right: 0;
+}

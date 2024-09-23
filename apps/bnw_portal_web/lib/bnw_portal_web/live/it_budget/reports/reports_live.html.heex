@@ -1,0 +1,36 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+
+  <div class="py-3 flex">
+    <div class="w-1/5"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+    <div class="w-full"></div>
+    <div><.bnw_button_primary phx_click="reports">Report</.bnw_button_primary></div>
+  </div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table>
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:report_name}>Name</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:active}>Active</.bnw_table_header_filter></th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for report <- @reports do %>
+        <tr>
+          <td class="px-2"><%= report.report_name %></td>
+          <td class="px-2"><.bnw_icon bnw_icon={ if report.active, do: "check", else: "ban"}/></td>
+          <td class="px-2"><.bnw_button_edit   phx-value-id={report.id}>Edit  </.bnw_button_edit></td>
+          <td class="px-2"><.bnw_button_delete phx-value-id={report.id}>Delete</.bnw_button_delete></td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

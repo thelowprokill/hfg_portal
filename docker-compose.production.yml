@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/production/Dockerfile
+    environment:
+      - LOCATION=bnw
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./docker/production/.env
+    image: 433323019751.dkr.ecr.us-west-2.amazonaws.com/bnw-portal-umbrella/fargate-production:0.0.69
