@@ -5,6 +5,19 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+config :car_maintenance, CarMaintenance.Repo,
+  username: "root",
+  password: "",
+  hostname: "localhost",
+  database: "car_maintenance_test#{System.get_env("MIX_TEST_PARTITION")}",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2
+
+# Configure your database
+#
+# The MIX_TEST_PARTITION environment variable can be used
+# to provide built-in test partitioning in CI environment.
+# Run `mix help test` for more information.
 config :dev_team_timetracking, DevTeamTimetracking.Repo,
   username: "root",
   password: "",

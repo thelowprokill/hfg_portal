@@ -1,10 +1,20 @@
 import Config
 
 # Configure your database
-config :hull_family_games, HullFamilyGames.Repo,
+config :car_maintenance, CarMaintenance.Repo,
   username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
+  database: "hull_family_games_car_maintenance_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Configure your database
+config :hull_family_games, HullFamilyGames.Repo,
+  username: System.get_env("MYSQL_USER", "root"),
+  password: System.get_env("MYSQL_PASSWORD", "root"),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
   database: "hull_family_games_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -83,4 +93,5 @@ config :swoosh, :api_client, false
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-config :hull_family_games,            env: :dev
+config :hull_family_games, env: :dev
+config :car_maintenance,   env: :dev

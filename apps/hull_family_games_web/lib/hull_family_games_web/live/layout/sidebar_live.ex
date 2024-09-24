@@ -91,6 +91,12 @@ defmodule HullFamilyGamesWeb.Layout.SidebarLive do
     ]
 
     apps = [
+      %App{
+        name: "Car Maintenance",
+        id: "car_maintenance",
+        links: CarMaintenance.Authorize.list_pages(current_user),
+        #show_admin: CarMaintenance.Admins.is_admin(current_user.id),
+      },
 
     ]
     

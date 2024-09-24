@@ -1,4 +1,4 @@
-defmodule BnwPortal.Umbrella.MixProject do
+defmodule HullFamilyGames.Umbrella.MixProject do
   use Mix.Project
 
   def project do

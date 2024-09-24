@@ -1,0 +1,48 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table height="80vh">
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>Name</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:year}>Yeaar</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:make}>Make</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:model}>Model</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:license_plate}>License Plate</.bnw_table_header_filter></th>
+        <th class="p-2">Mileage</th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for car <- @cars do %>
+        <tr phx-click="service_history" phx-value-id={car.id} class="cursor-pointer">
+          <td class="px-2"><%= car.name %></td>
+          <td class="px-2"><%= car.year %></td>
+          <td class="px-2"><%= car.make %></td>
+          <td class="px-2"><%= car.model %></td>
+          <td class="px-2"><%= car.license_plate %></td>
+          <td class="px-2">
+            <.bnw_button_default phx_click="mileage" phx-value-id={car.id}>
+            <%= if car.service_history, do: car.service_history.mileage |> Number.Delimit.number_to_delimited(precision: 0), else: "Mileage" %>
+            </.bnw_button_default>
+          </td>
+          <td class="px-2"><.bnw_button_default phx_click="maintenance_items" phx-value-id={car.id}>Maintenance Items</.bnw_button_default></td>
+          <td class="px-2"><.bnw_button_edit   phx-value-id={car.id} /></td>
+          <td class="px-2">
+            <%= if is_nil(car.service_history) || car.service_history && car.service_history.service_history == 0 do %>
+              <.bnw_button_delete phx-value-id={car.id} />
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

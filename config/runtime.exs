@@ -7,6 +7,7 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
+
   mysql_host =
     System.get_env("MYSQL_HOST") ||
       raise """
@@ -32,45 +33,13 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
-  config :dev_team_timetracking, DevTeamTimetracking.Repo,
+  config :car_maintenance, CarMaintenance.Repo,
     # ssl: true,
     hostname: mysql_host,
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "hull_family_games_dev_team_timetracking",
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
-
-  config :admin_logs, AdminLogs.Repo,
-    # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port: mysql_port,
-    database: "hull_family_games_admin_logs",
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
-
-  config :it_budget, ItBudget.Repo,
-    # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port: mysql_port,
-    database: "hull_family_games_it_budget",
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
-
-  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
-
-  config :budget, Budget.Repo,
-    # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port: mysql_port,
-    database: "hull_family_games_budget",
+    database: "hull_family_games_car_maintenance",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 

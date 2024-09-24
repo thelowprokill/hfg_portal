@@ -4,6 +4,7 @@ defmodule HullFamilyGames.Release do
   installed.
   """
   @apps [
+    :car_maintenance,
     :hull_family_games,
   ]
 
