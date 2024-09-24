@@ -1,6 +1,6 @@
 defmodule CarMaintenance.UserRoles do
   import Ecto.Query
-  import HullFamilyGames.Helpers.Utility
+  import HfgPortal.Helpers.Utility
 
   alias CarMaintenance.{Repo, Users.User, Users.Roles}
 
@@ -10,13 +10,13 @@ defmodule CarMaintenance.UserRoles do
   @created [:car_maintenance, :user_role, :created]
   @deleted [:car_maintenance, :user_role, :deleted]
 
-  def subscribe(),     do: Phoenix.PubSub.subscribe(HullFamilyGames.PubSub,   @topic)
-  def subscribe(id),   do: Phoenix.PubSub.subscribe(HullFamilyGames.PubSub,   "#{@topic}:#{id}")
-  def unsubscribe(),   do: Phoenix.PubSub.unsubscribe(HullFamilyGames.PubSub, @topic)
-  def unsubscribe(id), do: Phoenix.PubSub.unsubscribe(HullFamilyGames.PubSub, "#{@topic}:#{id}")
+  def subscribe(),     do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   @topic)
+  def subscribe(id),   do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   "#{@topic}:#{id}")
+  def unsubscribe(),   do: Phoenix.PubSub.unsubscribe(HfgPortal.PubSub, @topic)
+  def unsubscribe(id), do: Phoenix.PubSub.unsubscribe(HfgPortal.PubSub, "#{@topic}:#{id}")
   defp notify_subscribers({:ok, result}, event) do
-    Phoenix.PubSub.broadcast(HullFamilyGames.PubSub, @topic, {event, result})
-    Phoenix.PubSub.broadcast(HullFamilyGames.PubSub, "#{@topic}:#{result.id}", {event, result})
+    Phoenix.PubSub.broadcast(HfgPortal.PubSub, @topic, {event, result})
+    Phoenix.PubSub.broadcast(HfgPortal.PubSub, "#{@topic}:#{result.id}", {event, result})
     {:ok, result}
   end
   defp notify_subscribers({:error, reason}, _event), do: {:error, reason}

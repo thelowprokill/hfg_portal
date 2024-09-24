@@ -43,7 +43,7 @@ defmodule CarMaintenance.MixProject do
       {:jason,             "~> 1.2"},
       {:swoosh,            "~> 1.5"},
       {:finch,             "~> 0.13"},
-      {:hull_family_games, in_umbrella: true},
+      {:hfg_portal, in_umbrella: true},
     ]
   end
 

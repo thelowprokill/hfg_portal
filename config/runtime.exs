@@ -39,17 +39,17 @@ if config_env() == :prod do
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "hull_family_games_car_maintenance",
+    database: "hfg_portal_car_maintenance",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
-  config :hull_family_games, HullFamilyGames.Repo,
+  config :hfg_portal, HfgPortal.Repo,
     # ssl: true,
     hostname: mysql_host,
     username: mysql_username,
     password: mysql_password,
     port: mysql_port,
-    database: "#{System.get_env("LOCATION") || "bnw"}_portal",
+    database: "hfg_portal",
     pool_size: String.to_integer(System.get_env("MYSQL_POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -65,9 +65,9 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  config :hull_family_games_web, :environment, System.get_env("ENVIRONMENT") || "production"
+  config :hfg_portal_web, :environment, System.get_env("ENVIRONMENT") || "production"
 
-  config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+  config :hfg_portal_web, HfgPortalWeb.Endpoint,
     server: true,
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -83,7 +83,7 @@ if config_env() == :prod do
   # If you are doing OTP releases, you need to instruct Phoenix
   # to start each relevant endpoint:
   #
-  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint, server: true
+  #     config :hfg_portal_web, HfgPortalWeb.Endpoint, server: true
   #
   # Then you can assemble a release by calling `mix release`.
   # See `mix help release` for more information.
@@ -93,7 +93,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+  #     config :hfg_portal_web, HfgPortalWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -115,7 +115,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your endpoint, ensuring
   # no data is ever sent via http, always redirecting to https:
   #
-  #     config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+  #     config :hfg_portal_web, HfgPortalWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -126,7 +126,7 @@ if config_env() == :prod do
   # Also, you may need to configure the Swoosh API client of your choice if you
   # are not using SMTP. Here is an example of the configuration:
   #
-  #     config :hull_family_games, HullFamilyGames.Mailer,
+  #     config :hfg_portal, HfgPortal.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")

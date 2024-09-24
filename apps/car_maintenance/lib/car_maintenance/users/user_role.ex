@@ -2,7 +2,7 @@ defmodule CarMaintenance.Users.UserRole do
   use Ecto.Schema
   import Ecto.Changeset
 
-  prefix = "hull_family_games_car_maintenance"
+  prefix = "hfg_portal_car_maintenance"
   prefix = case Application.compile_env(:car_maintenance, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"

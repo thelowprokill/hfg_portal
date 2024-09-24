@@ -1,4 +1,4 @@
-# HullFamilyGames.Umbrella
+# HfgPortal.Umbrella
 dc run -w /app/apps app mix phx.new.ecto $name --database mysql
 
 set username, password, hostname, and database in config/dev.exs

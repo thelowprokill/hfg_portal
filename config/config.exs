@@ -23,8 +23,8 @@ config :car_maintenance,
 config :car_maintenance, CarMaintenance.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure Mix tasks and generators
-config :hull_family_games,
-  ecto_repos: [HullFamilyGames.Repo]
+config :hfg_portal,
+  ecto_repos: [HfgPortal.Repo]
 
 # Configures the mailer
 #
@@ -33,20 +33,20 @@ config :hull_family_games,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :hull_family_games, HullFamilyGames.Mailer, adapter: Swoosh.Adapters.Local
+config :hfg_portal, HfgPortal.Mailer, adapter: Swoosh.Adapters.Local
 
-config :hull_family_games_web,
-  ecto_repos: [HullFamilyGames.Repo],
-  generators: [context_app: :hull_family_games]
+config :hfg_portal_web,
+  ecto_repos: [HfgPortal.Repo],
+  generators: [context_app: :hfg_portal]
 
 # Configures the endpoint
-config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+config :hfg_portal_web, HfgPortalWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: HullFamilyGamesWeb.ErrorHTML, json: HullFamilyGamesWeb.ErrorJSON],
+    formats: [html: HfgPortalWeb.ErrorHTML, json: HfgPortalWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: HullFamilyGames.PubSub,
+  pubsub_server: HfgPortal.PubSub,
   live_view: [signing_salt: "1Qb4ZL3I"]
 
 # Configure esbuild (the version is required)
@@ -55,7 +55,7 @@ config :esbuild,
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
-    cd: Path.expand("../apps/hull_family_games_web/assets", __DIR__),
+    cd: Path.expand("../apps/hfg_portal_web/assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
@@ -68,7 +68,7 @@ config :tailwind,
       --input=css/app.css
       --output=../priv/static/assets/app.css
     ),
-    cd: Path.expand("../apps/hull_family_games_web/assets", __DIR__)
+    cd: Path.expand("../apps/hfg_portal_web/assets", __DIR__)
   ]
 
 # Configures Elixir's Logger

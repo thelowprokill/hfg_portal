@@ -14,7 +14,7 @@ do
 done
 
 # All apps in umbrella
-apps="hull_family_games car_maintenance"
+apps="hfg_portal car_maintenance"
 
 # Create, migrate, and seed database if it doesn't exist.
 echo ""

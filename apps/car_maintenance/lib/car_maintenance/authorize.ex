@@ -2,18 +2,18 @@ defmodule CarMaintenance.Authorize do
   alias CarMaintenance.{
     Users.Roles,
   }
-  alias HullFamilyGames.Helpers.Page
+  alias HfgPortal.Helpers.Page
 
   @pages [
-    %Page{id: "home",           name: "Home",           module: HullFamilyGamesWeb.CarMaintenance.Home.HomeLive},
-    #%Page{id: "reports",        name: "Reports",        module: HullFamilyGamesWeb.CarMaintenance.Reports.ReportsLive},
-    %Page{id: "users",          name: "Users",          module: HullFamilyGamesWeb.CarMaintenance.Users.UsersLive},
+    %Page{id: "home",           name: "Home",           module: HfgPortalWeb.CarMaintenance.Home.HomeLive},
+    #%Page{id: "reports",        name: "Reports",        module: HfgPortalWeb.CarMaintenance.Reports.ReportsLive},
+    %Page{id: "users",          name: "Users",          module: HfgPortalWeb.CarMaintenance.Users.UsersLive},
   ]
 
   # pattern match on user struct
   def list_pages(user, dev_admin \\ false)
   def list_pages(%CarMaintenance.Users.User{} = user, _),                  do: list_pages(user.user_role, user.dev_admin && user.admin_mode)
-  def list_pages(%HullFamilyGames.Accounts.User{} = user, _),                         do: list_pages(user.id, user.dev_admin && user.admin_mode)
+  def list_pages(%HfgPortal.Accounts.User{} = user, _),                         do: list_pages(user.id, user.dev_admin && user.admin_mode)
   def list_pages(user_id, dev_admin) when is_integer(user_id),                  do: CarMaintenance.UserRoles.get(user_id, :user) |> list_pages(dev_admin)
   def list_pages(%CarMaintenance.Users.UserRole{} = user_role, dev_admin), do: @pages |> Enum.filter(fn page -> authorize(user_role.role, page.id, dev_admin) end)
 

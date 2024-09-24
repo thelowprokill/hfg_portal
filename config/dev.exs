@@ -5,17 +5,17 @@ config :car_maintenance, CarMaintenance.Repo,
   username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  database: "hull_family_games_car_maintenance_dev",
+  database: "hfg_portal_car_maintenance_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
 # Configure your database
-config :hull_family_games, HullFamilyGames.Repo,
+config :hfg_portal, HfgPortal.Repo,
   username: System.get_env("MYSQL_USER", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST", "localhost"),
-  database: "hull_family_games_dev",
+  database: "hfg_portal_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -26,7 +26,7 @@ config :hull_family_games, HullFamilyGames.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+config :hfg_portal_web, HfgPortalWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   https: [
@@ -68,17 +68,17 @@ config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :hull_family_games_web, HullFamilyGamesWeb.Endpoint,
+config :hfg_portal_web, HfgPortalWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/hull_family_games_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/hfg_portal_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :hull_family_games_web, dev_routes: true
+config :hfg_portal_web, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -93,5 +93,5 @@ config :swoosh, :api_client, false
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-config :hull_family_games, env: :dev
+config :hfg_portal, env: :dev
 config :car_maintenance,   env: :dev

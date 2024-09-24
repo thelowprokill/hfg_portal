@@ -17,7 +17,7 @@ defmodule CarMaintenance.Repo.Migrations.CreateMaintenanceItem do
     end
   end
 
-  defp account_prefix(:dev),  do: "hull_family_games_dev"
-  defp account_prefix(:test), do: "hull_family_games_test"
-  defp account_prefix(_),     do: "hull_family_games"
+  defp account_prefix(:dev),  do: "hfg_portal_dev"
+  defp account_prefix(:test), do: "hfg_portal_test"
+  defp account_prefix(_),     do: "hfg_portal"
 end

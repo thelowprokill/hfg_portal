@@ -1,3 +1,0 @@
-# HullFamilyGames
-
-**TODO: Add description**

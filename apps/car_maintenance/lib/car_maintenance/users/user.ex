@@ -1,7 +1,7 @@
 defmodule CarMaintenance.Users.User do
   use Ecto.Schema
 
-  prefix = "hull_family_games"
+  prefix = "hfg_portal"
   prefix = case Application.compile_env(:car_maintenance, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"
