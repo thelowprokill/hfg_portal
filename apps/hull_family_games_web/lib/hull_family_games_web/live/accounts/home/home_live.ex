@@ -19,7 +19,6 @@ defmodule HullFamilyGamesWeb.Accounts.Home.HomeLive do
       per_page:     per_page,
       search_stack: search_stack,
       sort_stack:   sort_stack,
-      preload:      [:location],
     }))
   end
   defp reload_items(socket), do: socket |> assign(:accounts, []) |> fetch_accounts()
@@ -114,11 +113,11 @@ defmodule HullFamilyGamesWeb.Accounts.Home.HomeLive do
 
   @impl true
   def handle_info({[:user, :created], user}, socket) do
-    socket |> assign(:accounts, [user |> Accounts.preload(%{preload: [:location]}) | socket.assigns.accounts]) |> res()
+    socket |> assign(:accounts, [user | socket.assigns.accounts]) |> res()
   end
   @impl true
   def handle_info({[:user, :updated], user}, socket) do
-    socket |> assign(:accounts, Enum.map(socket.assigns.accounts, &(if &1.id == user.id, do: user |> Accounts.preload(%{preload: [:location]}), else: &1))) |> res()
+    socket |> assign(:accounts, Enum.map(socket.assigns.accounts, &(if &1.id == user.id, do: user, else: &1))) |> res()
   end
   @impl true
   def handle_info({[:user, :deleted], user}, socket) do

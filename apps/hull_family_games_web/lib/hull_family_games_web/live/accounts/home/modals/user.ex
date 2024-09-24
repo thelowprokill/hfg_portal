@@ -26,7 +26,6 @@ defmodule HullFamilyGamesWeb.Accounts.Home.Modals.ChangeAccounts do
             <.bnw_input        f={f} field={:first_name}     display_name="First Name"/>
             <.bnw_input        f={f} field={:middle_name}    display_name="Middle Name"/>
             <.bnw_input        f={f} field={:last_name}      display_name="Last Name"/>
-            <.bnw_input        f={f} field={:location_id}    display_name="Location"     type="select" list={[[key: "Select a Location", value: ""] | @locations |> Enum.map(&([key: &1.name, value: &1.id]))]} />
             <div class="grid grid-cols-2 justify-items-start">
               <.bnw_input_naked f={f} field={:active}        display_name="Active"       type="checkbox"/>
               <div></div>
@@ -53,12 +52,6 @@ defmodule HullFamilyGamesWeb.Accounts.Home.Modals.ChangeAccounts do
     """
   end
 
-  defp fetch_locations(socket) do
-    socket
-    #|> assign(:locationss, [])
-    |> assign(:locations, Locations.list(%{active: true}))
-  end
-
   defp save(socket) do
     %{modal: %{changeset: changeset} = modal} = socket.assigns
 
@@ -81,11 +74,7 @@ defmodule HullFamilyGamesWeb.Accounts.Home.Modals.ChangeAccounts do
   end
 
   @impl true
-  def mount(socket) do
-    socket
-    |> fetch_locations()
-    |> res(:ok)
-  end
+  def mount(socket), do: socket |> res(:ok)
 
   @impl true
   def handle_event("validate", params, socket) do

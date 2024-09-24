@@ -6,7 +6,6 @@ defmodule HullFamilyGames.Authorize do
   @pages [
     %Page{id: "home",         name: "Home",      module: HullFamilyGamesWeb.Accounts.Home.HomeLive},
     %Page{id: "api_accounts", name: "API Accounts", module: HullFamilyGamesWeb.Accounts.ApiAccounts.ApiAccountsLive},
-    %Page{id: "locations",    name: "Locations",    module: HullFamilyGamesWeb.Accounts.Locations.LocationsLive},
   ]
 
   # pattern match on user struct
