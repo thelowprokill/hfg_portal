@@ -2,19 +2,21 @@ import Config
 
 # Configure your database
 config :loan_repayment, LoanRepayment.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
+  username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
   database: "hfg_portal_loan_repayment_dev",
+  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
 # Configure your database
 config :car_maintenance, CarMaintenance.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
+  username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
+  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   database: "hfg_portal_car_maintenance_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -22,9 +24,10 @@ config :car_maintenance, CarMaintenance.Repo,
 
 # Configure your database
 config :hfg_portal, HfgPortal.Repo,
-  username: System.get_env("MYSQL_USER",     "root"),
+  username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
   hostname: System.get_env("MYSQL_HOST",     "localhost"),
+  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   database: "hfg_portal_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,

@@ -60,10 +60,10 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                               />
                             <% true -> %>
                               <td class="px-2"><%= item.service_date %></td>
-                              <td class="px-2"><%= item.mileage %></td>
+                              <td class="px-2 text-right"><%= item.mileage |> Number.Delimit.number_to_delimited(precision: 0) %></td>
                               <td class="px-2"></td>
                               <td class="px-2"><%= if item.named_item, do: item.name, else: item.maintenance_item.name %></td>
-                              <td class="px-2"><%= if !item.named_item, do: item.mileage + item.maintenance_item.interval_miles %></td>
+                              <td class="px-2 text-right"><%= (if !item.named_item, do: item.mileage + item.maintenance_item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %></td>
                               <td class="px-2"><%= item.notes %></td>
                           <% end %>
                         </tr>
@@ -82,7 +82,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                         <tr id={"maintenance_item_#{item.id}"}>
                           <td class="px-2"><%= if item.last_service_history, do: item.last_service_history.service_date %></td>
                           <td class="px-2"><%= item.name %></td>
-                          <td class="px-2"><%= if item.last_service_history, do: item.last_service_history.mileage + item.interval_miles %></td>
+                          <td class="px-2 text-right"><%= (if item.last_service_history, do: item.last_service_history.mileage + item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %></td>
                           <td class="px-2"><%= item.notes %></td>
                         </tr>
                       <% end %>
@@ -116,7 +116,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
       <td class="px-2"><.bnw_input_naked f={@f} type="number"   field={:mileage}      display_name="Service Mileage"/></td>
       <td class="px-2"><.bnw_input_naked f={@f} type="checkbox" field={:named_item}   display_name="Named Item"/></td>
       <td class="px-2">
-        <% IO.inspect @f %>
         <%= if @f.params |> Map.get("named_item", "#{Map.get(@f.data, :named_item)}") == "true" do %>
           <.bnw_input_naked f={@f} type="text"     field={:name}          display_name="Service Item"/>
         <% else %>
@@ -155,12 +154,17 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
       changeset.valid? ->
         changeset.data |> @module.create_or_update(changeset.changes)
         |> case do
-          {:ok, _} -> 
+          {:ok, data} -> 
             socket 
             |> assign(:changeset, @module.new_changeset(
               %{
                 service_date: Date.utc_today(), 
-                mileage: if(modal.opts.car.service_history, do: modal.opts.car.service_history.mileage, else: 0),
+                mileage: cond do
+                  modal.opts.car.service_history && data.mileage && data.mileage > modal.opts.car.service_history.mileage -> data.mileage
+                  modal.opts.car.service_history -> modal.opts.car.service_history.mileage
+                  data.mileage -> data.mileage
+                  true -> 0
+                end
               })) 
             |> assign(:new, true)
           {:error, changeset} -> socket |> assign(:changeset, changeset)

@@ -33,8 +33,8 @@ defmodule CarMaintenance.ServiceHistories do
     @schema
     |> join(:left, [sh], c in CarMaintenance.Cars.Car, on: c.id == sh.car_id)
     |> group_by([sh], [sh.car_id, sh.maintenance_item_id])
-    |> order_by([sh], [desc: sh.service_date])
-    #|> select([sh], %{car_id: sh.car_id, mileage: max(sh.mileage), service_history: count(sh.id)})
+    #|> order_by([sh], [desc: sh.service_date])
+    |> select([sh], %{car_id: sh.car_id, service_date: max(sh.service_date), mileage: max(sh.mileage)})
   end
 
   defp search_stack(query, search_stack) when is_list(search_stack) do
@@ -78,11 +78,9 @@ defmodule CarMaintenance.ServiceHistories do
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
     |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
-    #|> order_by(desc: :monday)
-    #|> filter_active(Map.get(opts, :active))
+    |> order_by([i], [desc: i.mileage, desc: i.service_date, desc: i.id])
     |> filter_car(Map.get(opts, :car_id))
     |> filter_mileage(Map.get(opts, :mileage))
-    #|> filter_dates(Map.get(opts, :dates))
     |> Repo.all()
     |> bnw_preload(Map.get(opts, :preload, []))
   end
