@@ -1,0 +1,19 @@
+* size
+** 467, 653
+* Colors
+** red    100,   0, 0
+** Green    0, 100, 0
+** Yellow 100, 100, 0
+** Black    0,   0, 0
+* corner_number
+** pos 30, 30
+** size 62
+* suit
+** pos 115, 30
+** 40
+* center number
+** square
+*** origin 67, 160
+*** final  400, 493
+** number
+* points
