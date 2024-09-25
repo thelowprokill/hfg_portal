@@ -139,11 +139,11 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
 
     socket |> assign(:items, items ++ @module.list(
       %{
-        page:             page,
-        per_page:         per_page,
-        loan_id:          loan_id,
-        mileage:          false,
-        preload:          @preload,
+        page:     page,
+        per_page: per_page,
+        loan_id:  loan_id,
+        mileage:  false,
+        preload:  @preload,
       }
     ) |> Enum.uniq_by(&(&1.id)))
   end

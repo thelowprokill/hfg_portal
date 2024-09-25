@@ -42,8 +42,8 @@ defmodule LoanRepayment.Repayments do
   end
   defp sort_stack(query, nil), do: query
 
-  defp filter_loan(query, loan) when not is_nil(loan), do: query |> where(loan: ^loan)
-  defp filter_loan(query, _loan), do: query
+  defp filter_loan(query, loan_id) when not is_nil(loan_id), do: query |> where(loan_id: ^loan_id)
+  defp filter_loan(query, _loan_id), do: query
 
   #defp filter_user(query, user_id) when not is_nil(user_id), do: query |> where(user_id: ^user_id)
   #defp filter_user(query, _user_id), do: query
@@ -59,7 +59,7 @@ defmodule LoanRepayment.Repayments do
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
     |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
-    |> filter_loan(Map.get(opts, :loan))
+    |> filter_loan(Map.get(opts, :loan_id))
     |> order_by([r], [desc: r.paid_amount_tot, desc: r.id])
     |> Repo.all()
     |> bnw_preload(Map.get(opts, :preload, []))

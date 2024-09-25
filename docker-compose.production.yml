@@ -6,7 +6,7 @@ services:
     environment:
       - LOCATION=bnw
     ports:
-      - "4000:4000"
+      - "5000:4000"
       - "443:4000"
     env_file:
       - ./docker/production/.env
