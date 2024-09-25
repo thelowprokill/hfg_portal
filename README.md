@@ -7,13 +7,13 @@
 -   username: System.get_env("MYSQL_USER",     "root"),
 -   password: System.get_env("MYSQL_PASSWORD", "root"),
 -   hostname: System.get_env("MYSQL_HOST",     "localhost"),
--   database: "bnw_portal_${APP_NAME}",
+-   database: "hfg_portal_${APP_NAME}",
 
 - sudo chown -R $USER:$USER .
 
 - add config :${APP_NAME}, env: :dev to the end of config/dev.exs
 
-- add :${APP_NAME} to @apps in apps/bnw_portal/lib/bnw_portal/release.ex
+- add :${APP_NAME} to @apps in apps/hfg_portal/lib/hfg_portal/release.ex
 
 - add $name to docker/development/entrypoint.sh
 
@@ -74,7 +74,7 @@
 </.bnw_modal>
 
 ### buttons
-- there are several canned button components. look at bnw_portal_web/live/helpers/buttons.ex for an up to date complete list.
+- there are several canned button components. look at hfg_portal_web/live/helpers/buttons.ex for an up to date complete list.
 - all buttons pass all arguments to the underlying button tag except phx-click which is taken as phx_click
 - bnw_button                # base button, all buttons call this
 - bnw_button_icon           # base icon button, all icon buttons call this
@@ -108,6 +108,6 @@
 
 ## Update files
 - /mix.exs
-- /apps/bnw_portal/lib/bnw_portal/release.ex
-- /apps/bnw_portal/mix.exs
-- /apps/bnw_portal_web/mix.exs
+- /apps/hfg_portal/lib/hfg_portal/release.ex
+- /apps/hfg_portal/mix.exs
+- /apps/hfg_portal_web/mix.exs

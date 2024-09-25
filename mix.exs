@@ -49,10 +49,10 @@ defmodule HfgPortal.Umbrella.MixProject do
 
   defp releases do
     [
-      bnw_portal_umbrella: [
+      hfg_portal_umbrella: [
         applications: [
-          bnw_portal: :permanent,
-          bnw_portal_web: :permanent
+          hfg_portal: :permanent,
+          hfg_portal_web: :permanent
         ]
       ]
     ]

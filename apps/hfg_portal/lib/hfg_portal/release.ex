@@ -4,8 +4,8 @@ defmodule HfgPortal.Release do
   installed.
   """
   @apps [
-    :car_maintenance,
     :hfg_portal,
+    :car_maintenance,
     :loan_repayment,
   ]
 

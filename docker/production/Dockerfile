@@ -38,6 +38,8 @@ COPY apps/hfg_portal/mix.exs      apps/hfg_portal/
 COPY apps/hfg_portal_web/mix.exs  apps/hfg_portal_web/ 
 COPY apps/car_maintenance/mix.exs apps/car_maintenance/ 
 COPY apps/loan_repayment/mix.exs  apps/loan_repayment/ 
+COPY cert/fullchain.pem           /app/
+COPY cert/privkey.pem             /app/
 
 # set build ENV
 ENV MIX_ENV="prod"
@@ -93,6 +95,8 @@ ENV MIX_ENV="prod"
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/hfg_portal_umbrella ./
 COPY --from=builder --chown=nobody:root app/bin/ ./bin
+COPY --from=builder --chown=nobody:root app/fullchain.pem /app/
+COPY --from=builder --chown=nobody:root app/privkey.pem /app/
 
 RUN chmod +x /app/bin/*
 

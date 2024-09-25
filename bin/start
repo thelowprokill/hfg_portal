@@ -3,4 +3,4 @@
 set -e
 
 echo "Starting app..."
-bin/bnw_portal_umbrella start
+bin/hfg_portal_umbrella start
