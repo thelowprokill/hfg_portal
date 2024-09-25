@@ -3,7 +3,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
 
   @module  CarMaintenance.MaintenanceItems
   @key     "maintenance_item"
-  @section "maintenance_items"
   @preload []
 
   @impl true

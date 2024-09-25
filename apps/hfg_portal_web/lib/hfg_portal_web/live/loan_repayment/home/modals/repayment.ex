@@ -3,7 +3,6 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
 
   @module  LoanRepayment.Repayments
   @key     "repayment"
-  @section "repayments"
   @preload []
 
   @impl true

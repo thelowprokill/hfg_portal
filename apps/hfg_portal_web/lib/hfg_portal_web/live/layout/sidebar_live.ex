@@ -130,7 +130,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     assign(socket, :apps, system_apps ++ apps)
   end
 
-  defp update_app(socket, app, links, show_admin \\ false) do
+  defp update_app(socket, app, links, show_admin) do
     socket 
     |> assign(:apps, Enum.map(socket.assigns.apps, &if(&1.id == app, do: Map.put(&1, :links, links) |> Map.put(:show_admin, show_admin), else: &1)))
     |> case do

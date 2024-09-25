@@ -4,8 +4,6 @@ defmodule HfgPortalWeb.Accounts.Home.Modals.ChangeAccounts do
   @module HfgPortal.Accounts
   @key "user"
 
-  alias HfgPortal.Locations
-
   @impl true
   def render(assigns) do
     ~H"""

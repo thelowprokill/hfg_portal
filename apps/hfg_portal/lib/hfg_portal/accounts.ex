@@ -318,29 +318,6 @@ defmodule HfgPortal.Accounts do
     end
   end
 
-  @doc """
-  Resets the user password.
-
-  ## Examples
-
-      iex> reset_user_password(user, %{password: "new long password", password_confirmation: "new long password"})
-      {:ok, %User{}}
-
-      iex> reset_user_password(user, %{password: "valid", password_confirmation: "not the same"})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def reset_user_password(user, attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
-  end
-
   alias HfgPortal.Accounts.{ApiUser, ApiUserToken, ApiUserNotifier}
 
   ## Database getters
@@ -362,24 +339,6 @@ defmodule HfgPortal.Accounts do
   end
 
   @doc """
-  Gets a api_user by email and password.
-
-  ## Examples
-
-      iex> get_api_user_by_email_and_password("foo@example.com", "correct_password")
-      %ApiUser{}
-
-      iex> get_api_user_by_email_and_password("foo@example.com", "invalid_password")
-      nil
-
-  """
-  def get_api_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    api_user = Repo.get_by(ApiUser, email: email)
-    if ApiUser.valid_password?(api_user, password), do: api_user
-  end
-
-  @doc """
   Gets a single api_user.
 
   Raises `Ecto.NoResultsError` if the ApiUser does not exist.
@@ -394,85 +353,6 @@ defmodule HfgPortal.Accounts do
 
   """
   def get_api_user!(id), do: Repo.get!(ApiUser, id)
-
-  ## Api user registration
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking api_user changes.
-
-  ### Examples
-
-  #    iex> change_api_user_registration(api_user)
-  #    %Ecto.Changeset{data: %ApiUser{}}
-
-  """
-  def change_api_user_registration(%ApiUser{} = api_user, attrs \\ %{}) do
-    ApiUser.registration_changeset(api_user, attrs, hash_password: false, validate_email: false)
-  end
-
-  ## Settings
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for changing the api_user email.
-
-  ## Examples
-
-      iex> change_api_user_email(api_user)
-      %Ecto.Changeset{data: %ApiUser{}}
-
-  """
-  def change_api_user_email(api_user, attrs \\ %{}) do
-    ApiUser.email_changeset(api_user, attrs, validate_email: false)
-  end
-
-  @doc """
-  Emulates that the email will change without actually changing
-  it in the database.
-
-  ## Examples
-
-      iex> apply_api_user_email(api_user, "valid password", %{email: ...})
-      {:ok, %ApiUser{}}
-
-      iex> apply_api_user_email(api_user, "invalid password", %{email: ...})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def apply_api_user_email(api_user, password, attrs) do
-    api_user
-    |> ApiUser.email_changeset(attrs)
-    |> ApiUser.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
-  end
-
-  @doc """
-  Updates the api_user email using the given token.
-
-  If the token matches, the api_user email is updated and the token is deleted.
-  The confirmed_at date is also updated to the current time.
-  """
-  def update_api_user_email(api_user, token) do
-    context = "change:#{api_user.email}"
-
-    with {:ok, query} <- ApiUserToken.verify_change_email_token_query(token, context),
-         %ApiUserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(api_user_email_multi(api_user, email, context)) do
-      :ok
-    else
-      _ -> :error
-    end
-  end
-
-  defp api_user_email_multi(api_user, email, context) do
-    changeset =
-      api_user
-      |> ApiUser.email_changeset(%{email: email})
-      |> ApiUser.confirm_changeset()
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:api_user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, ApiUserToken.api_user_and_contexts_query(api_user, [context]))
-  end
 
   @doc ~S"""
   Delivers the update email instructions to the given api_user.
@@ -489,47 +369,6 @@ defmodule HfgPortal.Accounts do
 
     Repo.insert!(api_user_token)
     ApiUserNotifier.deliver_update_email_instructions(api_user, update_email_url_fun.(encoded_token))
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for changing the api_user password.
-
-  ## Examples
-
-      iex> change_api_user_password(api_user)
-      %Ecto.Changeset{data: %ApiUser{}}
-
-  """
-  def change_api_user_password(api_user, attrs \\ %{}) do
-    ApiUser.password_changeset(api_user, attrs, hash_password: false)
-  end
-
-  @doc """
-  Updates the api_user password.
-
-  ## Examples
-
-      iex> update_api_user_password(api_user, "valid password", %{password: ...})
-      {:ok, %ApiUser{}}
-
-      iex> update_api_user_password(api_user, "invalid password", %{password: ...})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_api_user_password(api_user, password, attrs) do
-    changeset =
-      api_user
-      |> ApiUser.password_changeset(attrs)
-      |> ApiUser.validate_current_password(password)
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:api_user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, ApiUserToken.api_user_and_contexts_query(api_user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{api_user: api_user}} -> {:ok, api_user}
-      {:error, :api_user, changeset, _} -> {:error, changeset}
-    end
   end
 
   ## Session
@@ -584,28 +423,6 @@ defmodule HfgPortal.Accounts do
     end
   end
 
-  @doc """
-  Confirms a api_user by the given token.
-
-  If the token matches, the api_user account is marked as confirmed
-  and the token is deleted.
-  """
-  def confirm_api_user(token) do
-    with {:ok, query} <- ApiUserToken.verify_email_token_query(token, "confirm"),
-         %ApiUser{} = api_user <- Repo.one(query),
-         {:ok, %{api_user: api_user}} <- Repo.transaction(confirm_api_user_multi(api_user)) do
-      {:ok, api_user}
-    else
-      _ -> :error
-    end
-  end
-
-  defp confirm_api_user_multi(api_user) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:api_user, ApiUser.confirm_changeset(api_user))
-    |> Ecto.Multi.delete_all(:tokens, ApiUserToken.api_user_and_contexts_query(api_user, ["confirm"]))
-  end
-
   ## Reset password
 
   @doc ~S"""
@@ -642,29 +459,6 @@ defmodule HfgPortal.Accounts do
       api_user
     else
       _ -> nil
-    end
-  end
-
-  @doc """
-  Resets the api_user password.
-
-  ## Examples
-
-      iex> reset_api_user_password(api_user, %{password: "new long password", password_confirmation: "new long password"})
-      {:ok, %ApiUser{}}
-
-      iex> reset_api_user_password(api_user, %{password: "valid", password_confirmation: "not the same"})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def reset_api_user_password(api_user, attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:api_user, ApiUser.password_changeset(api_user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, ApiUserToken.api_user_and_contexts_query(api_user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{api_user: api_user}} -> {:ok, api_user}
-      {:error, :api_user, changeset, _} -> {:error, changeset}
     end
   end
 
@@ -722,85 +516,6 @@ defmodule HfgPortal.Accounts do
   """
   def get_customer!(id), do: Repo.get!(Customer, id)
 
-  ## Customer registration
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking customer changes.
-
-  ### Examples
-
-  #    iex> change_customer_registration(customer)
-  #    %Ecto.Changeset{data: %Customer{}}
-
-  """
-  def change_customer_registration(%Customer{} = customer, attrs \\ %{}) do
-    Customer.registration_changeset(customer, attrs, hash_password: false, validate_email: false)
-  end
-
-  ## Settings
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for changing the customer email.
-
-  ## Examples
-
-      iex> change_customer_email(customer)
-      %Ecto.Changeset{data: %Customer{}}
-
-  """
-  def change_customer_email(customer, attrs \\ %{}) do
-    Customer.email_changeset(customer, attrs, validate_email: false)
-  end
-
-  @doc """
-  Emulates that the email will change without actually changing
-  it in the database.
-
-  ## Examples
-
-      iex> apply_customer_email(customer, "valid password", %{email: ...})
-      {:ok, %Customer{}}
-
-      iex> apply_customer_email(customer, "invalid password", %{email: ...})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def apply_customer_email(customer, password, attrs) do
-    customer
-    |> Customer.email_changeset(attrs)
-    |> Customer.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
-  end
-
-  @doc """
-  Updates the customer email using the given token.
-
-  If the token matches, the customer email is updated and the token is deleted.
-  The confirmed_at date is also updated to the current time.
-  """
-  def update_customer_email(customer, token) do
-    context = "change:#{customer.email}"
-
-    with {:ok, query} <- CustomerToken.verify_change_email_token_query(token, context),
-         %CustomerToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(customer_email_multi(customer, email, context)) do
-      :ok
-    else
-      _ -> :error
-    end
-  end
-
-  defp customer_email_multi(customer, email, context) do
-    changeset =
-      customer
-      |> Customer.email_changeset(%{email: email})
-      |> Customer.confirm_changeset()
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:customer, changeset)
-    |> Ecto.Multi.delete_all(:tokens, CustomerToken.customer_and_contexts_query(customer, [context]))
-  end
-
   @doc ~S"""
   Delivers the update email instructions to the given customer.
 
@@ -816,47 +531,6 @@ defmodule HfgPortal.Accounts do
 
     Repo.insert!(customer_token)
     CustomerNotifier.deliver_update_email_instructions(customer, update_email_url_fun.(encoded_token))
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for changing the customer password.
-
-  ## Examples
-
-      iex> change_customer_password(customer)
-      %Ecto.Changeset{data: %Customer{}}
-
-  """
-  def change_customer_password(customer, attrs \\ %{}) do
-    Customer.password_changeset(customer, attrs, hash_password: false)
-  end
-
-  @doc """
-  Updates the customer password.
-
-  ## Examples
-
-      iex> update_customer_password(customer, "valid password", %{password: ...})
-      {:ok, %Customer{}}
-
-      iex> update_customer_password(customer, "invalid password", %{password: ...})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_customer_password(customer, password, attrs) do
-    changeset =
-      customer
-      |> Customer.password_changeset(attrs)
-      |> Customer.validate_current_password(password)
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:customer, changeset)
-    |> Ecto.Multi.delete_all(:tokens, CustomerToken.customer_and_contexts_query(customer, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{customer: customer}} -> {:ok, customer}
-      {:error, :customer, changeset, _} -> {:error, changeset}
-    end
   end
 
   ## Session
@@ -969,29 +643,6 @@ defmodule HfgPortal.Accounts do
       customer
     else
       _ -> nil
-    end
-  end
-
-  @doc """
-  Resets the customer password.
-
-  ## Examples
-
-      iex> reset_customer_password(customer, %{password: "new long password", password_confirmation: "new long password"})
-      {:ok, %Customer{}}
-
-      iex> reset_customer_password(customer, %{password: "valid", password_confirmation: "not the same"})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def reset_customer_password(customer, attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:customer, Customer.password_changeset(customer, attrs))
-    |> Ecto.Multi.delete_all(:tokens, CustomerToken.customer_and_contexts_query(customer, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{customer: customer}} -> {:ok, customer}
-      {:error, :customer, changeset, _} -> {:error, changeset}
     end
   end
 end

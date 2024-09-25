@@ -19,7 +19,7 @@ defmodule LoanRepayment.Loans.Loan do
     field :amount,        :decimal
     field :active,        :boolean, default: true
 
-    has_one :repayment, LoanRepayment.Repayments.Repayment
+    has_one :repayment, LoanRepayment.Loans.Repayment
 
     belongs_to :created_by, LoanRepayment.Users.User
     belongs_to :updated_by, LoanRepayment.Users.User

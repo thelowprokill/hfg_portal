@@ -44,15 +44,15 @@ defmodule HfgPortalWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: HfgPortalWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      #forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 
   ## API Routes
-  scope "/apis/admin_logs/update", HfgPortalWeb do
-    pipe_through :api
-    get "/", Apis.AdminLogsApiController, :update
-  end
+  #scope "/apis/admin_logs/update", HfgPortalWeb do
+  #  pipe_through :api
+  #  get "/", Apis.AdminLogsApiController, :update
+  #end
 
   ## Authentication routes
 
@@ -61,10 +61,10 @@ defmodule HfgPortalWeb.Router do
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{HfgPortalWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/users/register",              UserRegistrationLive,   :new
+      live "/users/log_in",                UserLoginLive,          :new
+      live "/users/reset_password",        UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive,  :edit
 
       get "/auth/google/callback", GoogleAuthController, :index
     end

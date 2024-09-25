@@ -4,8 +4,6 @@ defmodule HfgPortalWeb.Accounts.ApiAccounts.Modals.ChangeApiAccounts do
   @module HfgPortal.ApiAccounts
   @key "api_user"
 
-  alias HfgPortal.Locations
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -35,12 +33,6 @@ defmodule HfgPortalWeb.Accounts.ApiAccounts.Modals.ChangeApiAccounts do
     """
   end
 
-  defp fetch_locations(socket) do
-    socket
-    #|> assign(:locationss, [])
-    |> assign(:locations, Locations.list(%{active: true}))
-  end
-
   defp save(socket) do
     %{modal: %{changeset: changeset} = modal} = socket.assigns
 
@@ -63,11 +55,7 @@ defmodule HfgPortalWeb.Accounts.ApiAccounts.Modals.ChangeApiAccounts do
   end
 
   @impl true
-  def mount(socket) do
-    socket
-    |> fetch_locations()
-    |> res(:ok)
-  end
+  def mount(socket), do: socket |> res(:ok)
 
   @impl true
   def handle_event("validate", params, socket) do

@@ -137,87 +137,44 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
       opts:      %{loan: loan}
     } | modal_stack])
   end
-  #defp set_modal(socket, :fixed_timesheets, id) when not is_nil(id) do
-  #  %{
-  #    fixed_projects: projects,
-  #    modal_stack:    modal_stack,
-  #    current_user:   user
+  #defp set_modal(socket, :reports, id) when not is_nil(id) do
+  #  %{ 
+  #    modal_stack: modal_stack,
+  #    reports:     reports
   #  } = socket.assigns
-
-  #  socket |> assign(:modal_stack, [%Modal{
-  #    modal:     :timesheets,
-  #    id:        :timesheets,
-  #    module:    ChangeTimesheets,
-  #    live:      true,
-  #    user:      user,
-  #    opts:      %{
-  #      fixed_project_id: id,
-  #      project_name:     Enum.find(projects, &(&1.id == id)) |> Map.get(:name),
-  #      user_id:          user.id
-  #    }
+  #  socket
+  #  |> assign(:modal_stack, [%Modal{
+  #    modal:  :report,
+  #    id:     :report,
+  #    opts:   %{report: Enum.find(reports, &(&1.id == id)) |> Reports.decorate()},
   #  } | modal_stack])
   #end
 
-  #defp set_modal(socket, :timesheets, id) when not is_nil(id) do
-  #  %{
-  #    projects:          projects,
-  #    favorite_projects: favorite_projects,
-  #    modal_stack:       modal_stack,
-  #    current_user:      user
+  #defp set_modal(socket, :reports, _) do
+  #  %{ 
+  #    modal_stack: modal_stack,
+  #    reports:     reports
   #  } = socket.assigns
 
-  #  socket |> assign(:modal_stack, [%Modal{
-  #    modal:     :timesheets,
-  #    id:        :timesheets,
-  #    module:    ChangeTimesheets,
-  #    live:      true,
-  #    user:      user,
-  #    opts:      %{
-  #      project_id:   id,
-  #      project_name: Enum.find(projects, Enum.find(favorite_projects, &(&1.id == id)), &(&1.id == id)) |> Map.get(:name),
-  #      user_id:      user.id
-  #    }
-  #  } | modal_stack])
+  #  socket
+  #  |> assign(:modal_stack, 
+  #    cond do
+  #      length(reports) == 1 ->
+  #        [%Modal{
+  #          modal:  :report,
+  #          id:     :report,
+  #          opts:   %{report: Enum.at(reports, 0) |> Reports.decorate()},
+  #        } | modal_stack]
+  #      length(reports) > 1 ->
+  #        [ %Modal{
+  #          modal:  :pick_reports,
+  #          id:     :pick_reports,
+  #          module: nil
+  #        } | modal_stack]
+  #      true -> 
+  #        modal_stack
+  #    end)
   #end
-
-  defp set_modal(socket, :reports, id) when not is_nil(id) do
-    %{ 
-      modal_stack: modal_stack,
-      reports:     reports
-    } = socket.assigns
-    socket
-    |> assign(:modal_stack, [%Modal{
-      modal:  :report,
-      id:     :report,
-      opts:   %{report: Enum.find(reports, &(&1.id == id)) |> Reports.decorate()},
-    } | modal_stack])
-  end
-
-  defp set_modal(socket, :reports, _) do
-    %{ 
-      modal_stack: modal_stack,
-      reports:     reports
-    } = socket.assigns
-
-    socket
-    |> assign(:modal_stack, 
-      cond do
-        length(reports) == 1 ->
-          [%Modal{
-            modal:  :report,
-            id:     :report,
-            opts:   %{report: Enum.at(reports, 0) |> Reports.decorate()},
-          } | modal_stack]
-        length(reports) > 1 ->
-          [ %Modal{
-            modal:  :pick_reports,
-            id:     :pick_reports,
-            module: nil
-          } | modal_stack]
-        true -> 
-          modal_stack
-      end)
-  end
   defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
   @impl true

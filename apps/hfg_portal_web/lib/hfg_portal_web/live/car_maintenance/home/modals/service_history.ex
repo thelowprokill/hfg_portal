@@ -3,7 +3,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
 
   @module  CarMaintenance.ServiceHistories
   @key     "service_history"
-  @section "service_histories"
   @preload [:maintenance_item]
 
   @impl true
@@ -112,7 +111,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
       <% end %>
       <.bnw_input_hidden f={@f} field={:car_id}        value={@car_id} />
       <.bnw_input_hidden f={@f} field={:updated_by_id} value={@user_id} />
-      <td class="px-2"><.bnw_input_naked f={@f} type="date"     field={:service_date} display_name="Service Date"} /></td>
+      <td class="px-2"><.bnw_input_naked f={@f} type="date"     field={:service_date} display_name="Service Date" /></td>
       <td class="px-2"><.bnw_input_naked f={@f} type="number"   field={:mileage}      display_name="Service Mileage"/></td>
       <td class="px-2"><.bnw_input_naked f={@f} type="checkbox" field={:named_item}   display_name="Named Item"/></td>
       <td class="px-2">

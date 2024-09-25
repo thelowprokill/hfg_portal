@@ -21,4 +21,5 @@ defmodule HfgPortalWeb.Gettext do
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
   use Gettext, otp_app: :hfg_portal_web
+  #use Gettext, backend: HfgPortalWeb.Gettext
 end

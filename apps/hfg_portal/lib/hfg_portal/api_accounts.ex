@@ -8,12 +8,6 @@ defmodule HfgPortal.ApiAccounts do
 
   alias HfgPortal.Repo
 
-  alias HfgPortal.Accounts.{
-    User,
-    UserToken,
-    UserNotifier
-  }
-
   @topic "bnwportal:api_users"
 
   @schema HfgPortal.Accounts.ApiUser
