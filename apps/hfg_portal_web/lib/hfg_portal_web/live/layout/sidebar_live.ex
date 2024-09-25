@@ -95,7 +95,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         name: "Car Maintenance",
         id: "car_maintenance",
         links: CarMaintenance.Authorize.list_pages(current_user),
-        #show_admin: CarMaintenance.Admins.is_admin(current_user.id),
+      },
+      %App{
+        name: "Loan Repayment",
+        id: "loan_repayment",
+        links: LoanRepayment.Authorize.list_pages(current_user),
       },
 
     ]
@@ -298,39 +302,25 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     end
   end
 
-  #@impl true
-  #def handle_info({[:it_budget, :user_role, _], user_role}, socket) do 
-  #  cond do
-  #    user_role.user_id == socket.assigns.current_user.id ->
-  #      update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false) 
-  #    true -> socket
-  #  end
-  #  |> res()
-  #end
+  @impl true
+  def handle_info({[:car_maintenance, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "car_maintenance", CarMaintenance.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
 
-  #@impl true
-  #def handle_info({[:budget, :user_role, _], user_role}, socket) do 
-  #  cond do
-  #    user_role.user_id == socket.assigns.current_user.id ->
-  #      update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) 
-  #    true -> socket
-  #  end
-  #  |> res()
-  #end
-  #@impl true
-  #def handle_info({[:budget, _, _], _}, socket) do 
-  #  update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) |> res()
-  #end
-
-  #@impl true
-  #def handle_info({[:dev_team_timetracking, :user_role, _], user_role}, socket) do
-  #  cond do
-  #    user_role.user_id == socket.assigns.current_user.id ->
-  #      update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false)
-  #    true -> socket
-  #  end
-  #  |> res()
-  #end
+  @impl true
+  def handle_info({[:loan_repayment, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "loan_repayment", LoanRepayment.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
 
   @impl true
   def handle_info({[:user, _], user}, socket) do

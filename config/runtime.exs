@@ -38,8 +38,18 @@ if config_env() == :prod do
     hostname: mysql_host,
     username: mysql_username,
     password: mysql_password,
-    port: mysql_port,
+    port:     mysql_port,
     database: "hfg_portal_car_maintenance",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
+  config :loan_repayment, LoanRepayment.Repo,
+    # ssl: true,
+    hostname: mysql_host,
+    username: mysql_username,
+    password: mysql_password,
+    port:     mysql_port,
+    database: "hfg_portal_loan_repayment",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
@@ -48,7 +58,7 @@ if config_env() == :prod do
     hostname: mysql_host,
     username: mysql_username,
     password: mysql_password,
-    port: mysql_port,
+    port:     mysql_port,
     database: "hfg_portal",
     pool_size: String.to_integer(System.get_env("MYSQL_POOL_SIZE") || "10"),
     socket_options: maybe_ipv6

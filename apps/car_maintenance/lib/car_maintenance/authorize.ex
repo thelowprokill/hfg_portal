@@ -13,8 +13,8 @@ defmodule CarMaintenance.Authorize do
   # pattern match on user struct
   def list_pages(user, dev_admin \\ false)
   def list_pages(%CarMaintenance.Users.User{} = user, _),                  do: list_pages(user.user_role, user.dev_admin && user.admin_mode)
-  def list_pages(%HfgPortal.Accounts.User{} = user, _),                         do: list_pages(user.id, user.dev_admin && user.admin_mode)
-  def list_pages(user_id, dev_admin) when is_integer(user_id),                  do: CarMaintenance.UserRoles.get(user_id, :user) |> list_pages(dev_admin)
+  def list_pages(%HfgPortal.Accounts.User{} = user, _),                    do: list_pages(user.id, user.dev_admin && user.admin_mode)
+  def list_pages(user_id, dev_admin) when is_integer(user_id),             do: CarMaintenance.UserRoles.get(user_id, :user) |> list_pages(dev_admin)
   def list_pages(%CarMaintenance.Users.UserRole{} = user_role, dev_admin), do: @pages |> Enum.filter(fn page -> authorize(user_role.role, page.id, dev_admin) end)
 
   def list_pages(_, true),  do: @pages

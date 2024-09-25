@@ -45,24 +45,12 @@ defmodule CarMaintenance.Cars do
   defp filter_active(query, active) when not is_nil(active), do: query |> where(active: ^active)
   defp filter_active(query, _active), do: query
 
-  #defp filter_user(query, user_id) when not is_nil(user_id), do: query |> where(user_id: ^user_id)
-  #defp filter_user(query, _user_id), do: query
-
-  #defp filter_dates(query, dates) when not is_nil(dates) do
-  #  query
-  #  |> where([c], c.monday in ^dates)
-  #end
-  #defp filter_dates(query, _dates), do: query
-
   def list(opts \\ %{}) do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
     |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
-    #|> order_by(desc: :monday)
     |> filter_active(Map.get(opts, :active))
-    #|> filter_user(Map.get(opts, :user_id))
-    #|> filter_dates(Map.get(opts, :dates))
     |> Repo.all()
     |> bnw_preload(Map.get(opts, :preload, []))
   end

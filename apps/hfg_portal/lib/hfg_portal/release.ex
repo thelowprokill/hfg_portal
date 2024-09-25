@@ -6,6 +6,7 @@ defmodule HfgPortal.Release do
   @apps [
     :car_maintenance,
     :hfg_portal,
+    :loan_repayment,
   ]
 
   def migrate do

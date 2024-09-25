@@ -56,6 +56,7 @@ defmodule HfgPortalWeb.MixProject do
       {:jose,                   "~> 1.11"},
       {:hfg_portal,             in_umbrella: true},
       {:car_maintenance,        in_umbrella: true},
+      {:loan_repayment,         in_umbrella: true},
       #{:admin_logs,             in_umbrella: true},
       #{:budget,                 in_umbrella: true},
       #{:dev_team_timetracking,  in_umbrella: true},

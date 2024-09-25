@@ -1,0 +1,41 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table height="80vh">
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:paid_to}>Lendee</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:for}>For</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:description}>Description</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:amount}>Amount</.bnw_table_header_filter></th>
+        <th class="p-2">Paid</th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for loan <- @loans do %>
+        <tr phx-click="repayment" phx-value-id={loan.id} class="cursor-pointer">
+          <td class="px-2"><%= loan.paid_to %></td>
+          <td class="px-2"><%= loan.for %></td>
+          <td class="px-2"><%= loan.description %></td>
+          <td class="px-2"><%= loan.amount |> Number.Currency.number_to_currency(precision: 0) %></td>
+          <td class="px-2"><%# Total paid %></td>
+          <td class="px-2"></td>
+          <td class="px-2"><.bnw_button_edit   phx-value-id={loan.id} /></td>
+          <td class="px-2">
+            <%# if is_nil(loan.service_history) || loan.service_history && loan.service_history.service_history == 0 do %>
+              <.bnw_button_delete phx-value-id={loan.id} />
+            <%# end %>
+          </td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

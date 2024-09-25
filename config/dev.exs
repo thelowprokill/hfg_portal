@@ -1,6 +1,16 @@
 import Config
 
 # Configure your database
+config :loan_repayment, LoanRepayment.Repo,
+  username: System.get_env("MYSQL_USER",     "root"),
+  password: System.get_env("MYSQL_PASSWORD", "root"),
+  hostname: System.get_env("MYSQL_HOST",     "localhost"),
+  database: "hfg_portal_loan_repayment_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Configure your database
 config :car_maintenance, CarMaintenance.Repo,
   username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
@@ -12,9 +22,9 @@ config :car_maintenance, CarMaintenance.Repo,
 
 # Configure your database
 config :hfg_portal, HfgPortal.Repo,
-  username: System.get_env("MYSQL_USER", "root"),
+  username: System.get_env("MYSQL_USER",     "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST", "localhost"),
+  hostname: System.get_env("MYSQL_HOST",     "localhost"),
   database: "hfg_portal_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -93,5 +103,6 @@ config :swoosh, :api_client, false
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-config :hfg_portal, env: :dev
-config :car_maintenance,   env: :dev
+config :hfg_portal,      env: :dev
+config :car_maintenance, env: :dev
+config :loan_repayment,  env: :dev

@@ -1,11 +1,11 @@
-defmodule HfgPortalWeb.CarMaintenance.Users.UsersLive do
+defmodule HfgPortalWeb.LoanRepayment.Users.UsersLive do
   use HfgPortalWeb, :live_view
 
-  alias HfgPortalWeb.CarMaintenance.Users.Modals.{
+  alias HfgPortalWeb.LoanRepayment.Users.Modals.{
     ChangeUserRoles,
   }
 
-  alias CarMaintenance.{
+  alias LoanRepayment.{
     UserRoles,
     Users.Roles,
   }
@@ -115,7 +115,7 @@ defmodule HfgPortalWeb.CarMaintenance.Users.UsersLive do
   defp handle_params(socket, _session), do: socket
 
   @impl true
-  def handle_info({[:car_maintenance, :user_role, :created], user_role}, socket) do
+  def handle_info({[:loan_repayment, :user_role, :created], user_role}, socket) do
     %{users: users} = socket.assigns
 
     socket
@@ -124,7 +124,7 @@ defmodule HfgPortalWeb.CarMaintenance.Users.UsersLive do
   end
 
   @impl true
-  def handle_info({[:car_maintenance, :user_role, :updated], user_role}, socket) do
+  def handle_info({[:loan_repayment, :user_role, :updated], user_role}, socket) do
     %{users: users} = socket.assigns
 
     socket

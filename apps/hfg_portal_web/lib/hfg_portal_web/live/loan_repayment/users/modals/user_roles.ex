@@ -1,10 +1,10 @@
-defmodule HfgPortalWeb.CarMaintenance.Users.Modals.ChangeUserRoles do
+defmodule HfgPortalWeb.LoanRepayment.Users.Modals.ChangeUserRoles do
   use HfgPortalWeb, :live_component
 
-  @module CarMaintenance.UserRoles
+  @module LoanRepayment.UserRoles
   @key "user_role"
 
-  alias CarMaintenance.{
+  alias LoanRepayment.{
     Users.Roles
   }
 
@@ -12,7 +12,7 @@ defmodule HfgPortalWeb.CarMaintenance.Users.Modals.ChangeUserRoles do
   def render(assigns) do
     ~H"""
     <div>
-      <.bnw_modal id="ytd_detail_modal">
+      <.bnw_modal id="modal">
         <.bnw_modal_header><.bnw_modal_new_or_edit changeset={@modal.changeset}>Budget</.bnw_modal_new_or_edit></.bnw_modal_header>
         <.form :let={f}
           for={@modal.changeset}
