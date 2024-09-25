@@ -7,6 +7,6 @@ services:
       - INCLUDE_MIGRATIONS=true
       - LOCATION=bnw
     ports:
-      - "5000:5000"
+      - "4000:4000"
     env_file:
       - ./docker/production/.env
