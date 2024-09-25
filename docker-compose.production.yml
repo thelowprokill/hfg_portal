@@ -6,8 +6,8 @@ services:
     environment:
       - LOCATION=bnw
     ports:
-      - "5000:443"
-      - "443:443"
+      - "4000:4000"
+      - "443:4000"
     env_file:
       - ./docker/production/.env
     image: hfg-portal-production
