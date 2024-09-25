@@ -7,10 +7,11 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
 
   alias LoanRepayment.{
     Loans,
+    Repayments,
     Repo,
   }
 
-  @preload []
+  @preload [repayment: Repayments.repayment_query()]
 
   defp fetch_loans(socket) do
     %{
@@ -222,6 +223,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
   def mount(_params, session, socket) do
     if connected?(socket) do
       Loans.subscribe()
+      Repayments.subscribe()
       #Reports.subscribe()
     end
 
@@ -277,9 +279,9 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
   defp handle_params(socket, _session), do: socket
 
   @impl true
-  def handle_info({[:service_history, _], service_history}, socket) do
+  def handle_info({[:repayment, _], repayment}, socket) do
     socket
-    |> assign(:loans, Enum.map(socket.assigns.loans, &(if &1.id == service_history.loan_id, do: &1.id |> Loans.get() |> Repo.preload(@preload), else: &1)))
+    |> assign(:loans, Enum.map(socket.assigns.loans, &(if &1.id == repayment.loan_id, do: &1.id |> Loans.get() |> Repo.preload(@preload), else: &1)))
     |> res()
   end
 

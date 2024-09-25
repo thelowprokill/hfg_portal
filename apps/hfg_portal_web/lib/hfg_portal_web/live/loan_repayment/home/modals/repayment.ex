@@ -51,9 +51,9 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
                           last_item={@items |> Enum.max_by(&(&1.paid_amount_tot), fn -> %{paid_amount_tot: 0, remaining_balance: @moadl.opts.loan.amount} end)}
                         />
                       <% true -> %>
-                        <td class="px-2"><%= item.paid_amount |> Number.Currency.number_to_currency(precision: 0) %></td>
-                        <td class="px-2"><%= Decimal.sub(@modal.opts.loan.amount, item.paid_amount_tot) |> Number.Currency.number_to_currency(precision: 0) %></td>
-                        <td class="px-2"><%= item.paid_amount_tot |> Number.Currency.number_to_currency(precision: 0) %></td>
+                        <td class="px-2 text-right"><%= item.paid_amount |> Number.Currency.number_to_currency(precision: 0) %></td>
+                        <td class="px-2 text-right"><%= Decimal.sub(@modal.opts.loan.amount, item.paid_amount_tot) |> Number.Currency.number_to_currency(precision: 0) %></td>
+                        <td class="px-2 text-right"><%= item.paid_amount_tot |> Number.Currency.number_to_currency(precision: 0) %></td>
                         <td class="px-2"><%= item.updated_at |> Calendar.strftime("%Y-%m-%d %H:%M") %></td>
                     <% end %>
                   </tr>

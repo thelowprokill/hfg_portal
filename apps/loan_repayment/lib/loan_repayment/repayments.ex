@@ -21,6 +21,12 @@ defmodule LoanRepayment.Repayments do
   end
   defp notify_subscribers({:error, reason}, _event), do: {:error, reason}
 
+  def repayment_query() do
+    @schema
+    |> group_by([r], [r.loan_id])
+    |> select([r], %{loan_id: r.loan_id, paid_amount_tot: max(r.paid_amount_tot)})
+  end
+
 
   defp search_stack(query, search_stack) when is_list(search_stack) do
     Enum.reduce(search_stack, query, fn(search, query) ->
