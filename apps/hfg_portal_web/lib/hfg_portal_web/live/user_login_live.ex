@@ -5,13 +5,8 @@ defmodule HfgPortalWeb.UserLoginLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm dark:bg-zinc-900">
-      <div class="p-3 flex justify-center hidden dark:block">
-        <!-- this is apps/hfg_portal_web/priv/static/images/bnw_logo_white.svg -->
-        <img src={"/images/#{System.get_env("LOCATION") || "bnw"}_logo_white.svg"} width="300" />
-      </div>
-      <div class="p-3 flex justify-center dark:hidden">
-        <!-- this is apps/hfg_portal_web/priv/static/images/bnw_logo.svg -->
-        <img src={"/images/#{System.get_env("LOCATION") || "bnw"}_logo.svg"} width="300" />
+      <div class="p-3 flex justify-center">
+        <img src={"/images/rook_logo.svg"} width="200" />
       </div>
 
       <hr>

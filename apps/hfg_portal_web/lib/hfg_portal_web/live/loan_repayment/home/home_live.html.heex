@@ -27,9 +27,9 @@
           <td class="px-2"><%= (if loan.repayment, do: loan.repayment.paid_amount_tot) |> Number.Currency.number_to_currency(precision: 0) %></td>
           <td class="px-2"><.bnw_button_edit   phx-value-id={loan.id} /></td>
           <td class="px-2">
-            <%# if is_nil(loan.service_history) || loan.service_history && loan.service_history.service_history == 0 do %>
+            <%= if is_nil(loan.repayment) || loan.repayment && loan.repayment.paid_amount_tot == 0 do %>
               <.bnw_button_delete phx-value-id={loan.id} />
-            <%# end %>
+            <% end %>
           </td>
         </tr>
       <% end %>

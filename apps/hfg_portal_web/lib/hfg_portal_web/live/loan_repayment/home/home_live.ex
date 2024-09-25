@@ -2,6 +2,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
   use HfgPortalWeb, :live_view
 
   alias HfgPortalWeb.LoanRepayment.Home.Modals.{
+    ChangeLoan,
     ChangeRepayment,
   }
 
@@ -337,12 +338,6 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
   end
 
   @impl true
-  def handle_event("maintenance_items", %{"id" => id}, socket), do: socket |> set_modal(:maintenance_items, id |> String.to_integer) |> res()
-
-  @impl true
-  def handle_event("service_history", %{"id" => id}, socket), do: socket |> set_modal(:service_history, id |> String.to_integer) |> res()
-
-  @impl true
   def handle_event("repayment", %{"id" => id}, socket), do: socket |> set_modal(:repayment, id |> String.to_integer) |> res()
 
   @impl true
@@ -350,6 +345,12 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
 
   @impl true
   def handle_event("edit", %{"id" => id}, socket), do: socket |> set_modal(:edit, id |> String.to_integer) |> res()
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do 
+    Loans.delete(id) 
+    socket |> res()
+  end
 
   @impl true
   def handle_event("reports", %{"id" => id}, socket), do: socket |> set_modal(:reports, id |> String.to_integer) |> res()

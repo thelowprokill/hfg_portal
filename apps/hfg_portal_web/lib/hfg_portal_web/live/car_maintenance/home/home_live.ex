@@ -364,6 +364,12 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
   def handle_event("edit", %{"id" => id}, socket), do: socket |> set_modal(:edit, id |> String.to_integer) |> res()
 
   @impl true
+  def handle_event("delete", %{"id" => id}, socket) do 
+    Cars.delete(id) 
+    socket |> res()
+  end
+
+  @impl true
   def handle_event("reports", %{"id" => id}, socket), do: socket |> set_modal(:reports, id |> String.to_integer) |> res()
 
   @impl true
