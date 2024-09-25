@@ -34,12 +34,10 @@ RUN mix local.hex --force && \
     mix local.rebar --force
 
 # copy mix files for each app
-COPY apps/hfg_portal/mix.exs            apps/hfg_portal/ 
-COPY apps/hfg_portal_web/mix.exs        apps/hfg_portal_web/ 
-COPY apps/admin_logs/mix.exs            apps/admin_logs/ 
-COPY apps/budget/mix.exs                apps/budget/ 
-COPY apps/dev_team_timetracking/mix.exs apps/dev_team_timetracking/ 
-COPY apps/it_budget/mix.exs             apps/it_budget/ 
+COPY apps/hfg_portal/mix.exs      apps/hfg_portal/ 
+COPY apps/hfg_portal_web/mix.exs  apps/hfg_portal_web/ 
+COPY apps/car_maintenance/mix.exs apps/car_maintenance/ 
+COPY apps/loan_repayment/mix.exs  apps/loan_repayment/ 
 
 # set build ENV
 ENV MIX_ENV="prod"
