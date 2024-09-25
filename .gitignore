@@ -30,3 +30,5 @@ erl_crash.dump
 
 # vscode elixir files
 *.elixir_ls
+
+cert/
