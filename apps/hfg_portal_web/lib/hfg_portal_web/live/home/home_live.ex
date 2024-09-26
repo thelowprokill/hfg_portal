@@ -21,7 +21,7 @@ defmodule HfgPortalWeb.Home.HomeLive do
     end
 
     socket
-    |> bnw_verify_user_token(session, "#{(System.get_env("LOCATION") || "bnw") |> String.upcase} Portal", "Home")
+    |> bnw_verify_user_token(session, "HFG Portal", "Home")
     |> assign(:session, %{})
     |> handle_params(session)
     |> can_see_dm_page()
