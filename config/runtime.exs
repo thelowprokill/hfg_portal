@@ -7,7 +7,6 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-
   mysql_host =
     System.get_env("MYSQL_HOST") ||
       raise """
@@ -32,6 +31,16 @@ if config_env() == :prod do
   mysql_port = (System.get_env("MYSQL_PORT") || "3306") |> String.to_integer()
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+  config :wife_time, WifeTime.Repo,
+    # ssl: true,
+    hostname: mysql_host,
+    username: mysql_username,
+    password: mysql_password,
+    port:     mysql_port,
+    database: "hfg_portal_wife_time",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
 
   config :car_maintenance, CarMaintenance.Repo,
     # ssl: true,
@@ -84,17 +93,17 @@ if config_env() == :prod do
       cipher_suite: :strong,
       # TODO
       # fix this. for some reason it is not working with my cert bot certification
-      #keyfile:  System.get_env("SSL_KEY"),
-      #certfile: System.get_env("SSL_CERT"),
+      # keyfile:  System.get_env("SSL_KEY"),
+      # certfile: System.get_env("SSL_CERT"),
       keyfile: "priv/cert/selfsigned_key.pem",
       certfile: "priv/cert/selfsigned.pem"
     ],
-    #http: [
+    # http: [
     #  # Enable IPv6 and bind on all interfaces.
     #  # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
     #  ip: {0, 0, 0, 0, 0, 0, 0, 0},
     #  port: String.to_integer(System.get_env("PORT") || "4000")
-    #],
+    # ],
     url: [host: System.get_env("HOSTNAME") || "localhost", port: System.get_env("PORT") || 4000],
     secret_key_base: secret_key_base
 

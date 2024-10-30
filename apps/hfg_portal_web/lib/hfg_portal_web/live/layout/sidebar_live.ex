@@ -101,6 +101,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         id: "loan_repayment",
         links: LoanRepayment.Authorize.list_pages(current_user),
       },
+      %App{
+        name: "Wife Time",
+        id: "wife_time",
+        links: WifeTime.Authorize.list_pages(current_user),
+      },
 
     ]
     

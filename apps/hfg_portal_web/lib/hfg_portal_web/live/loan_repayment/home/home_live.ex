@@ -186,12 +186,12 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
     end
 
     socket
-    |> bnw_verify_user_token(session, "Loan Maintenance", "Home")
+    |> bnw_verify_user_token(session, "Loan Repayment", "Home")
     #|> fetch_user_role()
     |> assign(:session,       %{})
     |> assign(:page,          0)
     |> assign(:per_page,      50)
-    |> assign(:loans,      [])
+    |> assign(:loans,         [])
     |> assign(:reports,       [])
     |> assign(:modal_stack,   [])
     |> assign(:capacity,      %{})

@@ -1,12 +1,23 @@
 import Config
 
 # Configure your database
+config :wife_time, WifeTime.Repo,
+  username: System.get_env("MYSQL_USERNAME", "root"),
+  password: System.get_env("MYSQL_PASSWORD", "root"),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
+  database: "hfg_portal_wife_time_dev",
+  port: String.to_integer(System.get_env("MYSQL_PORT", "3306")),
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Configure your database
 config :loan_repayment, LoanRepayment.Repo,
   username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
   database: "hfg_portal_loan_repayment_dev",
-  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
+  port: String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -15,8 +26,8 @@ config :loan_repayment, LoanRepayment.Repo,
 config :car_maintenance, CarMaintenance.Repo,
   username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
+  port: String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   database: "hfg_portal_car_maintenance_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -26,8 +37,8 @@ config :car_maintenance, CarMaintenance.Repo,
 config :hfg_portal, HfgPortal.Repo,
   username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
-  hostname: System.get_env("MYSQL_HOST",     "localhost"),
-  port:     String.to_integer(System.get_env("MYSQL_PORT", "3306")),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
+  port: String.to_integer(System.get_env("MYSQL_PORT", "3306")),
   database: "hfg_portal_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -109,3 +120,4 @@ config :phoenix, :stacktrace_depth, 20
 config :hfg_portal,      env: :dev
 config :car_maintenance, env: :dev
 config :loan_repayment,  env: :dev
+config :wife_time,       env: :dev
