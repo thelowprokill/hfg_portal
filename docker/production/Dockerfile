@@ -38,6 +38,7 @@ COPY apps/hfg_portal/mix.exs      apps/hfg_portal/
 COPY apps/hfg_portal_web/mix.exs  apps/hfg_portal_web/ 
 COPY apps/car_maintenance/mix.exs apps/car_maintenance/ 
 COPY apps/loan_repayment/mix.exs  apps/loan_repayment/ 
+COPY apps/wife_time/mix.exs       apps/wife_time/
 COPY cert/fullchain.pem           /app/
 COPY cert/privkey.pem             /app/
 
