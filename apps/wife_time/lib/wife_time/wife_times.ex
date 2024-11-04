@@ -49,6 +49,7 @@ defmodule WifeTime.WifeTimes do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
+    |> order_by([wt], desc: wt.entry_date)
     |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
     |> Repo.all()
