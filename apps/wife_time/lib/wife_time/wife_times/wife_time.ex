@@ -13,9 +13,10 @@ defmodule WifeTime.WifeTimes.WifeTime do
   @schema_prefix prefix
 
   schema "wife_times" do
-    field :entry_date, :date
-    field :happened,   :boolean
-    field :comment,    :string
+    field :entry_date,  :date
+    field :happened,    :boolean
+    field :menstration, :boolean
+    field :comment,     :string
 
     belongs_to :created_by, WifeTime.Users.User
     belongs_to :updated_by, WifeTime.Users.User
@@ -28,6 +29,7 @@ defmodule WifeTime.WifeTimes.WifeTime do
     |> cast(attrs, [
       :entry_date,
       :happened,
+      :menstration,
       :comment,
       :created_by_id,
       :updated_by_id,

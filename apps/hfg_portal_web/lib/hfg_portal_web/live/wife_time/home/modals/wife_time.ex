@@ -22,9 +22,10 @@ defmodule HfgPortalWeb.WifeTime.Home.Modals.ChangeWifeTime do
             <% end %>
             <.bnw_input_hidden f={f} field={:updated_by_id} value={@modal.user.id} />
 
-            <.bnw_input f={f} type="date"     field={:entry_date} display_name="Date" />
-            <.bnw_input f={f} type="checkbox" field={:happened}   display_name="Happened" />
-            <.bnw_input f={f} type="textarea" field={:comment}    display_name="Comment" />
+            <.bnw_input f={f} type="date"     field={:entry_date}  display_name="Date" />
+            <.bnw_input f={f} type="checkbox" field={:happened}    display_name="Happened" />
+            <.bnw_input f={f} type="checkbox" field={:menstration} display_name="Menstruation" />
+            <.bnw_input f={f} type="textarea" field={:comment}     display_name="Comment" />
 
           </.bnw_modal_body>
           <.bnw_modal_footer><.bnw_button_cancel /><.bnw_button_submit/></.bnw_modal_footer>

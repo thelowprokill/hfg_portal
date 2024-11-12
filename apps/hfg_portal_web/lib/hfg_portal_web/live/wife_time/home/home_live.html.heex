@@ -12,6 +12,7 @@
       <:header>
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:entry_date}>Date</.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:happened}>Happened</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:menstration}>Menstration</.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:comment}>Comment</.bnw_table_header_filter></th>
         <th class="p-2"></th>
         <th class="p-2"></th>
@@ -20,6 +21,7 @@
         <tr>
           <td class="px-2"><%= wife_time.entry_date %></td>
           <td class="px-2"><.bnw_icon bnw_icon={if wife_time.happened, do: "check", else: "ban"}/></td>
+          <td class="px-2"><.bnw_icon bnw_icon={if wife_time.menstration, do: "check", else: "ban"}/></td>
           <td class="px-2"><%= wife_time.comment %></td>
           <td class="px-2"><.bnw_button_edit   phx-value-id={wife_time.id} /></td>
           <td class="px-2"><.bnw_button_delete phx-value-id={wife_time.id} /></td>

@@ -3,9 +3,10 @@ defmodule WifeTime.Repo.Migrations.WifeTimes do
 
   def change do
     create table(:wife_times) do
-      add :entry_date, :date
-      add :happened,   :boolean
-      add :comment,    :string
+      add :entry_date,  :date
+      add :happened,    :boolean
+      add :menstration, :boolean, default: false
+      add :comment,     :string
 
       add :created_by_id, references(:users, prefix: account_prefix(Application.get_env(:wife_time, :env)))
       add :updated_by_id, references(:users, prefix: account_prefix(Application.get_env(:wife_time, :env)))
