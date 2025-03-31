@@ -49,7 +49,8 @@ defmodule HfgPortalWeb.WifeTime.Home.HomeLive do
       modal:     :new,
       id:        :new,
       module:    ChangeWifeTime,
-      changeset: WifeTimes.new_changeset(%{entry_date: Date.utc_today(), created_by_id: user.id}),
+      #changeset: WifeTimes.new_changeset(%{entry_date: Date.utc_today(), created_by_id: user.id}),
+      changeset: WifeTimes.new_changeset(%{entry_date: Date.add(WifeTimes.get_max_date(), 1), created_by_id: user.id}),
       live:      false,
       user:      user,
       opts:      %{}

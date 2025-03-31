@@ -10,6 +10,17 @@ defmodule WifeTime.WifeTimes do
   @created [:wife_time, :created]
   @deleted [:wife_time, :deleted]
 
+  def get_max_date() do
+    @schema
+    |> order_by(desc: :entry_date)
+    |> limit(1)
+    |> Repo.one()
+    |> case do
+      nil -> Date.utc_today()
+      item -> item.entry_date
+    end
+  end
+
   def subscribe(),     do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   @topic)
   def subscribe(id),   do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   "#{@topic}:#{id}")
   def unsubscribe(),   do: Phoenix.PubSub.unsubscribe(HfgPortal.PubSub, @topic)
