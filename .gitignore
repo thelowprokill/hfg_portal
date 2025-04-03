@@ -32,3 +32,8 @@ erl_crash.dump
 *.elixir_ls
 
 cert/
+
+credentials.json
+credentials.py
+
+__pycache__
