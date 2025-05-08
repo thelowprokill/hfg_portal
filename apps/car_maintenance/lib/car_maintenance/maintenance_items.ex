@@ -5,8 +5,6 @@ defmodule CarMaintenance.MaintenanceItems do
   @created [:maintenance_item, :created]
   @deleted [:maintenance_item, :deleted]
 
-    import Ecto.Query
-
   use HfgPortal.Helpers.DefaultCrud, 
     schema:  @schema,
     topic:   @topic,
@@ -21,12 +19,12 @@ defmodule CarMaintenance.MaintenanceItems do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
-    #|> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
+    |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
     |> filter_car(Map.get(opts, :car_id))
     |> order_by([asc: :name])
     |> Repo.all()
-    #|> bnw_preload(Map.get(opts, :preload, []))
+    |> bnw_preload(Map.get(opts, :preload, []))
   end
 
   #import Ecto.Query

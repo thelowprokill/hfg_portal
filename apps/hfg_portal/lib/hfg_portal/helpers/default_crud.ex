@@ -1,14 +1,17 @@
 defmodule HfgPortal.Helpers.DefaultCrud do
-  import Ecto.Query
-  import HfgPortal.Helpers.Utility
   defmacro __using__(opts) do
     quote do
-      @schema  unquote(Keyword.fetch!(opts, :schema))
-      #@archive unquote(Keyword.fetch!(opts, :archive))
-      @topic   unquote(Keyword.fetch!(opts, :topic))
-      @updated unquote(Keyword.fetch!(opts, :updated))
-      @created unquote(Keyword.fetch!(opts, :created))
-      @deleted unquote(Keyword.fetch!(opts, :deleted))
+      import Ecto.Query
+      import HfgPortal.Helpers.Utility
+
+      alias HfgPortal.Repo
+
+      @schema  unquote(opts[:schema])
+      #@archive unquote(opts[:archive])
+      @topic   unquote(opts[:topic])
+      @updated unquote(opts[:updated])
+      @created unquote(opts[:created])
+      @deleted unquote(opts[:deleted])
   
       def subscribe(),     do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   @topic)
       def subscribe(id),   do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   "#{@topic}:#{id}")
@@ -45,14 +48,13 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       defp filter_active(query, active) when not is_nil(active), do: query |> where(active: ^active)
       defp filter_active(query, _active), do: query
     
-      def list(opts \\ %{})
-      def list(opts) do
+      def list(opts \\ %{}) do
         @schema
         |> search_stack(Map.get(opts, :search_stack))
         |> sort_stack(Map.get(opts, :sort_stack))
         |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
         |> filter_active(Map.get(opts, :active))
-        |> HfgPortal.Repo.all()
+        |> Repo.all()
         |> bnw_preload(Map.get(opts, :preload, []))
       end
       def preload(val, opts \\ %{}), do: bnw_preload(val, Map.get(opts, :preload, []))
@@ -72,10 +74,28 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       def delete(%@schema{} = item), do: item |> Repo.delete() |> notify_subscribers(@deleted)
       def delete(id), do: get(id) |> delete()
     
-      def activate(%@schema{} = item),   do: item |> change(%{active: true})  |> Repo.update() |> notify_subscribers(@updated)
-      def activate(id), do: get(id) |> activate()
-      def deactivate(%@schema{} = item), do: item |> change(%{active: false}) |> Repo.update() |> notify_subscribers(@updated)
-      def deactivate(id), do: get(id) |> deactivate()
+      def activate(item, key \\ :active)
+      def activate(%@schema{} = item, key),   do: item |> change(Map.put(%{}, key, true))  |> Repo.update() |> notify_subscribers(@updated)
+      def activate(id, key), do: get(id) |> activate(key)
+      def deactivate(item, key \\ :active)
+      def deactivate(%@schema{} = item, key), do: item |> change(Map.put(%{}, key, false)) |> Repo.update() |> notify_subscribers(@updated)
+      def deactivate(id, key), do: get(id) |> deactivate(key)
+
+      defoverridable [
+        notify_subscribers: 2,
+        search_stack:       2,
+        sort_stack:         2,
+        filter_active:      2,
+        list:               1,
+        create_or_update:   2,
+        get:                1,
+        new:                0,
+        new_changeset:      1,
+        change:             2,
+        delete:             1,
+        activate:           2,
+        deactivate:         2,
+      ]
   
     end
   end
