@@ -7,7 +7,7 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       alias HfgPortal.Repo
 
       @schema  unquote(opts[:schema])
-      #@archive unquote(opts[:archive])
+      @archive unquote(opts[:archive])
       @topic   unquote(opts[:topic])
       @updated unquote(opts[:updated])
       @created unquote(opts[:created])
@@ -64,8 +64,26 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         item
         |> change(attrs)
         |> Repo.insert_or_update()
+        |> archive(attrs)
         |> notify_subscribers(if new_item, do: @created, else: @updated)
       end
+
+      if @archive do
+        defp archive({:ok, %@schema{} = item}, attrs) when not is_nil(@schema) do
+          new_attrs =
+            item
+            |> Map.from_struct()
+            |> Map.drop([:__meta__, :id, :inserted_at, :updated_at])
+            |> Map.merge(attrs, fn _, _, v -> v end)
+            |> Map.put(:item_id, item.id)
+
+          %@archive{}
+          |> @archive.changeset(new_attrs)
+          |> Repo.insert()
+          {:ok, item}
+        end
+      end
+      defp archive(ret, _), do: ret
     
       def get(id), do: Repo.get(@schema, id)
       def new(), do: %@schema{}
