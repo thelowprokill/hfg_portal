@@ -12,7 +12,7 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       @updated unquote(opts[:updated])
       @created unquote(opts[:created])
       @deleted unquote(opts[:deleted])
-  
+
       def subscribe(),     do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   @topic)
       def subscribe(id),   do: Phoenix.PubSub.subscribe(HfgPortal.PubSub,   "#{@topic}:#{id}")
       def unsubscribe(),   do: Phoenix.PubSub.unsubscribe(HfgPortal.PubSub, @topic)
@@ -23,8 +23,8 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         {:ok, result}
       end
       defp notify_subscribers({:error, reason}, _event), do: {:error, reason}
-    
-    
+
+
       defp search_stack(query, search_stack) when is_list(search_stack) do
         Enum.reduce(search_stack, query, fn(search, query) ->
           cond do
@@ -34,7 +34,7 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         end)
       end
       defp search_stack(query, nil), do: query
-    
+
       defp sort_stack(query, sort_stack) when is_list(sort_stack) do
         Enum.reduce(sort_stack, query, fn(sort, query) ->
           cond do
@@ -44,21 +44,31 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         end)
       end
       defp sort_stack(query, nil), do: query
-    
+
       defp filter_active(query, active) when not is_nil(active), do: query |> where(active: ^active)
       defp filter_active(query, _active), do: query
-    
+
       def list(opts \\ %{}) do
         @schema
         |> search_stack(Map.get(opts, :search_stack))
         |> sort_stack(Map.get(opts, :sort_stack))
-        |> bnw_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
+        |> paginate(opts)
         |> filter_active(Map.get(opts, :active))
         |> Repo.all()
-        |> bnw_preload(Map.get(opts, :preload, []))
+        |> preload_associations(opts)
       end
-      def preload(val, opts \\ %{}), do: bnw_preload(val, Map.get(opts, :preload, []))
-    
+
+      def preload_associations(val, opts \\ %{})
+      def preload_associations(val, %{preload: preload}), do: hfg_preload(val, preload)
+      def preload_associations(val, _), do: val
+
+      def paginate(query, opts \\ %{})
+      def paginate(query, %{page: page, per_page: per_page}), do:
+        query
+        |> limit(^(per_page))
+        |> offset(^(page * per_page))
+      def paginate(query, _), do: query
+
       def create_or_update(%@schema{} = item, attrs \\ %{}) do
         new_item = is_nil(item.id)
         item
@@ -84,14 +94,14 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         end
       end
       defp archive(ret, _), do: ret
-    
+
       def get(id), do: Repo.get(@schema, id)
       def new(), do: %@schema{}
       def new_changeset(attrs \\ %{}), do: new() |> change(attrs)
       def change(%@schema{} = item, attrs \\ %{}), do: @schema.changeset(item, attrs)
       def delete(%@schema{} = item), do: item |> Repo.delete() |> notify_subscribers(@deleted)
       def delete(id), do: get(id) |> delete()
-    
+
       def activate(item, key \\ :active)
       def activate(%@schema{} = item, key),   do: item |> change(Map.put(%{}, key, true))  |> Repo.update() |> notify_subscribers(@updated)
       def activate(id, key), do: get(id) |> activate(key)
@@ -100,21 +110,22 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       def deactivate(id, key), do: get(id) |> deactivate(key)
 
       defoverridable [
-        notify_subscribers: 2,
-        search_stack:       2,
-        sort_stack:         2,
-        filter_active:      2,
-        list:               1,
-        create_or_update:   2,
-        get:                1,
-        new:                0,
-        new_changeset:      1,
-        change:             2,
-        delete:             1,
-        activate:           2,
-        deactivate:         2,
+        notify_subscribers:   2,
+        search_stack:         2,
+        sort_stack:           2,
+        filter_active:        2,
+        list:                 1,
+        preload_associations: 2,
+        paginate:             2,
+        create_or_update:     2,
+        get:                  1,
+        new:                  0,
+        new_changeset:        1,
+        change:               2,
+        delete:               1,
+        activate:             2,
+        deactivate:           2,
       ]
-  
     end
   end
 end

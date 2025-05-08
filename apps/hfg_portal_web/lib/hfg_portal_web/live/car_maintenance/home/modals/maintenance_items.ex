@@ -175,7 +175,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
     cond do
       (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) || (item.fixed_car_id == socket.assigns.fixed_car_id && !is_nil(item.fixed_car_id)) ->
         %{items: items} = socket.assigns
-        socket |> assign(:items, [item |> @module.preload(%{preload: @preload}) | items] |> Enum.uniq_by(&(&1.id)))
+        socket |> assign(:items, [item |> @module.preload_associations(%{preload: @preload}) | items] |> Enum.uniq_by(&(&1.id)))
       true -> socket
     end |> res()
   end
@@ -184,7 +184,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
     cond do
       (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) || (item.fixed_car_id == socket.assigns.fixed_car_id && !is_nil(item.fixed_car_id)) ->
         %{items: items} = socket.assigns
-        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload(%{preload: @preload}), else: &1))) |> res()
+        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload_associations(%{preload: @preload}), else: &1))) |> res()
       true -> socket
     end |> res()
   end
