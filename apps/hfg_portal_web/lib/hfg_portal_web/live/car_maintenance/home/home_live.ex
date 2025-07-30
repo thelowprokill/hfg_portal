@@ -100,7 +100,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
       modal:     :mileage,
       id:        :mileage,
       module:    ChangeMileage,
-      changeset: ServiceHistories.new_changeset(%{service_date: Date.utc_today(), mileage: mileage}),
+      changeset: ServiceHistories.new_changeset(%{service_date: DateTime.utc_now() |> DateTime.from_naive!("PST8PDT"), mileage: mileage}),
       live:      false,
       user:      user,
       opts:      %{car_id: id}

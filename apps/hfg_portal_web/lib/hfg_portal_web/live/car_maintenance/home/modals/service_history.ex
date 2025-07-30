@@ -157,7 +157,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
             socket 
             |> assign(:changeset, @module.new_changeset(
               %{
-                service_date: Date.utc_today(), 
+                service_date: DateTime.utc_now() |> DateTime.from_naive!("PST8PDT"), 
                 mileage: cond do
                   modal.opts.car.service_history && data.mileage && data.mileage > modal.opts.car.service_history.mileage -> data.mileage
                   modal.opts.car.service_history -> modal.opts.car.service_history.mileage
@@ -232,7 +232,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
     |> assign(:maintenance_items_list, [])
     |> assign(:changeset,        @module.new_changeset(
       %{
-        service_date: Date.utc_today(),
+        service_date: DateTime.utc_now() |> DateTime.from_naive!("PST8PDT"),
         mileage: if(modal.opts.car.service_history, do: modal.opts.car.service_history.mileage, else: 0),
       }))
     |> assign(:new,              true)

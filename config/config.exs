@@ -105,6 +105,8 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 # Configure Google Auth
 config :elixir_auth_google,
   client_id: System.get_env("GOOGLE_CLIENT_ID"),

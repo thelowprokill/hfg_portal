@@ -54,6 +54,8 @@ defmodule HfgPortalWeb.MixProject do
       {:elixir_auth_google,     "~> 1.6.9"},
       {:qrcode_ex,              "~> 0.1.1"},
       {:jose,                   "~> 1.11"},
+      {:timex,                  "~> 3.7.9"},
+      {:tzdata,                 "~> 1.1.1"},
       {:hfg_portal,             in_umbrella: true},
       {:car_maintenance,        in_umbrella: true},
       {:loan_repayment,         in_umbrella: true},
