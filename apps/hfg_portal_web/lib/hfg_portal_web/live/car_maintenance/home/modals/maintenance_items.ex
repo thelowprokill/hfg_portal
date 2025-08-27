@@ -19,11 +19,12 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
               phx-submit="save">
               <.bnw_table height="60vh" id="timesheets_table">
                 <:header>
-                  <th class="p-2">Name</th>
-                  <th class="p-2">Interval Miles</th>
-                  <th class="p-2">Interval Months</th>
-                  <th class="p-2">Notes</th>
-                  <th class="p-2">Active</th>
+                  <.bnw_th>Name</.bnw_th>
+                  <.bnw_th>Interval Miles</.bnw_th>
+                  <.bnw_th>Interval Months</.bnw_th>
+                  <.bnw_th>Notes</.bnw_th>
+                  <.bnw_th>Active</.bnw_th>
+                  <.bnw_th></.bnw_th>
                 </:header>
 
                 <tr id="new_item">
@@ -52,6 +53,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
                         <td class="px-2"><%= item.interval_months %></td>
                         <td class="px-2"><%= item.notes %></td>
                         <td class="px-2"><.toggle_active active={item.active} item_id={item.id} /></td>
+                        <td class="px-2"><.bnw_button_edit   phx-value-id={item.id} /></td>
                     <% end %>
                   </tr>
                 <% end %>
@@ -184,7 +186,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceItems do
     cond do
       (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) || (item.fixed_car_id == socket.assigns.fixed_car_id && !is_nil(item.fixed_car_id)) ->
         %{items: items} = socket.assigns
-        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload_associations(%{preload: @preload}), else: &1))) |> res()
+        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload_associations(%{preload: @preload}), else: &1)))
       true -> socket
     end |> res()
   end
