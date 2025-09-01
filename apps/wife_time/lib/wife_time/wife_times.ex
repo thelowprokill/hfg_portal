@@ -22,4 +22,15 @@ defmodule WifeTime.WifeTimes do
       item -> item.entry_date
     end
   end
+
+  def list(opts \\ %{}) do
+    @schema
+    |> search_stack(Map.get(opts, :search_stack))
+    |> sort_stack(Map.get(opts, :sort_stack))
+    |> order_by([desc: :entry_date])
+    |> paginate(opts)
+    |> filter_active(Map.get(opts, :active))
+    |> Repo.all()
+    |> preload_associations(opts)
+  end
 end
