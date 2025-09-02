@@ -44,6 +44,5 @@ defmodule CarMaintenance.ServiceHistories do
     |> filter_mileage(Map.get(opts, :mileage))
     |> Repo.all()
     |> preload_associations(opts)
-    |> IO.inspect()
   end
 end

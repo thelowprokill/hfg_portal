@@ -62,7 +62,17 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                               <td class="px-2 text-right"><%= item.mileage |> Number.Delimit.number_to_delimited(precision: 0) %></td>
                               <td class="px-2"></td>
                               <td class="px-2"><%= if item.named_item, do: item.name, else: item.maintenance_item.name %></td>
-                              <td class="px-2 text-right"><%= (if !item.named_item, do: item.mileage + item.maintenance_item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %></td>
+                              <td class="px-2 text-right">
+                                <%= cond do %>
+                                  <% !item.named_item && item.maintenance_item.interval_miles -> %>
+                                    <%= item.mileage + item.maintenance_item.interval_miles %>
+                                  <% !item.named_item && item.maintenance_item.interval_months -> %>
+                                    <%= item.service_date |> Date.add(item.maintenance_item.interval_months * 30) %>
+                                  <% true -> %>
+                                    <%= nil %>
+                                <% end %>
+                                <%= (if !item.named_item && item.maintenance_item.interval_miles, do: item.mileage + item.maintenance_item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %>
+                              </td>
                               <td class="px-2"><%= item.notes %></td>
                           <% end %>
                         </tr>
@@ -81,7 +91,16 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                         <tr id={"maintenance_item_#{item.id}"}>
                           <td class="px-2"><%= if item.last_service_history, do: item.last_service_history.service_date %></td>
                           <td class="px-2"><%= item.name %></td>
-                          <td class="px-2 text-right"><%= (if item.last_service_history, do: item.last_service_history.mileage + item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %></td>
+                          <td class="px-2 text-right">
+                            <%= cond do %>
+                              <% item.interval_miles -> %>
+                                <%= (if item.last_service_history, do: item.last_service_history.mileage, else: 0) + item.interval_miles |> Number.Delimit.number_to_delimited(precision: 0) %>
+                              <% item.interval_months && item.last_service_history -> %>
+                                <%= item.last_service_history.service_date |> Date.add(item.interval_months * 30) %>
+                              <% true -> %>
+                                <%= nil %>
+                            <% end %>
+                          </td>
                           <td class="px-2"><%= item.notes %></td>
                         </tr>
                       <% end %>
