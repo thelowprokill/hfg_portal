@@ -133,7 +133,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
       :service_history, 
       CarMaintenance.ServiceHistories.get(service_history_id)
       |> CarMaintenance.ServiceHistories.preload_associations(%{preload: [:maintenance_item]})
-      |> IO.inspect()
     )
   end
 
@@ -198,10 +197,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
   @impl true
   def handle_event("validate", params, socket) do
     %{changeset: changeset} = socket.assigns
-
-    IO.puts "{{{{{{{{{{{{{{{ validate }}}}}}}}}}}}}}}"
-    IO.inspect params
-    IO.puts "{{{{{{{{{{{{{{{ validate }}}}}}}}}}}}}}}"
 
     changeset =
       changeset.data
