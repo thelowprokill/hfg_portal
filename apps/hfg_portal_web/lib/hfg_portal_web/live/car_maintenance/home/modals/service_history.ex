@@ -1,6 +1,8 @@
 defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   use HfgPortalWeb, :live_view
 
+  alias HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages
+
   @module  CarMaintenance.ServiceHistories
   @key     "service_history"
   @preload [:maintenance_item]
@@ -33,6 +35,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                         <th class="p-2">Service Item</th>
                         <th class="p-2">Next Serviec Due</th>
                         <th class="p-2">Service Notes</th>
+                        <th class="p-2"></th>
                       </:header>
 
                       <tr id="new_item">
@@ -74,6 +77,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                                 <%= (if !item.named_item && item.maintenance_item.interval_miles, do: item.mileage + item.maintenance_item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %>
                               </td>
                               <td class="px-2"><%= item.notes %></td>
+                              <td class="px-2"><.bnw_button_default phx_click="maintenance_images" phx-value-id={item.id}>Images</.bnw_button_default></td>
                           <% end %>
                         </tr>
                       <% end %>
@@ -113,6 +117,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
           <.bnw_modal_footer><.bnw_button_done /></.bnw_modal_footer>
         </.bnw_modal>
       <% end %>
+      <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
     </div>
     """
   end
@@ -142,7 +147,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
       </td>
       <td class="px-2"></td>
       <td class="px-2"><.bnw_input_naked f={@f} type="text"     field={:notes}        display_name="Notes"/></td>
-      <td class="px-2"><%= if @cancel do %><.bnw_button_cancel phx_click="cancel_edit" /><% end %></td>
       <td class="px-2"><.bnw_button_submit /></td>
     """
   end
@@ -230,6 +234,23 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
     ) |> Enum.uniq_by(&(&1.id)))
   end
 
+  defp set_modal(socket, type \\ nil, id \\ nil)
+  defp set_modal(socket, :images, id) do
+    %{
+      modal_stack:  modal_stack,
+      user:         user,
+    } = socket.assigns
+
+    socket |> assign(:modal_stack, [%Modal{
+      modal:  :images,
+      id:     :images,
+      module: ChangeMaintenanceImages,
+      live:   true,
+      user:   user
+    } | modal_stack])
+  end
+  defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
+
   @impl true
   def mount(_params, %{"modal" => modal, "parent" => parent}, socket) do
     if connected?(socket) do
@@ -249,6 +270,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
     |> assign(:per_page,         30)
     |> assign(:items,            [])
     |> assign(:maintenance_items_list, [])
+    |> assign(:modal_stack,      [])
     |> assign(:changeset,        @module.new_changeset(
       %{
         service_date: DateTime.utc_now() |> DateTime.from_naive!("Etc/UTC") |> DateTime.shift_zone!("America/Los_Angeles"),
@@ -357,6 +379,13 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   @impl true
   def handle_event("activate", %{"id" => id}, socket) do
     id |> String.to_integer() |> @module.activate()
+    socket |> res()
+  end
+
+  @impl true
+  def handle_event("maintenance_images", %{"id" => id}, socket) do
+    %{parent: parent} = socket.assigns
+    send(parent, {:maintenance_images, id |> String.to_integer()})
     socket |> res()
   end
 

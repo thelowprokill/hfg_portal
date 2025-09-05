@@ -123,6 +123,7 @@ defmodule HfgPortalWeb.Router do
   scope "/", HfgPortalWeb do
     pipe_through [:browser]
 
+    get "/car_maitenance_images/:id/image",  CarMaintenance.MaintenanceImageRenderController, :image
     delete "/api_users/log_out",        ApiUserSessionController,      :delete
     #get    "/api_users/confirm",        ApiUserConfirmationController, :new
     #post   "/api_users/confirm",        ApiUserConfirmationController, :create

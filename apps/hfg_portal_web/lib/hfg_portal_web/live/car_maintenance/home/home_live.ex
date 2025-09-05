@@ -5,6 +5,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
     ChangeCar,
     ChangeMileage,
     ChangeMaintenanceItems,
+    ChangeMaintenanceImages,
     ChangeServiceHistory,
   }
 
@@ -128,6 +129,22 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
     } | modal_stack])
   end
 
+  defp set_modal(socket, :maintenance_images, id) do
+    %{
+      modal_stack:  modal_stack,
+      current_user: user,
+    } = socket.assigns
+
+    socket |> assign(:modal_stack, [%Modal{
+      modal:  :maintenance_images,
+      id:     :maintenance_images,
+      module: ChangeMaintenanceImages,
+      live:   true,
+      user:   user,
+      opts:   %{service_history_id: id}
+    } | modal_stack])
+  end
+
   defp set_modal(socket, :service_history, id) when not is_nil(id) do
     %{
       cars:           cars,
@@ -148,45 +165,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
       opts:      %{car: car}
     } | modal_stack])
   end
-
-  #defp set_modal(socket, :reports, id) when not is_nil(id) do
-  #  %{ 
-  #    modal_stack: modal_stack,
-  #    reports:     reports
-  #  } = socket.assigns
-  #  socket
-  #  |> assign(:modal_stack, [%Modal{
-  #    modal:  :report,
-  #    id:     :report,
-  #    opts:   %{report: Enum.find(reports, &(&1.id == id)) |> Reports.decorate()},
-  #  } | modal_stack])
-  #end
-
-  #defp set_modal(socket, :reports, _) do
-  #  %{ 
-  #    modal_stack: modal_stack,
-  #    reports:     reports
-  #  } = socket.assigns
-
-  #  socket
-  #  |> assign(:modal_stack, 
-  #    cond do
-  #      length(reports) == 1 ->
-  #        [%Modal{
-  #          modal:  :report,
-  #          id:     :report,
-  #          opts:   %{report: Enum.at(reports, 0) |> Reports.decorate()},
-  #        } | modal_stack]
-  #      length(reports) > 1 ->
-  #        [ %Modal{
-  #          modal:  :pick_reports,
-  #          id:     :pick_reports,
-  #          module: nil
-  #        } | modal_stack]
-  #      true -> 
-  #        modal_stack
-  #    end)
-  #end
   defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
   @impl true
@@ -299,6 +277,9 @@ defmodule HfgPortalWeb.CarMaintenance.Home.HomeLive do
 
   @impl true
   def handle_info(:cancel, socket), do: socket |> set_modal() |> res()
+
+  @impl true
+  def handle_info({:maintenance_images, maintenance_item_id}, socket), do: socket |> set_modal(:maintenance_images, maintenance_item_id) |> res()
 
   @impl true
   def handle_info(info, socket) do
