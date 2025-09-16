@@ -39,7 +39,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
                   <tr id={"image_#{image.id}"}>
                     <td class="px-2"><%= image.name %></td>
                     <td class="px-2"><img src={~p"/car_maitenance_images/#{image.id}/image"} width="500" /></td>
-                    <td class="px-2"></td>
+                    <td class="px-2"><.bnw_button_delete phx-value-id={image.id} /></td>
                   </tr>
                 <% end %>
               </.bnw_table>
