@@ -74,7 +74,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                                   <% true -> %>
                                     <%= nil %>
                                 <% end %>
-                                <%= (if !item.named_item && item.maintenance_item.interval_miles, do: item.mileage + item.maintenance_item.interval_miles) |> Number.Delimit.number_to_delimited(precision: 0) %>
                               </td>
                               <td class="px-2"><%= item.notes %></td>
                               <td class="px-2"><.bnw_button_default phx_click="maintenance_images" phx-value-id={item.id}>Images</.bnw_button_default></td>
