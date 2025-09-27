@@ -49,10 +49,12 @@ defmodule HfgPortalWeb.Router do
   end
 
   ## API Routes
-  #scope "/apis/admin_logs/update", HfgPortalWeb do
-  #  pipe_through :api
-  #  get "/", Apis.AdminLogsApiController, :update
-  #end
+  scope "/apis", HfgPortalWeb do
+    pipe_through :api
+    get    "/call", Apis.RoutesController, :call
+    put    "/call", Apis.RoutesController, :call
+    delete "/call", Apis.RoutesController, :call
+  end
 
   ## Authentication routes
 
