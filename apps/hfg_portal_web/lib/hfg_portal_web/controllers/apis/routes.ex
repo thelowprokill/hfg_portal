@@ -3,8 +3,9 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
 
   @scopes [
-    %{name: "hfg_portal",      module: HfgPortalWeb.Apis.RoutesController},
-    %{name: "car_maintenance", module: HfgPortalWeb.Apis.CarMaintenance.CarController},
+    %{name: "hfg_portal",                      module: HfgPortalWeb.Apis.RoutesController},
+    %{name: "car_maintenance:cars",            module: HfgPortalWeb.Apis.CarMaintenance.CarController},
+    %{name: "car_maintenance:service_history", module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController},
   ]
 
   def scopes(conn, _params) do
