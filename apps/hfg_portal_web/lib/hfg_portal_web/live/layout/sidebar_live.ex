@@ -156,14 +156,15 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
 
   defp set_modal(socket, modal \\ nil)
   defp set_modal(socket, :user_settings) do
-    %{modal_stack: modal_stack} = socket.assigns
+    %{modal_stack: modal_stack, jwt_token: jwt_token} = socket.assigns
 
     socket
     |> assign(:modal_stack, [%{
       modal:  :user_settings,
       module: UserSettings,
       id:     :user_settings,
-      user:   socket.assigns.current_user
+      user:   socket.assigns.current_user,
+      opts:   %{jwt: jwt_token}
     } | modal_stack])
   end
   defp set_modal(socket, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
@@ -220,6 +221,25 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     end
   end
 
+  defp generate_token(socket) do
+    %{current_user: %{id: user_id}} = socket.assigns
+
+    token_config = Map.put(%{}, "scope", %Joken.Claim{
+      generate: fn -> "user" end,
+      validate: fn val, _claims, _context -> val in ["u", "a"] end
+    })
+    signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
+
+    {:ok, claims} = Joken.generate_claims(token_config, %{
+      user_id:    user_id,
+      admin:      false,
+      updated_at: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%dT%H:%M:%S"),
+    })
+    {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
+    socket
+    |> assign(:jwt_token, jwt)
+  end
+
   @impl true
   def mount(_session, session, socket) do
     if connected?(socket) do
@@ -244,6 +264,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     |> assign(:module,         HfgPortalWeb.Home.HomeLive)
     |> assign(:render_success, false)
     |> list_apps()
+    |> generate_token()
     |> res(:ok)
   end
 

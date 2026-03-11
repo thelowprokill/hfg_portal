@@ -16,7 +16,6 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
 
   def call(%{method: method, query_params: %{"route" => route}} = conn, params) do
     Enum.find(@routes, &(&1.name == route && &1.method == method))
-    |> IO.inspect()
     |> case do
       nil -> 
         conn

@@ -49,6 +49,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
         user = HfgPortal.Accounts.get_user!(user_id)
 
+        # authenticate the user with the scope
         cond do
           admin || user.portal_admin -> scope
           true -> nil
