@@ -10,9 +10,9 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
   def scopes(conn, _params) do
     json(conn, %{
-      "scopes" => [
-        "hfg_portal",
-      ]
+      "scopes" => 
+        @scopes
+        |> Enum.map(&(&1.name))
     })
   end
 
@@ -34,10 +34,25 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     scope = Enum.find(@scopes, &(&1.name == scope))
 
     cond do
-      is_nil(api_key)   -> nil
-      is_nil(scope)     -> nil
-      api_key != "1234" -> nil
-      true              -> scope
+      is_nil(api_key) || is_nil(scope) -> nil
+      true -> 
+        signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
+
+        token_config = %{
+          "scope" => %Joken.Claim{
+            generate: fn -> "user" end,
+            validate: fn val, _claims, _context -> val in ["u", "a"] end
+          }
+        }
+
+        {:ok, %{"user_id" => user_id, "admin" => admin}} = Joken.verify(api_key, signer)
+
+        user = HfgPortal.Accounts.get_user!(user_id)
+
+        cond do
+          admin || user.portal_admin -> scope
+          true -> nil
+        end
     end
   end
 end

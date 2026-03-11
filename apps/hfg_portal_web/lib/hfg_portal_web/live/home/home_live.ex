@@ -14,6 +14,25 @@ defmodule HfgPortalWeb.Home.HomeLive do
     |> assign(:can_see_dm_page, active && !generic_user)
   end
 
+  defp generate_token(socket) do
+    %{current_user: %{id: user_id}} = socket.assigns
+
+    token_config = Map.put(%{}, "scope", %Joken.Claim{
+      generate: fn -> "user" end,
+      validate: fn val, _claims, _context -> val in ["u", "a"] end
+    })
+    signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
+
+    {:ok, claims} = Joken.generate_claims(token_config, %{
+      user_id:    user_id,
+      admin:      false,
+      updated_at: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%dT%H:%M:%S"),
+    })
+    {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
+    socket
+    |> assign(:jwt_token, jwt)
+  end
+
   @impl true
   def mount(_params, session, socket) do
     if connected?(socket) do
@@ -25,6 +44,7 @@ defmodule HfgPortalWeb.Home.HomeLive do
     |> assign(:session, %{})
     |> handle_params(session)
     |> can_see_dm_page()
+    |> generate_token()
     |> res(:ok)
   end
 

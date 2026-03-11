@@ -157,6 +157,19 @@ Hooks.sticky_columns_general = {
     }
   }
 }
+Hooks.copy_to_clipboard = {
+  mounted() {
+    this.handleEvent("copy_to_clipboard", ({text}) => {
+      navigator.clipboard.writeText(text).then(() => {
+        // Optional: show success feedback
+        console.log("Copied to clipboard");
+        console.log(text)
+      }).catch(err => {
+        console.error("Failed to copy: ", err);
+      });
+    });
+  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks}, )

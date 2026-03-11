@@ -37,6 +37,18 @@ defmodule HfgPortalWeb.Layout.UserSettings do
               <.bnw_input       f={f} field={:password}         display_name="Password"         type="password" />
               <.bnw_input       f={f} field={:password_confirm} display_name="Password Confirm" type="password" />
 
+              <div class="flex">
+                <.bnw_button_copy 
+                  id="copy_jwt_token"
+                  phx_click="copy_jwt"
+                  phx-hook="copy_to_clipboard"
+                  phx-target={@myself}
+                />
+                <div class="w-full cursor-pointer" phx-click="copy_jwt" phx-target={@myself} style="overflow-wrap: anywhere;">
+                  <%= @modal.opts.jwt %>
+                </div>
+              </div>
+
           </.bnw_modal_body>
 
           <.bnw_modal_footer><.bnw_button_cancel /><.bnw_button_submit/></.bnw_modal_footer>
@@ -46,11 +58,29 @@ defmodule HfgPortalWeb.Layout.UserSettings do
     """
   end
 
+  def generate_token(socket) do
+    %{modal: %{user: %{id: user_id}}} = socket.assigns
+    token_config = Map.put(%{}, "scope", %Joken.Claim{
+      generate: fn -> "user" end,
+      validate: fn val, _claims, _context -> val in ["u", "a"] end
+    })
+    signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
+
+    {:ok, claims} = Joken.generate_claims(token_config, %{
+      user_id:    user_id,
+      updated_at: DateTime.utc_now(),
+    })
+    {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
+    socket
+    |> assign(:jwt, jwt)
+  end
+
   @impl true
   def update(assigns, socket) do
     changeset = assigns.modal.user |> Accounts.change_self_user()
     socket
     |> assign(assigns)
+    |> generate_token()
     |> assign(:changeset, changeset)
     |> res(:ok)
   end
@@ -76,6 +106,16 @@ defmodule HfgPortalWeb.Layout.UserSettings do
         end
       true -> socket |> res()
     end
+  end
+
+  @impl true
+  def handle_event("copy_jwt", _, socket) do
+    %{jwt: jwt} = socket.assigns
+    
+    socket
+    |> push_event("copy_to_clipboard", %{text: jwt})
+    |> put_flash(:info, "JWT token copied to clipboard")
+    |> res()
   end
 
   @impl true
