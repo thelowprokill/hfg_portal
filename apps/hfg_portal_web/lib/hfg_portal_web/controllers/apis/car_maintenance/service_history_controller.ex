@@ -95,6 +95,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
       mileage:             Map.get(params, "mileage"),
       name:                Map.get(params, "name"),
       maintenance_item_id: Map.get(params, "item_id"),
+      named_item:          Map.get(params, "name", "") != "",
       notes:               Map.get(params, "notes"),
     }
     |> Enum.reject(fn {_k, v} -> v == "" or v == nil end)
@@ -146,6 +147,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
       mileage:             Map.get(params, "mileage"),
       name:                Map.get(params, "name"),
       maintenance_item_id: Map.get(params, "item_id"),
+      named_item:          Map.get(params, "name", "") != "",
       notes:               Map.get(params, "notes"),
     }
     |> Enum.reject(fn {_k, v} -> v == "" or v == nil end)
