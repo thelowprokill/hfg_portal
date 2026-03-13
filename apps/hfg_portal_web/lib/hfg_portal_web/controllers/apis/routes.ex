@@ -43,6 +43,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
       _ ->
         conn
         |> put_status(:ok)
+        |> json(%{jwt: nil})
     end
     
   end
