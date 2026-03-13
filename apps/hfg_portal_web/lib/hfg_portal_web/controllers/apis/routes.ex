@@ -1,6 +1,8 @@
 defmodule HfgPortalWeb.Apis.RoutesController do
   use HfgPortalWeb, :controller
 
+  alias HfgPortal.Accounts
+  alias HfgPortal.Accounts.User
 
   @scopes [
     %{name: "hfg_portal",                      module: HfgPortalWeb.Apis.RoutesController},
@@ -14,6 +16,35 @@ defmodule HfgPortalWeb.Apis.RoutesController do
         @scopes
         |> Enum.map(&(&1.name))
     })
+  end
+
+  def call(%{query_params: %{"username" => username, "password" => password}} = conn, params) do
+
+    user = Accounts.get_active_user_by_username_and_password(username, password)
+
+    case user do
+      %User{id: id} ->
+        token_config = Map.put(%{}, "scope", %Joken.Claim{
+          generate: fn -> "user" end,
+          validate: fn val, _claims, _context -> val in ["u", "a"] end
+        })
+        signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
+
+        {:ok, claims} = Joken.generate_claims(token_config, %{
+          user_id:    id,
+          admin:      false,
+          updated_at: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%dT%H:%M:%S"),
+        })
+        {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
+
+        conn
+        |> put_status(:ok)
+        |> json(%{jwt: jwt})
+      _ ->
+        conn
+        |> put_status(:ok)
+    end
+    
   end
 
   def call(conn, params) do
