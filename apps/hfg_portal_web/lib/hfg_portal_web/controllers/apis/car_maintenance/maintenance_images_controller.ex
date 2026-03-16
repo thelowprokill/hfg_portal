@@ -78,65 +78,8 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     })
   end
 
-  #def put_maintenance_image(%{query_params: _} = conn, params) do
-  #  update_params = %{
-  #    name:               Map.get(params, "name"),
-  #    image:              Map.get(params, "image"),
-  #    image_content_type: Map.get(params, "image_content_type"),
-  #  }
-  #  |> Enum.reject(fn {_k, v} -> v == "" or v == nil end)
-  #  |> Enum.into(%{})
-
-  #  IO.puts ""
-  #  IO.puts ""
-  #  IO.puts ""
-  #  IO.puts "{{{{{{{{{{{{{{{{{{{{{{{ put image }}}}}}}}}}}}}}}}}}}}}}}"
-  #  IO.inspect update_params
-  #  IO.puts "{{{{{{{{{{{{{{{{{{{{{{{ put image }}}}}}}}}}}}}}}}}}}}}}}"
-  #  IO.puts ""
-  #  IO.puts ""
-  #  IO.puts ""
-
-  #  MaintenanceImages.new()
-  #  |> MaintenanceImages.create_or_update(update_params)
-  #  |> case do
-  #    {:ok, mi} ->
-  #      conn
-  #      |> put_status(:ok)
-  #      |> json(%{
-  #        response: :ok, 
-  #        date: DateTime.utc_now(),
-  #        data: %{
-  #          id:                 mi.id, 
-  #          name:               mi.name, 
-  #          image:              mi.image, 
-  #          image_content_type: mi.image_content_type, 
-  #        }
-  #      })
-  #    {:error, error} -> 
-  #      conn
-  #      |> put_status(:ok)
-  #      |> json(%{
-  #        response: :error, 
-  #        date: DateTime.utc_now(),
-  #        data: nil,
-  #        error: error,
-  #      })
-  #  end
-  #end
-
   def put_maintenance_image(%{query_params: query_params, body_params: body_params} = conn, _params) do
     upload = Map.get(body_params, "image")
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ upload }}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect upload
-    IO.inspect query_params
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ upload }}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
     binary_data = File.read!(upload.path)
     File.rm(upload.path)
   
