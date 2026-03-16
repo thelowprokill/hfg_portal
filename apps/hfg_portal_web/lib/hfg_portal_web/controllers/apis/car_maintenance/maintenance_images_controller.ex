@@ -121,7 +121,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     end
   end
 
-  def delete_car(%{query_params: %{"id" => id}} = conn, _params) do
+  def delete_maintenance_image(%{query_params: %{"id" => id}} = conn, _params) do
     id |> String.to_integer()
     |> MaintenanceImages.delete()
 
