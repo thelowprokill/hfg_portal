@@ -125,7 +125,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   #  end
   #end
 
-  def put_maintenance_image(%{query_params: query_params, body_params: %{"image" => %Plug.Upload{} = upload}} = conn, params) do
+  def put_maintenance_image(%{query_params: query_params, body_params: %{"image" => %Plug.Upload{} = upload} = body_params} = conn, params) do
     # Log to see the separation
     IO.inspect(query_params, label: "Routing/Auth Params")
     IO.inspect(params,       label: "All Combined Params")
@@ -134,10 +134,10 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     binary_data = File.read!(upload.path)
   
     update_params = %{
-      "name"               => params["name"],
+      "name"               => Map.get(body_params, "name"),
       "image"              => binary_data,
-      "image_content_type" => upload.content_type,
-      "service_history_id" => params["service_history_id"]
+      "image_content_type" => Map.get(body_params, "image_content_type"),
+      "service_history_id" => Map.get(body_params, "service_history_id")
     }
   
     MaintenanceImages.new()
