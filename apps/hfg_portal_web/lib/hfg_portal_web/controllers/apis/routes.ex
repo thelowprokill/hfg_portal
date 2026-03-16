@@ -5,10 +5,11 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   alias HfgPortal.Accounts.User
 
   @scopes [
-    %{name: "hfg_portal",                        module: HfgPortalWeb.Apis.RoutesController},
-    %{name: "car_maintenance:cars",              module: HfgPortalWeb.Apis.CarMaintenance.CarController},
-    %{name: "car_maintenance:service_history",   module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController},
-    %{name: "car_maintenance:maintenance_items", module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController},
+    %{name: "hfg_portal",                         module: HfgPortalWeb.Apis.RoutesController},
+    %{name: "car_maintenance:cars",               module: HfgPortalWeb.Apis.CarMaintenance.CarController},
+    %{name: "car_maintenance:service_history",    module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController},
+    %{name: "car_maintenance:maintenance_items",  module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController},
+    %{name: "car_maintenance:maintenance_images", module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController},
   ]
 
   def scopes(conn, _params) do

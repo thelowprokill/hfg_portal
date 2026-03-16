@@ -13,12 +13,12 @@ defmodule CarMaintenance.Cars.MaintenanceImage do
   @schema_prefix prefix
 
   schema "maintenance_images" do
-    field :name,                 :string
-    belongs_to :service_history, CarMaintenance.Cars.ServiceHistory
-    field :image,                :binary
-    field :image_content_type,   :string
-    belongs_to :created_by, CarMaintenance.Users.User
-    belongs_to :updated_by, CarMaintenance.Users.User
+    field      :name,               :string
+    belongs_to :service_history,    CarMaintenance.Cars.ServiceHistory
+    field      :image,              :binary
+    field      :image_content_type, :string
+    belongs_to :created_by,         CarMaintenance.Users.User
+    belongs_to :updated_by,         CarMaintenance.Users.User
 
     timestamps()
   end

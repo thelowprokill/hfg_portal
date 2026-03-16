@@ -224,6 +224,16 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
     binary = File.read!(uploaded_file.dest)
     File.rm(uploaded_file.dest)
 
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{ save }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"
+    IO.inspect binary
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{ save }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+
     changeset =
       changeset.data
       |> @module.change(params |> Map.get(@key, %{}) |> Map.put("image", binary) |> Map.put("image_content_type", String.trim_leading(uploaded_file.type, ".")))
