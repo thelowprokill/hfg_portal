@@ -125,8 +125,8 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   #  end
   #end
 
-  def put_maintenance_image(%{query_params: query_params} = conn, _params) do
-    upload = Map.get(query_params, "image")
+  def put_maintenance_image(%{query_params: query_params, body_params: body_params} = conn, _params) do
+    upload = Map.get(body_params, "image")
     IO.puts ""
     IO.puts ""
     IO.puts ""
@@ -141,10 +141,10 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     File.rm(upload.path)
   
     update_params = %{
-      "name"               => Map.get(query_params, "name"),
+      "name"               => Map.get(body_params, "name"),
       "image"              => binary_data,
-      "image_content_type" => Map.get(query_params, "image_content_type"),
-      "service_history_id" => Map.get(query_params, "service_history_id")
+      "image_content_type" => Map.get(body_params, "image_content_type"),
+      "service_history_id" => Map.get(body_params, "service_history_id")
     }
   
     MaintenanceImages.new()
