@@ -170,6 +170,36 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     end
   end
 
+  def put_maintenance_image(%{query_params: query_params} = conn, params) do
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ qp }}}}}}}}}}}}}}}}}}}}}}"
+    IO.inspect query_params
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ qp }}}}}}}}}}}}}}}}}}}}}}"
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ p }}}}}}}}}}}}}}}}}}}}}}"
+    IO.inspect params
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ p }}}}}}}}}}}}}}}}}}}}}}"
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+
+    conn
+    |> put_status(:ok)
+    |> json(%{
+      response: :error, 
+      date: DateTime.utc_now(),
+      data: nil,
+      error: error,
+    })
+  end
+
   def delete_car(%{query_params: %{"id" => id}} = conn, _params) do
     id |> String.to_integer()
     |> MaintenanceImages.delete()
