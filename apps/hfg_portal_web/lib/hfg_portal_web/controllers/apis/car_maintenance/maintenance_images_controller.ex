@@ -81,11 +81,21 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   def put_maintenance_image(%{query_params: params} = conn, _params) do
     update_params = %{
       name:               Map.get(params, "name"),
-      year:               Map.get(params, "image"),
+      image:              Map.get(params, "image"),
       image_content_type: Map.get(params, "image_content_type"),
     }
     |> Enum.reject(fn {_k, v} -> v == "" or v == nil end)
     |> Enum.into(%{})
+
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{ put image }}}}}}}}}}}}}}}}}}}}}}}"
+    IO.inspect update_params
+    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{ put image }}}}}}}}}}}}}}}}}}}}}}}"
+    IO.puts ""
+    IO.puts ""
+    IO.puts ""
 
     MaintenanceImages.new()
     |> MaintenanceImages.create_or_update(update_params)
