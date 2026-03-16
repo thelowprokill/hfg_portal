@@ -51,21 +51,6 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   end
 
   def call(conn, params) do
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{ conn }}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect conn
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{ conn }}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{ params }}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect params
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{ params }}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
     auth(conn)
     |> case do
       %{module: module} -> 

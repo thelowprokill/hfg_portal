@@ -125,19 +125,15 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   #  end
   #end
 
-  def put_maintenance_image(%{query_params: query_params, body_params: %{"image" => %Plug.Upload{} = upload} = body_params} = conn, params) do
-    # Log to see the separation
-    IO.inspect(query_params, label: "Routing/Auth Params")
-    IO.inspect(params,       label: "All Combined Params")
-    IO.inspect(upload,       label: "Upload")
-  
-    binary_data = File.read!(upload.path)
+  def put_maintenance_image(%{query_params: query_params} = conn, params) do
+    binary_data = File.read!(Map.get(query_params, "upload").path)
+    File.rm(upload.path)
   
     update_params = %{
-      "name"               => Map.get(body_params, "name"),
+      "name"               => Map.get(params, "name"),
       "image"              => binary_data,
-      "image_content_type" => Map.get(body_params, "image_content_type"),
-      "service_history_id" => Map.get(body_params, "service_history_id")
+      "image_content_type" => Map.get(params, "image_content_type"),
+      "service_history_id" => Map.get(params, "service_history_id")
     }
   
     MaintenanceImages.new()
@@ -169,36 +165,6 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
           error: error,
         })
     end
-  end
-
-  def put_maintenance_image(%{query_params: query_params} = conn, params) do
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ qp }}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect query_params
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ qp }}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ p }}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect params
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{ p }}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-
-    conn
-    |> put_status(:ok)
-    |> json(%{
-      response: :error, 
-      date: DateTime.utc_now(),
-      data: nil,
-      error: "error",
-    })
   end
 
   def delete_car(%{query_params: %{"id" => id}} = conn, _params) do
