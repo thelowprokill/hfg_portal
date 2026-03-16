@@ -196,7 +196,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
       response: :error, 
       date: DateTime.utc_now(),
       data: nil,
-      error: error,
+      error: "error",
     })
   end
 
