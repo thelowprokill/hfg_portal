@@ -126,7 +126,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   #end
 
   def put_maintenance_image(%{query_params: query_params} = conn, params) do
-    upload = Map.get(query_params, "upload").path
+    upload = Map.get(query_params, "image").path
     binary_data = File.read!(upload)
     File.rm(upload)
   
