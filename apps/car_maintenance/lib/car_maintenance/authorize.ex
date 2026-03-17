@@ -23,10 +23,9 @@ defmodule CarMaintenance.Authorize do
   def authorize(role, page, dev_admin \\ false)
   def authorize(%CarMaintenance.Users.Roles{} = role, page, dev_admin) do
     cond do
-      #user.dev_admin -> true
       dev_admin -> true
-      role && role.edit  && page     in ["home", "reports"]    -> true
-      role && role.view  && page     in ["home", "reports"]    -> true
+      role && role.edit  && page in ["home", "reports"] -> true
+      role && role.view  && page in ["home", "reports"] -> true
       true -> false
     end
   end

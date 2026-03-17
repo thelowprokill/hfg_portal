@@ -63,6 +63,9 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       def preload_associations(val, _), do: val
 
       def paginate(query, opts \\ %{})
+      def paginate(query, %{page: nil,  per_page: nil}), do: query
+      def paginate(query, %{page: page, per_page: per_page} = opts) when is_binary(page),     do: query |> paginate(%{page: String.to_integer(page), per_page: per_page})
+      def paginate(query, %{page: page, per_page: per_page} = opts) when is_binary(per_page), do: query |> paginate(%{page: page, per_page: String.to_integer(per_page)})
       def paginate(query, %{page: page, per_page: per_page}), do:
         query
         |> limit(^(per_page))

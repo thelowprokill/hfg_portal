@@ -12,9 +12,6 @@ defmodule CarMaintenance.MaintenanceImages do
     created: @created,
     deleted: @deleted
   
-  defp filter_car(query, car_id) when not is_nil(car_id), do: query |> where(car_id: ^car_id)
-  defp filter_car(query, _car_id), do: query
-
   defp filter_service_history(query, sh_id) when not is_nil(sh_id), do: query |> where(service_history_id: ^sh_id)
   defp filter_service_history(query, _sh_id), do: query
 
