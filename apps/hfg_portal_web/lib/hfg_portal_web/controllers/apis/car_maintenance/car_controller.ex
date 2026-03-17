@@ -31,9 +31,13 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
     end
   end
 
-  def get_cars(conn, _params) do
+  def get_cars(%{query_params: query_params} = conn, _params) do
     cars = 
-      Cars.list(%{preload: @preload}) 
+      Cars.list(%{
+        page:     Map.get(query_params, "page"),
+        per_page: Map.get(query_params, "per_page"),
+        preload:  @preload,
+      }) 
       |> Enum.map(&(%{
         id:            &1.id, 
         name:          &1.name, 

@@ -33,11 +33,11 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
   def get_service_histories(%{query_params: %{"car_id" => car_id} = query_params} = conn, _params) do
     service_histories = 
       ServiceHistories.list(%{
-        page: Map.get(query_params, "page"),
+        page:     Map.get(query_params, "page"),
         per_page: Map.get(query_params, "per_page"),
-        car_id: car_id, 
-        mileage: false, 
-        preload: @preload
+        car_id:   car_id, 
+        mileage:  false, 
+        preload:  @preload,
       }) 
       |> Enum.map(&(%{
         id:            &1.id, 
