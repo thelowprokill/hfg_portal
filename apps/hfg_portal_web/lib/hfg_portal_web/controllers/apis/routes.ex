@@ -20,6 +20,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     })
   end
 
+  # auth request
   def call(%{query_params: %{"username" => username, "password" => password}} = conn, params) do
 
     user = Accounts.get_active_user_by_username_and_password(username, password)
