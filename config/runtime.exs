@@ -100,13 +100,6 @@ if config_env() == :prod do
     #],
     http: [
       port: String.to_integer(System.get_env("PORT") || "4000"),
-      #cipher_suite: :strong,
-      # TODO
-      # fix this. for some reason it is not working with my cert bot certification
-      # keyfile:  System.get_env("SSL_KEY"),
-      # certfile: System.get_env("SSL_CERT"),
-      #keyfile: "priv/cert/selfsigned_key.pem",
-      #certfile: "priv/cert/selfsigned.pem"
     ],
     #http: [
     # # Enable IPv6 and bind on all interfaces.
