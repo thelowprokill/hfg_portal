@@ -3,8 +3,8 @@ defmodule Budget.Repo.Migrations.CreateBuckets do
 
   def change do
     create table(:buckets) do
-      add :user_id,              :integer,      null: false
-      add :name,                 :string,       null: false
+      add :user_id,              :integer, null: false
+      add :name,                 :string,  null: false
       add :description,          :text
       add :balance,              :decimal, precision: 12, scale: 2, null: false, default: 0
       add :monthly_budget,       :decimal, precision: 12, scale: 2

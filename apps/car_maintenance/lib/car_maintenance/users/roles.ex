@@ -1,7 +1,6 @@
 defmodule CarMaintenance.Users.Roles do
   defstruct name: "", admin: false, edit: false, view: false
 
-
   def list(_opts \\ %{}) do
     [
       %__MODULE__{name: "None" , admin: false, edit: false, view: false},

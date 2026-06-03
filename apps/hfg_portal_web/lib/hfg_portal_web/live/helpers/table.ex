@@ -89,8 +89,6 @@ defmodule HfgPortalWeb.Helpers.Table do
           <div class="flex">
             <p class="text-xs">
               <%= cond do %>
-                <%# this_search && this_search.val && @type == "drop_down" -> %>
-                  <%# "Search: #{get_drop_down_value(@list, @keys)}" %>
                 <% this_search && this_search.val && @type == "month" -> %>
                   <%= "Search: #{get_month_name(this_search.val |> String.to_integer(), @starting_month, @offset)}" %>
                 <% this_search && this_search.val -> %> <%= "Search: #{this_search.val}" %>
@@ -105,7 +103,7 @@ defmodule HfgPortalWeb.Helpers.Table do
             <% cur_search && cur_search.field == @field && cur_search.show -> %>
               <div phx-click-away={@on_close}>
                 <.bnw_input_hidden f={@f} field="field" value={@field} />
-                <.bnw_input_naked {assigns} field="val" />
+                <.bnw_input_naked value={if this_search, do: Map.get(this_search, :val)} {assigns} field="val" />
               </div>
             <% true -> %>
               <%= render_slot(@inner_block) %>

@@ -106,7 +106,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         id: "wife_time",
         links: WifeTime.Authorize.list_pages(current_user),
       },
-
+      %App{
+        name: "Budget",
+        id: "budget",
+        links: Budget.Authorize.list_pages(current_user),
+      },
     ]
     
     #apps = cond do
@@ -244,9 +248,9 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   def mount(_session, session, socket) do
     if connected?(socket) do
       Accounts.subscribe()
+      Budget.UserRoles.subscribe()
       #ItBudget.UserRoles.subscribe()
       #Budget.Admins.subscribe()
-      #Budget.UserRoles.subscribe()
       #Budget.Roles.subscribe()
       #Budget.CompanyPermissions.subscribe()
       #Budget.HomePermissions.subscribe()
@@ -343,6 +347,16 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
         update_app(socket, "loan_repayment", LoanRepayment.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+
+  @impl true
+  def handle_info({[:budget, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()

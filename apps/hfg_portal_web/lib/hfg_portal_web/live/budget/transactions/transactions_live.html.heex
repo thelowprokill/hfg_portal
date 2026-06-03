@@ -1,0 +1,38 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="flex items-center gap-4 py-6">
+    <.bnw_button_new />
+  </div>
+
+  <.form :let={f}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table height="80vh">
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:description}>Description</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:bucket_id} type="select" list={@buckets |> Enum.map(&([key: &1.name, value: &1.id]))}>  Bucket     </.bnw_table_header_filter></th>
+        <th class="p-2">Amount</th>
+        <th class="p-2">Type</th>
+        <th class="p-2">Date</th>
+        <th class="p-2"></th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for transaction <- @transactions do %>
+        <tr>
+          <td class="px-2"><%= transaction.description %></td>
+          <td class="px-2"><%= if transaction.bucket, do: transaction.bucket.name, else: "—" %></td>
+          <td class="px-2">$<%= transaction.amount %></td>
+          <td class="px-2"><%= transaction.type %></td>
+          <td class="px-2"><%= transaction.transaction_date %></td>
+          <td class="px-2"><.bnw_button_edit phx-value-id={transaction.id} /></td>
+          <td class="px-2"><.bnw_button_delete phx-value-id={transaction.id} /></td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

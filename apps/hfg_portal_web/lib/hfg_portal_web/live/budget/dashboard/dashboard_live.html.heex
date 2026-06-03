@@ -1,0 +1,230 @@
+<div>
+  <%# ── Month/year navigator (always visible) ── %>
+  <div class="flex items-center gap-3 py-4">
+    <button phx-click="prev_month"
+            class="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors text-lg leading-none">
+      ‹
+    </button>
+    <span class="text-base font-medium w-36 text-center">
+      <%= get_month_name(@selected_month) %> <%= @selected_year %>
+    </span>
+    <button phx-click="next_month"
+            class="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors text-lg leading-none">
+      ›
+    </button>
+    <%= if @selected_month != Date.utc_today().month or @selected_year != Date.utc_today().year do %>
+      <button phx-click="reset_month"
+              class="ml-2 px-2 py-1 rounded text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 border border-zinc-300 dark:border-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+        Today
+      </button>
+    <% end %>
+  </div>
+
+  <%= if @selected_bucket do %>
+    <%# ── Bucket detail view ── %>
+
+    <div class="py-4">
+      <button phx-click="back"
+              class="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+        ← Back
+      </button>
+    </div>
+
+    <%# Summary card %>
+    <% bucket = @selected_bucket %>
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 space-y-3 mb-6">
+      <%= cond do %>
+        <% bucket.monthly_contribution -> %>
+          <% month_balance = Map.get(@month_end_balances, bucket.id, Decimal.new(0)) %>
+          <% deposited     = Map.get(@monthly_deposits,   bucket.id, Decimal.new(0)) %>
+          <% remaining     = Decimal.sub(bucket.max_balance, month_balance) |> Decimal.max(Decimal.new(0)) %>
+          <% target_met    = Decimal.compare(deposited, bucket.monthly_contribution) != :lt %>
+
+          <div class="flex justify-between items-center">
+            <span class="font-semibold"><%= bucket.name %></span>
+            <span class="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Sinking Fund</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-500">Saved</span>
+            <span class="font-medium">$<%= month_balance %> / $<%= bucket.max_balance %></span>
+          </div>
+          <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+            <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.div(month_balance, bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+            <div class="h-2 rounded-full bg-green-500" style={"width: #{Float.round(pct, 1)}%"}></div>
+          </div>
+          <div class="text-sm text-zinc-500">$<%= remaining %> remaining to fill</div>
+          <div class="pt-1 border-t border-zinc-100 dark:border-zinc-700">
+            <div class="flex justify-between text-sm">
+              <span class="text-zinc-500">This month</span>
+              <span class={if target_met, do: "text-green-600 dark:text-green-400", else: "text-zinc-600 dark:text-zinc-400"}>
+                $<%= deposited %> / $<%= bucket.monthly_contribution %>
+              </span>
+            </div>
+            <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mt-1">
+              <% mpct = if Decimal.compare(bucket.monthly_contribution, Decimal.new(0)) == :gt, do: Decimal.div(deposited, bucket.monthly_contribution) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+              <div class={["h-1.5 rounded-full", if(target_met, do: "bg-green-500", else: "bg-blue-400")]}
+                   style={"width: #{Float.round(mpct, 1)}%"}></div>
+            </div>
+          </div>
+
+        <% bucket.monthly_budget -> %>
+          <% spent = Map.get(@monthly_expenses, bucket.id, Decimal.new(0)) %>
+          <% over  = Decimal.compare(spent, bucket.monthly_budget) == :gt %>
+
+          <div class="flex justify-between items-center">
+            <span class="font-semibold"><%= bucket.name %></span>
+            <span class="text-sm text-zinc-500">$<%= bucket.balance %> balance</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-500">Spent this month</span>
+            <span class={if over, do: "text-red-500 font-medium", else: "text-zinc-600 dark:text-zinc-400"}>
+              $<%= spent %> / $<%= bucket.monthly_budget %>
+            </span>
+          </div>
+          <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+            <% pct = if Decimal.compare(bucket.monthly_budget, Decimal.new(0)) == :gt, do: Decimal.div(spent, bucket.monthly_budget) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+            <div class={["h-2 rounded-full", if(over, do: "bg-red-500", else: "bg-blue-500")]}
+                 style={"width: #{Float.round(pct, 1)}%"}></div>
+          </div>
+          <% remaining = Decimal.sub(bucket.monthly_budget, spent) %>
+          <div class="text-sm text-zinc-500">
+            <%= if over do %>$<%= Decimal.abs(remaining) %> over budget<% else %>$<%= remaining %> remaining this month<% end %>
+          </div>
+
+        <% true -> %>
+          <div class="flex justify-between items-center">
+            <span class="font-semibold"><%= bucket.name %></span>
+          </div>
+          <div class="text-2xl font-semibold">$<%= bucket.balance %></div>
+
+      <% end %>
+    </div>
+
+    <div class="pb-4"><.bnw_button_new /></div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-200 dark:border-zinc-700 text-left text-zinc-500">
+            <th class="pb-2 pr-4 font-medium">Description</th>
+            <th class="pb-2 pr-4 font-medium">Amount</th>
+            <th class="pb-2 pr-4 font-medium">Type</th>
+            <th class="pb-2 pr-4 font-medium">Date</th>
+            <th class="pb-2"></th>
+            <th class="pb-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for t <- @transactions do %>
+            <tr class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+              <td class="py-2 pr-4"><%= t.description %></td>
+              <td class="py-2 pr-4">$<%= t.amount %></td>
+              <td class="py-2 pr-4 capitalize"><%= String.replace(t.type, "_", " ") %></td>
+              <td class="py-2 pr-4"><%= t.transaction_date %></td>
+              <td class="py-2 pr-2"><.bnw_button_edit phx-value-id={t.id} /></td>
+              <td class="py-2"><.bnw_button_delete phx-value-id={t.id} /></td>
+            </tr>
+          <% end %>
+          <%= if @transactions == [] do %>
+            <tr>
+              <td colspan="6" class="py-8 text-center text-zinc-400">No transactions yet</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+
+  <% else %>
+    <%# ── Dashboard grid ── %>
+
+    <h3 class="text-xl"><%= @page_title %></h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-6">
+      <%= for bucket <- @buckets do %>
+        <div phx-click="select_bucket"
+             phx-value-id={bucket.id}
+             class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 space-y-3 cursor-pointer hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-500 transition-all">
+
+          <%= cond do %>
+            <% bucket.monthly_contribution -> %>
+              <%# Sinking fund card %>
+              <% month_balance = Map.get(@month_end_balances, bucket.id, Decimal.new(0)) %>
+              <% deposited     = Map.get(@monthly_deposits,   bucket.id, Decimal.new(0)) %>
+              <% remaining     = Decimal.sub(bucket.max_balance, month_balance) |> Decimal.max(Decimal.new(0)) %>
+              <% target_met    = Decimal.compare(deposited, bucket.monthly_contribution) != :lt %>
+
+              <div class="flex justify-between items-center">
+                <span class="font-semibold"><%= bucket.name %></span>
+                <span class="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Sinking Fund</span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-zinc-500">Saved</span>
+                <span class="font-medium">$<%= month_balance %> / $<%= bucket.max_balance %></span>
+              </div>
+              <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+                <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.div(month_balance, bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                <div class="h-2 rounded-full bg-green-500" style={"width: #{Float.round(pct, 1)}%"}></div>
+              </div>
+              <div class="text-sm text-zinc-500">$<%= remaining %> remaining to fill</div>
+
+              <div class="pt-1 border-t border-zinc-100 dark:border-zinc-700">
+                <div class="flex justify-between text-sm">
+                  <span class="text-zinc-500">This month</span>
+                  <span class={if target_met, do: "text-green-600 dark:text-green-400", else: "text-zinc-600 dark:text-zinc-400"}>
+                    $<%= deposited %> / $<%= bucket.monthly_contribution %>
+                  </span>
+                </div>
+                <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mt-1">
+                  <% mpct = if Decimal.compare(bucket.monthly_contribution, Decimal.new(0)) == :gt, do: Decimal.div(deposited, bucket.monthly_contribution) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                  <div class={["h-1.5 rounded-full", if(target_met, do: "bg-green-500", else: "bg-blue-400")]}
+                       style={"width: #{Float.round(mpct, 1)}%"}></div>
+                </div>
+              </div>
+
+            <% bucket.monthly_budget -> %>
+              <%# Regular budget card %>
+              <% spent = Map.get(@monthly_expenses, bucket.id, Decimal.new(0)) %>
+              <% over  = Decimal.compare(spent, bucket.monthly_budget) == :gt %>
+
+              <div class="flex justify-between items-center">
+                <span class="font-semibold"><%= bucket.name %></span>
+                <span class="text-sm text-zinc-500">$<%= bucket.balance %> balance</span>
+              </div>
+
+              <div class="flex justify-between text-sm">
+                <span class="text-zinc-500">Spent this month</span>
+                <span class={if over, do: "text-red-500 font-medium", else: "text-zinc-600 dark:text-zinc-400"}>
+                  $<%= spent %> / $<%= bucket.monthly_budget %>
+                </span>
+              </div>
+              <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+                <% pct = if Decimal.compare(bucket.monthly_budget, Decimal.new(0)) == :gt, do: Decimal.div(spent, bucket.monthly_budget) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                <div class={["h-2 rounded-full", if(over, do: "bg-red-500", else: "bg-blue-500")]}
+                     style={"width: #{Float.round(pct, 1)}%"}></div>
+              </div>
+              <% remaining = Decimal.sub(bucket.monthly_budget, spent) %>
+              <div class="text-sm text-zinc-500">
+                <%= if over do %>
+                  $<%= Decimal.abs(remaining) %> over budget
+                <% else %>
+                  $<%= remaining %> remaining this month
+                <% end %>
+              </div>
+
+            <% true -> %>
+              <%# Plain balance card %>
+              <div class="flex justify-between items-center">
+                <span class="font-semibold"><%= bucket.name %></span>
+              </div>
+              <div class="text-2xl font-semibold">$<%= bucket.balance %></div>
+
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+  <% end %>
+</div>
