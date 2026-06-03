@@ -1,6 +1,17 @@
 import Config
 
 # Configure your database
+config :budget, Budget.Repo,
+  username: System.get_env("MYSQL_USERNAME", "root"),
+  password: System.get_env("MYSQL_PASSWORD", "root"),
+  hostname: System.get_env("MYSQL_HOST", "localhost"),
+  database: "hfg_portal_budget_dev",
+  port: String.to_integer(System.get_env("MYSQL_PORT", "3306")),
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Configure your database
 config :wife_time, WifeTime.Repo,
   username: System.get_env("MYSQL_USERNAME", "root"),
   password: System.get_env("MYSQL_PASSWORD", "root"),
@@ -121,3 +132,4 @@ config :hfg_portal,      env: :dev
 config :car_maintenance, env: :dev
 config :loan_repayment,  env: :dev
 config :wife_time,       env: :dev
+config :budget,          env: :dev

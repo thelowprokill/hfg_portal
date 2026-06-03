@@ -32,6 +32,16 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
+  config :budget, WifeTime.Repo,
+    # ssl: true,
+    hostname: mysql_host,
+    username: mysql_username,
+    password: mysql_password,
+    port:     mysql_port,
+    database: "hfg_portal_budget",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
   config :wife_time, WifeTime.Repo,
     # ssl: true,
     hostname: mysql_host,
@@ -88,7 +98,7 @@ if config_env() == :prod do
 
   config :hfg_portal_web, HfgPortalWeb.Endpoint,
     server: true,
-    #https: [
+    # https: [
     #  port: String.to_integer(System.get_env("PORT") || "4000"),
     #  cipher_suite: :strong,
     #  # TODO
@@ -97,19 +107,20 @@ if config_env() == :prod do
     #  # certfile: System.get_env("SSL_CERT"),
     #  keyfile: "priv/cert/selfsigned_key.pem",
     #  certfile: "priv/cert/selfsigned.pem"
-    #],
+    # ],
     http: [
-      port: String.to_integer(System.get_env("PORT") || "4000"),
+      port: String.to_integer(System.get_env("PORT") || "4000")
     ],
-    #http: [
+    # http: [
     # # Enable IPv6 and bind on all interfaces.
     # # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
     # ip: {0, 0, 0, 0, 0, 0, 0, 0},
     # port: String.to_integer(System.get_env("PORT") || "4000")
-    #],
+    # ],
     url: [
-      host:   System.get_env("HOSTNAME") || "localhost",
-      port:   String.to_integer(System.get_env("EXTERNAL_PORT") || System.get_env("PORT") || "4000"),
+      host: System.get_env("HOSTNAME") || "localhost",
+      port:
+        String.to_integer(System.get_env("EXTERNAL_PORT") || System.get_env("PORT") || "4000"),
       scheme: System.get_env("URL_SCHEME") || "http"
     ],
     secret_key_base: secret_key_base

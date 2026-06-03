@@ -14,7 +14,7 @@ do
 done
 
 # All apps in umbrella
-apps="hfg_portal car_maintenance loan_repayment wife_time"
+apps="hfg_portal car_maintenance loan_repayment wife_time budget"
 
 # Create, migrate, and seed database if it doesn't exist.
 echo ""

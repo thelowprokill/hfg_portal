@@ -8,6 +8,7 @@ defmodule HfgPortal.Release do
     :car_maintenance,
     :loan_repayment,
     :wife_time,
+    :budget,
   ]
 
   def migrate do
