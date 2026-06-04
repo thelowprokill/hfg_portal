@@ -118,6 +118,22 @@ defmodule HfgPortalWeb.Budget.ScheduledExpenses.ScheduledExpensesLive do
   end
 
   @impl true
+  def handle_event("run_scheduled", _, socket) do
+    %{scheduled_expenses: expenses, sinking_contributions: sinking} =
+      ScheduledExpenses.run_scheduled()
+
+    expense_count = Enum.count(expenses, &(&1.status == :created))
+    sinking_count = Enum.count(sinking,  &(&1.status == :created))
+
+    msg = "Ran scheduled: #{expense_count} expense(s) created, #{sinking_count} sinking fund contribution(s) added."
+
+    socket
+    |> put_flash(:info, msg)
+    |> reload_items()
+    |> res()
+  end
+
+  @impl true
   def handle_event("add_new", _, socket),                         do: socket |> set_modal(:new) |> res()
   @impl true
   def handle_event("edit", %{"id" => id}, socket),                do: socket |> set_modal(:edit, String.to_integer(id)) |> res()

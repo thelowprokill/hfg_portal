@@ -82,6 +82,16 @@ defmodule Budget.Transactions do
     |> Kernel.||(Decimal.new(0))
   end
 
+  def sinking_fund_deposit_this_month?(bucket_id, year, month) do
+    start_date = Date.new!(year, month, 1)
+    end_date   = Date.end_of_month(start_date)
+
+    @schema
+    |> where([t], t.bucket_id == ^bucket_id and t.type == "sinking_fund_deposit")
+    |> where([t], t.transaction_date >= ^start_date and t.transaction_date <= ^end_date)
+    |> Repo.exists?()
+  end
+
   def balance_as_of_month(bucket_id, year, month) do
     end_date = Date.end_of_month(Date.new!(year, month, 1))
 
@@ -104,6 +114,35 @@ defmodule Budget.Transactions do
     |> select([t], sum(t.amount))
     |> Repo.one()
     |> Kernel.||(Decimal.new(0))
+  end
+
+  def list_for_user(user_id, opts \\ %{}) do
+    bucket_ids =
+      Budget.Buckets.Bucket
+      |> where([b], b.user_id == ^user_id)
+      |> select([b], b.id)
+      |> Repo.all()
+
+    @schema
+    |> where([t], t.bucket_id in ^bucket_ids)
+    |> then(fn q ->
+      case Map.get(opts, :bucket_id) do
+        nil -> q
+        id  -> where(q, [t], t.bucket_id == ^id)
+      end
+    end)
+    |> then(fn q ->
+      case {Map.get(opts, :year), Map.get(opts, :month)} do
+        {y, m} when not is_nil(y) and not is_nil(m) ->
+          start_date = Date.new!(y, m, 1)
+          end_date   = Date.end_of_month(start_date)
+          where(q, [t], t.transaction_date >= ^start_date and t.transaction_date <= ^end_date)
+        _ -> q
+      end
+    end)
+    |> order_by([t], desc: t.transaction_date)
+    |> paginate(opts)
+    |> Repo.all()
   end
 
   defp sync_bucket_balance(bucket_id) do

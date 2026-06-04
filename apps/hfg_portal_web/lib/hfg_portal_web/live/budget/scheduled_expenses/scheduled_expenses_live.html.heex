@@ -1,7 +1,10 @@
 <div>
   <h3 class="text-xl"><%= @page_title %></h3>
 
-  <div class="py-6"><.bnw_button_new /></div>
+  <div class="flex items-center gap-3 py-6">
+    <.bnw_button_new />
+    <.bnw_button_default phx_click="run_scheduled">Run Scheduled</.bnw_button_default>
+  </div>
 
   <.form :let={f}
     for={@search_map}
@@ -11,7 +14,7 @@
     <.bnw_table height="80vh">
       <:header>
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:description}>Description</.bnw_table_header_filter></th>
-        <th class="p-2">Bucket</th>
+        <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:bucket_id} type="select" list={[[key: "Select a Bucket", value: ""]] ++ (@buckets |> Enum.map(&([key: &1.name, value: &1.id])))}>  Bucket     </.bnw_table_header_filter></th>
         <th class="p-2">Amount</th>
         <th class="p-2">Frequency</th>
         <th class="p-2">Next Due</th>

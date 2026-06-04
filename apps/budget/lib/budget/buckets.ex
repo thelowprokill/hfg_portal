@@ -27,4 +27,11 @@ defmodule Budget.Buckets do
     |> order_by([b], b.name)
     |> Repo.all()
   end
+
+  def list_all_sinking_funds do
+    @schema
+    |> where([b], not is_nil(b.monthly_contribution))
+    |> order_by([b], b.name)
+    |> Repo.all()
+  end
 end

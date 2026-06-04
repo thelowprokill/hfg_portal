@@ -14,9 +14,66 @@ defmodule Budget.ScheduledExpenses do
     created: @created,
     deleted: @deleted
 
+  def run_scheduled(date \\ Date.utc_today()) do
+    expense_results =
+      list_due(date)
+      |> Enum.map(fn se ->
+        result =
+          Budget.Transactions.new()
+          |> Budget.Transactions.create_or_update(%{
+            bucket_id:            se.bucket_id,
+            scheduled_expense_id: se.id,
+            amount:               se.amount,
+            description:          se.description,
+            transaction_date:     date,
+            type:                 "expense",
+          })
+
+        case result do
+          {:ok, t} ->
+            advance_due_date(se)
+            %{status: :created, description: t.description, amount: t.amount}
+          {:error, cs} ->
+            %{status: :error, description: se.description, errors: inspect(cs.errors)}
+        end
+      end)
+
+    sinking_results =
+      Budget.Buckets.list_all_sinking_funds()
+      |> Enum.reject(fn bucket ->
+        Budget.Transactions.sinking_fund_deposit_this_month?(bucket.id, date.year, date.month)
+      end)
+      |> Enum.map(fn bucket ->
+        result =
+          Budget.Transactions.new()
+          |> Budget.Transactions.create_or_update(%{
+            bucket_id:        bucket.id,
+            amount:           bucket.monthly_contribution,
+            description:      "Monthly contribution",
+            transaction_date: date,
+            type:             "sinking_fund_deposit",
+          })
+
+        case result do
+          {:ok, t}   -> %{status: :created, bucket: bucket.name, amount: t.amount}
+          {:error, cs} -> %{status: :error, bucket: bucket.name, errors: inspect(cs.errors)}
+        end
+      end)
+
+    %{scheduled_expenses: expense_results, sinking_contributions: sinking_results}
+  end
+
   def list_for_bucket(bucket_id) do
     @schema
     |> where([s], s.bucket_id == ^bucket_id)
+    |> order_by([s], s.description)
+    |> Repo.all()
+  end
+
+  def list_for_user(user_id) do
+    @schema
+    |> join(:inner, [s], b in Budget.Buckets.Bucket, on: s.bucket_id == b.id)
+    |> where([s, b], b.user_id == ^user_id)
     |> order_by([s], s.description)
     |> Repo.all()
   end

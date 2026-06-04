@@ -6,15 +6,21 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
   @scopes [
     %{name: "hfg_portal",                         module: HfgPortalWeb.Apis.RoutesController},
+
     %{name: "car_maintenance:cars",               module: HfgPortalWeb.Apis.CarMaintenance.CarController},
     %{name: "car_maintenance:service_history",    module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController},
     %{name: "car_maintenance:maintenance_items",  module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController},
     %{name: "car_maintenance:maintenance_images", module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController},
+
+    %{name: "budget",                             module: HfgPortalWeb.Apis.Budget.BudgetController,             require_admin: false},
+    %{name: "budget:buckets",                     module: HfgPortalWeb.Apis.Budget.BucketsController,            require_admin: false},
+    %{name: "budget:transactions",                module: HfgPortalWeb.Apis.Budget.TransactionsController,       require_admin: false},
+    %{name: "budget:scheduled_expenses",          module: HfgPortalWeb.Apis.Budget.ScheduledExpensesController,  require_admin: false},
   ]
 
   def scopes(conn, _params) do
     json(conn, %{
-      "scopes" => 
+      "scopes" =>
         @scopes
         |> Enum.map(&(&1.name))
     })
@@ -22,7 +28,6 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
   # auth request
   def call(%{query_params: %{"username" => username, "password" => password}} = conn, params) do
-
     user = Accounts.get_active_user_by_username_and_password(username, password)
 
     case user do
@@ -48,14 +53,14 @@ defmodule HfgPortalWeb.Apis.RoutesController do
         |> put_status(:ok)
         |> json(%{jwt: nil})
     end
-    
   end
 
   def call(conn, params) do
-    auth(conn)
-    |> case do
-      %{module: module} -> 
-        module.call(conn, params)
+    case auth(conn) do
+      {%{module: module}, user} ->
+        conn
+        |> assign(:current_api_user, user)
+        |> module.call(params)
       _ ->
         conn
         |> put_status(401)
@@ -63,14 +68,13 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     end
   end
 
-  defp auth(%{req_headers: headers, query_params: %{"scope" => scope} = params}) do
-    api_key = Enum.find(headers, fn {k, _} -> k == "x-api-key" end) |> elem(1)
-
-    scope = Enum.find(@scopes, &(&1.name == scope))
+  defp auth(%{req_headers: headers, query_params: %{"scope" => scope_name} = _params}) do
+    api_key = Enum.find(headers, fn {k, _} -> k == "x-api-key" end)
+    scope   = Enum.find(@scopes, &(&1.name == scope_name))
 
     cond do
       is_nil(api_key) || is_nil(scope) -> nil
-      true -> 
+      true ->
         signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
 
         token_config = %{
@@ -80,15 +84,20 @@ defmodule HfgPortalWeb.Apis.RoutesController do
           }
         }
 
-        {:ok, %{"user_id" => user_id, "admin" => admin}} = Joken.verify(api_key, signer)
+        {_, jwt} = api_key
 
-        user = HfgPortal.Accounts.get_user!(user_id)
+        case Joken.verify(jwt, signer) do
+          {:ok, %{"user_id" => user_id, "admin" => admin}} ->
+            user          = HfgPortal.Accounts.get_user!(user_id)
+            require_admin = Map.get(scope, :require_admin, true)
 
-        # authenticate the user with the scope
-        cond do
-          admin || user.portal_admin -> scope
-          true -> nil
+            cond do
+              require_admin && !admin && !user.portal_admin -> nil
+              true -> {scope, user}
+            end
+          _ -> nil
         end
     end
   end
+  defp auth(_), do: nil
 end
