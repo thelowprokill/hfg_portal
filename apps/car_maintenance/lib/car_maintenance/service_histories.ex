@@ -38,11 +38,11 @@ defmodule CarMaintenance.ServiceHistories do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> order_by([i], [desc: i.mileage, desc: i.service_date, desc: i.id])
     |> filter_car(Map.get(opts, :car_id))
     |> filter_mileage(Map.get(opts, :mileage))
     |> Repo.all()
-    |> preload_associations(opts)
+    |> preload(opts)
   end
 end

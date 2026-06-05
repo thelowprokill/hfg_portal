@@ -1,37 +1,19 @@
 defmodule WifeTime.Authorize do
-  alias WifeTime.{
-    Users.Roles,
-  }
+  @roles      WifeTime.Users.Roles
+  @user       WifeTime.Users.User
+  @user_role  WifeTime.Users.UserRole
+  @user_roles WifeTime.UserRoles
   alias HfgPortal.Helpers.Page
 
   @pages [
-    %Page{id: "home",           name: "Home",           module: HfgPortalWeb.WifeTime.Home.HomeLive},
-    #%Page{id: "reports",        name: "Reports",        module: HfgPortalWeb.WifeTime.Reports.ReportsLive},
-    %Page{id: "users",          name: "Users",          module: HfgPortalWeb.WifeTime.Users.UsersLive},
+    %Page{id: "home",  name: "Home",  module: HfgPortalWeb.WifeTime.Home.HomeLive},
+    %Page{id: "users", name: "Users", module: HfgPortalWeb.WifeTime.Users.UsersLive},
   ]
 
-  # pattern match on user struct
-  def list_pages(user, dev_admin \\ false)
-  def list_pages(%WifeTime.Users.User{} = user, _),                  do: list_pages(user.user_role, user.dev_admin && user.admin_mode)
-  def list_pages(%HfgPortal.Accounts.User{} = user, _),              do: list_pages(user.id, user.dev_admin && user.admin_mode)
-  def list_pages(user_id, dev_admin) when is_integer(user_id),       do: WifeTime.UserRoles.get(user_id, :user) |> list_pages(dev_admin)
-  def list_pages(%WifeTime.Users.UserRole{} = user_role, dev_admin), do: @pages |> Enum.filter(fn page -> authorize(user_role.role, page.id, dev_admin) end)
-
-  def list_pages(_, true),  do: @pages
-  def list_pages(_, false), do: []
-
-  def authorize(role, page, dev_admin \\ false)
-  def authorize(%WifeTime.Users.Roles{} = role, page, dev_admin) do
-    cond do
-      #user.dev_admin -> true
-      dev_admin -> true
-      role && role.edit  && page     in ["home", "reports"]    -> true
-      role && role.view  && page     in ["home", "reports"]    -> true
-      true -> false
-    end
-  end
-  def authorize(%WifeTime.Users.UserRole{} = user_role, page, dev_admin), do: authorize(user_role.role, page, dev_admin)
-  def authorize(%WifeTime.Users.User{} = user, page, _dev_admin), do: authorize((if Map.get(user, :user_role), do: user.user_role.role, else: "None"), page, user.dev_admin)
-  def authorize(role, page, dev_admin) when is_binary(role), do: authorize(Roles.get(role), page, dev_admin)
-  def authorize(_user, _page, _dev_admin), do: false
+  use HfgPortal.Helpers.DefaultAuthorize,
+    roles:      @roles,
+    user:       @user,
+    user_role:  @user_role,
+    user_roles: @user_roles,
+    pages:      @pages
 end

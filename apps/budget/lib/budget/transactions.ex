@@ -41,10 +41,10 @@ defmodule Budget.Transactions do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
     |> Repo.all()
-    |> preload_associations(opts)
+    |> preload(opts)
   end
 
   def new_changeset(attrs \\ %{}) do
@@ -141,7 +141,7 @@ defmodule Budget.Transactions do
       end
     end)
     |> order_by([t], desc: t.transaction_date)
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> Repo.all()
   end
 

@@ -25,10 +25,10 @@ defmodule LoanRepayment.Repayments do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_loan(Map.get(opts, :loan_id))
     |> order_by([r], [desc: r.paid_amount_tot, desc: r.id])
     |> Repo.all()
-    |> preload_associations(opts)
+    |> preload(opts)
   end
 end

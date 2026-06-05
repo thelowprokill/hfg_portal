@@ -19,11 +19,11 @@ defmodule CarMaintenance.MaintenanceItems do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
     |> filter_car(Map.get(opts, :car_id))
     |> order_by([asc: :name])
     |> Repo.all()
-    |> preload_associations(opts)
+    |> preload(opts)
   end
 end

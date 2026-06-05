@@ -28,9 +28,9 @@ defmodule WifeTime.WifeTimes do
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
     |> order_by([desc: :entry_date])
-    |> paginate(opts)
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
     |> Repo.all()
-    |> preload_associations(opts)
+    |> preload(opts)
   end
 end

@@ -4,13 +4,20 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   alias HfgPortalWeb.Budget.Transactions.Modals.ChangeTransaction
 
   alias Budget.{
+    Authorize,
     Buckets,
     Transactions,
+    UserRoles,
   }
 
   defp fetch_buckets(socket) do
     %{current_user: %{id: user_id}} = socket.assigns
     socket |> assign(:buckets, Buckets.list_for_user(user_id))
+  end
+
+  defp fetch_can_edit(socket) do
+    %{current_user: user} = socket.assigns
+    assign(socket, :can_edit, Authorize.can_edit?(user))
   end
 
   defp fetch_monthly_totals(socket) do
@@ -137,6 +144,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     if connected?(socket) do
       Buckets.subscribe()
       Transactions.subscribe()
+      UserRoles.subscribe()
     end
 
     today = Date.utc_today()
@@ -153,11 +161,20 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> assign(:selected_month,   today.month)
     |> assign(:transactions,     [])
     |> assign(:modal_stack,      [])
+    |> assign(:can_edit,         false)
     |> fetch_buckets()
+    |> fetch_can_edit()
     |> handle_params(session)
     |> fetch_monthly_totals()
     |> fetch_bucket_transactions()
     |> res(:ok)
+  end
+
+  @impl true
+  def handle_info({[:budget, :user_role, _], user_role}, socket) do
+    if user_role.user_id == socket.assigns.current_user.id,
+      do:   socket |> fetch_can_edit() |> res(),
+      else: socket |> res()
   end
 
   @impl true
@@ -221,15 +238,15 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   end
 
   @impl true
-  def handle_event("add_new", _, socket), do: socket |> set_modal(:new) |> res()
+  def handle_event("add_new", _, %{assigns: %{can_edit: true}} = socket), do: socket |> set_modal(:new) |> res()
 
   @impl true
-  def handle_event("edit", %{"id" => id}, socket) do
+  def handle_event("edit", %{"id" => id}, %{assigns: %{can_edit: true}} = socket) do
     socket |> set_modal(:edit, String.to_integer(id)) |> res()
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("delete", %{"id" => id}, %{assigns: %{can_edit: true}} = socket) do
     Transactions.delete(String.to_integer(id))
     socket |> res()
   end

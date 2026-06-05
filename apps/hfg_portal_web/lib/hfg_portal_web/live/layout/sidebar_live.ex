@@ -159,6 +159,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
 
     apps = [
       %Page{
+        name: "Budget",
+        id: "budget",
+        links: Budget.Authorize.list_pages(current_user),
+      },
+      %Page{
         name: "Car Maintenance",
         id: "car_maintenance",
         links: CarMaintenance.Authorize.list_pages(current_user),
@@ -173,23 +178,21 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         id: "wife_time",
         links: WifeTime.Authorize.list_pages(current_user),
       },
-      %Page{
-        name: "Budget",
-        id: "budget",
-        links: Budget.Authorize.list_pages(current_user),
-      },
     ]
 
     assign(socket, :apps, system_apps ++ apps)
   end
 
   defp update_app(socket, app, links, show_admin) do
-    socket
+    socket = socket
     |> assign(:apps, Enum.map(socket.assigns.apps, &if(&1.id == app, do: Map.put(&1, :links, links) |> Map.put(:show_admin, show_admin), else: &1)))
-    |> case do
-      socket when socket.assigns.selected_app == app -> socket |> redraw()
-      socket -> socket
-    end
+
+    selected_app  = Map.get(socket.assigns, :selected_app)
+    selected_page = Map.get(socket.assigns, :selected_page, [])
+
+    if selected_app == app || List.first(selected_page) == app,
+      do:   redraw(socket),
+      else: socket
   end
 
   defp list_dev_tools(%{dev_admin: true, admin_mode: true}) do
@@ -268,22 +271,28 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   end
 
   defp redraw(socket) do
-    %{
-      selected_app:   selected_app,
-      apps:           apps,
-      page:           page,
-      render_success: render_success
-    } = socket.assigns
-    cond do
-      # this is to check if the user still has access to the page they are on.
-      # If they do. don't do anything here.
-      # If they don't, redirect.
-      render_success && Enum.find(apps, %{links: []}, &(&1.id == selected_app)) |> Map.get(:links) |> Enum.find(&(&1.id == page)) -> socket
-      true ->
-        address =
-          Enum.reduce(socket.assigns.session, "/?", fn {k, v}, acc -> "#{acc}#{k}=#{v}&" end)
-          |> fn x -> String.slice(x, 0, String.length(x) - 1) end.()
-        push_navigate(socket, to: address)
+    apps          = socket.assigns.apps
+    selected_app  = Map.get(socket.assigns, :selected_app)
+    selected_page = Map.get(socket.assigns, :selected_page, [])
+
+    # Build the full page path. When navigating via the sidebar, selected_page
+    # already includes the app prefix (e.g. ["budget", "dashboard"]).  When
+    # navigating via a child LiveView push_patch, selected_app is set separately
+    # and selected_page contains only the leaf (e.g. ["dashboard"]).
+    full_path =
+      if not is_nil(selected_app) and List.first(selected_page) != selected_app,
+        do:   [selected_app | selected_page],
+        else: selected_page
+
+    {_module, error} = find_page(apps, full_path)
+
+    if is_nil(error) do
+      socket
+    else
+      address =
+        Enum.reduce(socket.assigns.session, "/?", fn {k, v}, acc -> "#{acc}#{k}=#{v}&" end)
+        |> fn x -> String.slice(x, 0, String.length(x) - 1) end.()
+      push_navigate(socket, to: address)
     end
   end
 
@@ -296,25 +305,6 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       LoanRepayment.UserRoles.subscribe()
       WifeTime.UserRoles.subscribe()
       Budget.UserRoles.subscribe()
-
-
-      #AdminLogs.UserRoles.subscribe()
-      #AdminDashboard.UserRoles.subscribe()
-      #ApiTokens.UserRoles.subscribe()
-      #Budget.Admins.subscribe()
-      #Budget.UserRoles.subscribe()
-      #Budget.Roles.subscribe()
-      #Budget.CompanyPermissions.subscribe()
-      #Budget.HomePermissions.subscribe()
-      #DevTeamTimetracking.UserRoles.subscribe()
-      #ItBudget.UserRoles.subscribe()
-      #ItDashboard.UserRoles.subscribe()
-      #Procurement.UserRoles.subscribe()
-      #Reports.StreamlitReports.UserRoles.subscribe()
-      #Reports.StreamlitReports.Roles.subscribe()
-      #Reports.StreamlitReports.Permissions.subscribe()
-      #TaskAutomationController.UserRoles.subscribe()
-      #TestDashboard.UserRoles.subscribe()
     end
 
     socket
@@ -394,128 +384,57 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   #################################################################################
   # App user role updates                                                         #
   #################################################################################
-  @impl true
-  def handle_info({[:api_tokens, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "api_tokens", ApiTokens.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
-  @impl true
-  def handle_info({[:api_tokens, _, _], _}, socket) do
-    update_app(socket, "api_tokens", ApiTokens.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
 
+  @impl true
+  def handle_info({[:user, :updated], user}, socket) do
+    %{current_user: current_user} = socket.assigns
+
+    cond do
+      current_user.id == user.id -> socket |> assign(:current_user, user) |> res()
+      true -> socket |> res()
+    end
+  end
+  
   @impl true
   def handle_info({[:budget, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id))
+        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()
   end
-  @impl true
-  def handle_info({[:budget, _, _], _}, socket) do
-    update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) |> res()
-  end
 
   @impl true
-  def handle_info({[:dev_team_timetracking, :user_role, _], user_role}, socket) do
+  def handle_info({[:car_maintenance, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false)
+        update_app(socket, "car_maintenance", CarMaintenance.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()
   end
-  def handle_info({[:dev_team_timetracking, _, _], _}, socket) do
-    update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
 
   @impl true
-  def handle_info({[:it_budget, :user_role, _], user_role}, socket) do
+  def handle_info({[:loan_repayment, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false)
+        update_app(socket, "loan_repayment", LoanRepayment.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()
   end
-  def handle_info({[:it_budget, _, _], _}, socket) do
-    update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
 
   @impl true
-  def handle_info({[:it_dashboard, :user_role, _], user_role}, socket) do
+  def handle_info({[:wife_time, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "it_dashboard", ItDashboard.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
-  def handle_info({[:it_dashboard, _, _], _}, socket) do
-    update_app(socket, "it_dashboard", ItDashboard.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
-
-  @impl true
-  def handle_info({[:procurement, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "procurement", Procurement.Authorize.list_pages(socket.assigns.current_user), false)
+        update_app(socket, "wife_time", WifeTime.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()
   end
 
-  @impl true
-  def handle_info({[:procurement, _, _], _}, socket) do
-    update_app(socket, "procurement", Procurement.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
-
-  @impl true
-  def handle_info({[:reports, :streamlit_report_user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "reports", Reports.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
-
-  @impl true
-  def handle_info({[:reports, _, _], _}, socket) do
-    update_app(socket, "reports", Reports.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
-
-  @impl true
-  def handle_info({[:task_automation_controller, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "task_automation_controller", TaskAutomationController.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
-  def handle_info({[:task_automation_controller, _, _], _}, socket) do
-    update_app(socket, "test_dashboard", TaskAutomationController.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
-
-  @impl true
-  def handle_info({[:test_dashboard, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "task_automation_controller", TestDashboard.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
-  end
-  def handle_info({[:test_dashboard, _, _], _}, socket) do
-    update_app(socket, "test_dashboard", TestDashboard.Authorize.list_pages(socket.assigns.current_user), false) |> res()
-  end
   #################################################################################
   # App user role updates                                                         #
   #################################################################################

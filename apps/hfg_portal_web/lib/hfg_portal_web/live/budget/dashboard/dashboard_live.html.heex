@@ -99,7 +99,11 @@
       <% end %>
     </div>
 
-    <div class="pb-4"><.bnw_button_new /></div>
+    <%= if @can_edit do %>
+      <div class="pb-4"><.bnw_button_new /></div>
+    <% else %>
+      <div class="pb-4 text-xs font-medium text-zinc-400 uppercase tracking-wide">View Only</div>
+    <% end %>
 
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -120,8 +124,8 @@
               <td class="py-2 pr-4">$<%= t.amount %></td>
               <td class="py-2 pr-4 capitalize"><%= String.replace(t.type, "_", " ") %></td>
               <td class="py-2 pr-4"><%= t.transaction_date %></td>
-              <td class="py-2 pr-2"><.bnw_button_edit phx-value-id={t.id} /></td>
-              <td class="py-2"><.bnw_button_delete phx-value-id={t.id} /></td>
+              <td class="py-2 pr-2"><%= if @can_edit do %><.bnw_button_edit phx-value-id={t.id} /><% end %></td>
+              <td class="py-2"><%= if @can_edit do %><.bnw_button_delete phx-value-id={t.id} /><% end %></td>
             </tr>
           <% end %>
           <%= if @transactions == [] do %>
