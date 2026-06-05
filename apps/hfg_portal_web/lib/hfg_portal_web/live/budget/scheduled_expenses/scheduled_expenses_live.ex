@@ -87,6 +87,18 @@ defmodule HfgPortalWeb.Budget.ScheduledExpenses.ScheduledExpensesLive do
     |> res(:ok)
   end
 
+  defp handle_params(socket, %{"app" => app} = session) do
+    %{session: stored} = socket.assigns
+    socket |> assign(:session, Map.put(stored, "app", app)) |> handle_params(Map.delete(session, "app"))
+  end
+  defp handle_params(socket, %{"page" => page} = session) do
+    %{session: stored} = socket.assigns
+    socket |> assign(:session, Map.put(stored, "page", page)) |> handle_params(Map.delete(session, "page"))
+  end
+  defp handle_params(socket, %{"admin" => admin} = session) do
+    %{session: stored} = socket.assigns
+    socket |> assign(:session, Map.put(stored, "admin", admin)) |> handle_params(Map.delete(session, "admin"))
+  end
   defp handle_params(socket, %{"search" => _} = session) do
     socket |> search_handle_params(session) |> handle_params(Map.delete(session, "search"))
   end
