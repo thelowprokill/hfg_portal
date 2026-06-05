@@ -58,6 +58,7 @@ defmodule HfgPortalWeb.MixProject do
       {:timex,                  "~> 3.7.9"},
       {:tzdata,                 "~> 1.1.1"},
       {:hfg_portal,             in_umbrella: true},
+      {:budget,                 in_umbrella: true},
       {:car_maintenance,        in_umbrella: true},
       {:loan_repayment,         in_umbrella: true},
       {:wife_time,              in_umbrella: true},

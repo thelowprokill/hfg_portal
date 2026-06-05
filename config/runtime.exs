@@ -32,7 +32,7 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
-  config :budget, WifeTime.Repo,
+  config :budget, Budget.Repo,
     # ssl: true,
     hostname: mysql_host,
     username: mysql_username,
