@@ -1,6 +1,5 @@
 defmodule HfgPortalWeb.Layout.SidebarLive do
-
-  @doc """
+  @moduledoc """
   To add a new app to the side bar:
 
   Create the function App.Authorize.list_pages/1
@@ -28,16 +27,18 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   This will not automatically set in page permissions.
   """
 
+  @depths ["pl-2", "pl-6", "pl-10", "pl-14"]
+
   use HfgPortalWeb, :live_view
 
   alias HfgPortalWeb.Layout.UserSettings
 
   alias HfgPortal.Accounts
-  alias HfgPortal.Helpers.{App, Page}
+  alias HfgPortal.Helpers.Page
 
   # this is a copy of
   # https://github.com/aiwaiwa/phoenix_dark_mode
-  def dark_mode_button(assigns) do
+  defp dark_mode_button(assigns) do
     ~H"""
     <button
       id="theme-toggle"
@@ -65,15 +66,81 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     """
   end
 
+  attr :page,          :map,    required: true
+  attr :current_user,  :map,    required: true
+  attr :selected_page, :list,   required: true
+  attr :depth,         :list,   default: []
+  attr :link,          :string, default: ""
+  defp page_links(%{page: %{links: links}} = assigns) when is_list(links) and length(links) > 0 do
+    ~H"""
+      <a phx-click="select_section"
+         phx-value-link={"#{if(@link == "", do: "", else: "#{@link},")}#{@page.id}"}
+         class={"
+           cursor-pointer
+           flex
+           items-center
+           p-2
+           #{Enum.at(@depth, 0)}
+           #{if length(@depth) == 0, do: "border-2 border-black"}
+           text-gray-900
+           rounded-lg
+           dark:text-white
+           hover:bg-gray-100
+           dark:hover:bg-gray-700
+         "}>
+        <%= @page.name %>
+      </a>
+      <%= if @page.id == Enum.at(@selected_page, 0) do %>
+        <ul>
+          <%= for link <- @page.links do %>
+            <li>
+              <.page_links
+                page={link}
+                current_user={@current_user}
+                selected_page={Enum.slice(@selected_page, 1..-1//1)}
+                depth={Enum.slice(@depth, 1..-1//1)}
+                link={"#{if(@link == "", do: "", else: "#{@link},")}#{@page.id}"}
+              />
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    """
+  end
+  defp page_links(%{page: %{module: module}} = assigns) when not is_nil(module) do
+    ~H"""
+      <.link
+         class={"
+           flex
+           items-center
+           p-2
+           #{Enum.at(@depth, 0)}
+           #{if length(@depth) == 0, do: "border-2 border-black"}
+           text-gray-900
+           rounded-lg
+           dark:text-white
+           hover:bg-gray-100
+           dark:hover:bg-gray-700"}
+        
+        navigate={"/?page=#{if(@link == "", do: "", else: "#{@link},")}#{@page.id}#{if @current_user.admin_mode, do: "&admin=true"}"}>
+        <%= @page.name %>
+      </.link>
+    """
+  end
+  defp page_links(assigns) do
+    ~H"""
+    """
+  end
+
   defp list_apps(socket) do
     %{current_user: current_user} = socket.assigns
     system_apps = [
-      %App{
+      %Page{
         name: "Home",
         id: "home",
         module: HfgPortalWeb.Home.HomeLive,
       },
-      %App{
+      %Page{
         name: "Accounts",
         id: "accounts",
         links: HfgPortal.Authorize.list_pages(current_user),
@@ -83,7 +150,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       #  id: "admin_logs",
       #  links: AdminLogs.Authorize.list_pages(current_user),
       #},
-      %App{
+      %Page{
         name: "Dev Tools", 
         id: "dev_tools",
         links: list_dev_tools(current_user),
@@ -91,56 +158,33 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     ]
 
     apps = [
-      %App{
+      %Page{
         name: "Car Maintenance",
         id: "car_maintenance",
         links: CarMaintenance.Authorize.list_pages(current_user),
       },
-      %App{
+      %Page{
         name: "Loan Repayment",
         id: "loan_repayment",
         links: LoanRepayment.Authorize.list_pages(current_user),
       },
-      %App{
+      %Page{
         name: "Wife Time",
         id: "wife_time",
         links: WifeTime.Authorize.list_pages(current_user),
       },
-      %App{
+      %Page{
         name: "Budget",
         id: "budget",
         links: Budget.Authorize.list_pages(current_user),
       },
     ]
-    
-    #apps = cond do
-    #  true ->
-    #    [
-    #      %App{
-    #        name: "Budget",
-    #        id: "budget",
-    #        links: Budget.Authorize.list_pages(current_user),
-    #        show_admin: Budget.Admins.is_admin(current_user.id),
-    #      },
-    #      %App{
-    #        name: "Dev Team Timetracking",
-    #        id:   "dev_team_timetracking",
-    #        links: DevTeamTimetracking.Authorize.list_pages(current_user),
-    #      },
-    #      %App{
-    #        name: "IT Budget",
-    #        id: "it_budget",
-    #        links: ItBudget.Authorize.list_pages(current_user),
-    #        show_admin: false,
-    #      },
-    #    ]
-    #end
 
     assign(socket, :apps, system_apps ++ apps)
   end
 
   defp update_app(socket, app, links, show_admin) do
-    socket 
+    socket
     |> assign(:apps, Enum.map(socket.assigns.apps, &if(&1.id == app, do: Map.put(&1, :links, links) |> Map.put(:show_admin, show_admin), else: &1)))
     |> case do
       socket when socket.assigns.selected_app == app -> socket |> redraw()
@@ -150,41 +194,59 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
 
   defp list_dev_tools(%{dev_admin: true, admin_mode: true}) do
     [
-      %Page{id: "button_gallery",  name: "Button Gallery",  module: HfgPortalWeb.DevTools.ButtonGallery.ButtonGalleryLive},          
-      %Page{id: "icon_gallery",    name: "Icon Gallery",    module: HfgPortalWeb.DevTools.IconGallery.IconGallery},
+      %Page{id: "expand",          name: "Expand",          links: [
+        %Page{id: "archive",         name: "Archive",         module: HfgPortalWeb.DevTools.Archive.ArchiveLive},
+        %Page{id: "button_gallery",  name: "Button Gallery",  module: HfgPortalWeb.DevTools.ButtonGallery.ButtonGalleryLive},
+        %Page{id: "icon_gallery",    name: "Icon Gallery",    module: HfgPortalWeb.DevTools.IconGallery.IconGallery},
+      ]},
       %Page{id: "infinite_scroll", name: "Infinite Scroll", module: HfgPortalWeb.DevTools.InfiniteScroll.InfiniteScrollLive},
       %Page{id: "input_gallery",   name: "Input Gallery",   module: HfgPortalWeb.DevTools.InputGallery.InputGalleryLive},
+      #%Page{id: "streamlit_test",  name: "Streamlit Test",  module: HfgPortalWeb.DevTools.StreamlitTest.StreamlitTestLive},
     ]
   end
   defp list_dev_tools(_), do: []
 
   defp set_modal(socket, modal \\ nil)
   defp set_modal(socket, :user_settings) do
-    %{modal_stack: modal_stack, jwt_token: jwt_token} = socket.assigns
+    %{modal_stack: modal_stack} = socket.assigns
 
     socket
     |> assign(:modal_stack, [%{
       modal:  :user_settings,
       module: UserSettings,
       id:     :user_settings,
-      user:   socket.assigns.current_user,
-      opts:   %{jwt: jwt_token}
+      user:   socket.assigns.current_user
     } | modal_stack])
   end
   defp set_modal(socket, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
-  defp redirect_to(socket, app, link) do
-    %{apps: apps} = socket.assigns
+  defp find_page(pages, selected_page) do
+    page = 
+      pages
+      |> Enum.find(&(&1.id == Enum.at(selected_page, 0)))
+    
+    cond do
+      page && length(selected_page) == 1 -> {page.module, nil}
+      page && length(selected_page) > 1 && length(page.links) > 0 -> find_page(page.links, Enum.slice(selected_page, 1..-1//1))
+      true -> {HfgPortalWeb.Home.HomeLive, :error}
+    end
+  end
 
-    {module, error} = 
-      apps
-      |> Enum.find(%{links: []}, &(&1.id == app))
-      |> Map.get(:links)
-      |> fn x -> Enum.find(x, Map.put(Enum.at(x, 0, %{module: HfgPortalWeb.Home.HomeLive}), :error, :error), &(&1.id == link)) end.()
-      #|> Map.get(:module)
-      |> fn x -> {Map.get(x, :module), Map.get(x, :error)} end.()
+  defp redirect_to(socket) do
+    %{apps: apps, selected_page: selected_page, session: session} = socket.assigns
 
-    socket 
+    {module, error} = find_page(apps, selected_page)
+
+    #UserPageLogs.new()
+    #|> UserPageLogs.create_or_update(
+    #  %{
+    #  user_id: socket.assigns.current_user.id,
+    #  page:    Enum.join(selected_page, ","),
+    #  params:  session |> Map.drop(["page"]) |> Enum.map(fn {k, v} -> "#{k}=#{v}" end) |> Enum.join("&"),
+    #  success: is_nil(error)
+    #})
+
+    socket
     |> assign(:module, module)
     |> assign(:render_success, is_nil(error))
     #|> fn x -> if !is_nil(error), do: put_flash(x, :error, "Page not available"), else: x end.()
@@ -194,7 +256,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   defp redirect_to(socket, app) do
     %{apps: apps} = socket.assigns
 
-    module = 
+    module =
       apps
       |> Enum.find(%{links: []}, &(&1.id == app))
       |> Map.get(:module)
@@ -205,7 +267,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     end
   end
 
-  defp redraw(socket) do 
+  defp redraw(socket) do
     %{
       selected_app:   selected_app,
       apps:           apps,
@@ -218,57 +280,54 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       # If they don't, redirect.
       render_success && Enum.find(apps, %{links: []}, &(&1.id == selected_app)) |> Map.get(:links) |> Enum.find(&(&1.id == page)) -> socket
       true ->
-        address = 
+        address =
           Enum.reduce(socket.assigns.session, "/?", fn {k, v}, acc -> "#{acc}#{k}=#{v}&" end)
           |> fn x -> String.slice(x, 0, String.length(x) - 1) end.()
         push_navigate(socket, to: address)
     end
   end
 
-  defp generate_token(socket) do
-    %{current_user: %{id: user_id}} = socket.assigns
-
-    token_config = Map.put(%{}, "scope", %Joken.Claim{
-      generate: fn -> "user" end,
-      validate: fn val, _claims, _context -> val in ["u", "a"] end
-    })
-    signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
-
-    {:ok, claims} = Joken.generate_claims(token_config, %{
-      user_id:    user_id,
-      admin:      false,
-      updated_at: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%dT%H:%M:%S"),
-    })
-    {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
-    socket
-    |> assign(:jwt_token, jwt)
-  end
-
   @impl true
   def mount(_session, session, socket) do
     if connected?(socket) do
       Accounts.subscribe()
+
+      CarMaintenance.UserRoles.subscribe()
+      LoanRepayment.UserRoles.subscribe()
+      WifeTime.UserRoles.subscribe()
       Budget.UserRoles.subscribe()
-      #ItBudget.UserRoles.subscribe()
+
+
+      #AdminLogs.UserRoles.subscribe()
+      #AdminDashboard.UserRoles.subscribe()
+      #ApiTokens.UserRoles.subscribe()
       #Budget.Admins.subscribe()
+      #Budget.UserRoles.subscribe()
       #Budget.Roles.subscribe()
       #Budget.CompanyPermissions.subscribe()
       #Budget.HomePermissions.subscribe()
       #DevTeamTimetracking.UserRoles.subscribe()
+      #ItBudget.UserRoles.subscribe()
+      #ItDashboard.UserRoles.subscribe()
+      #Procurement.UserRoles.subscribe()
+      #Reports.StreamlitReports.UserRoles.subscribe()
+      #Reports.StreamlitReports.Roles.subscribe()
+      #Reports.StreamlitReports.Permissions.subscribe()
+      #TaskAutomationController.UserRoles.subscribe()
+      #TestDashboard.UserRoles.subscribe()
     end
 
     socket
     |> bnw_verify_user_token_side_bar(session)
     #|> set_modal()
     |> assign(:modal_stack,    [])
-    |> assign(:selected_app,   nil)
-    |> assign(:page,           nil)
+    |> assign(:selected_page,  [])
     |> assign(:show_sidebar,   true)
     |> assign(:session,        %{})
+    |> assign(:depths,         @depths)
     |> assign(:module,         HfgPortalWeb.Home.HomeLive)
     |> assign(:render_success, false)
     |> list_apps()
-    |> generate_token()
     |> res(:ok)
   end
 
@@ -289,7 +348,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   def handle_params(%{"app" => app} = session, uri, socket) do
     %{session: stored_session} = socket.assigns
     socket =
-      socket 
+      socket
       |> assign(:selected_app, app)
       |> assign(:session, Map.merge(stored_session, %{"app" => app}))
       |> redirect_to(app)
@@ -299,13 +358,13 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
 
   @impl true
   def handle_params(%{"page" => page} = session, uri, socket) do
-    %{session: stored_session, selected_app: selected_app} = socket.assigns
+    %{session: stored_session} = socket.assigns
 
     socket =
-      socket 
+      socket
       |> assign(:session, Map.merge(stored_session, %{"page" => page}))
-      |> assign(:page, page)
-      |> redirect_to(selected_app, page) 
+      |> assign(:selected_page, page |> String.split(","))
+      |> redirect_to()
 
     handle_params(session |> Map.delete("page"), uri, socket)
   end
@@ -332,35 +391,134 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     end
   end
 
+  #################################################################################
+  # App user role updates                                                         #
+  #################################################################################
   @impl true
-  def handle_info({[:car_maintenance, :user_role, _], user_role}, socket) do
+  def handle_info({[:api_tokens, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "car_maintenance", CarMaintenance.Authorize.list_pages(socket.assigns.current_user), false)
+        update_app(socket, "api_tokens", ApiTokens.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()
   end
-
   @impl true
-  def handle_info({[:loan_repayment, :user_role, _], user_role}, socket) do
-    cond do
-      user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "loan_repayment", LoanRepayment.Authorize.list_pages(socket.assigns.current_user), false)
-      true -> socket
-    end
-    |> res()
+  def handle_info({[:api_tokens, _, _], _}, socket) do
+    update_app(socket, "api_tokens", ApiTokens.Authorize.list_pages(socket.assigns.current_user), false) |> res()
   end
 
   @impl true
   def handle_info({[:budget, :user_role, _], user_role}, socket) do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
-        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), false)
+        update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id))
       true -> socket
     end
     |> res()
   end
+  @impl true
+  def handle_info({[:budget, _, _], _}, socket) do
+    update_app(socket, "budget", Budget.Authorize.list_pages(socket.assigns.current_user), Budget.Admins.is_admin(socket.assigns.current_user.id)) |> res()
+  end
+
+  @impl true
+  def handle_info({[:dev_team_timetracking, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+  def handle_info({[:dev_team_timetracking, _, _], _}, socket) do
+    update_app(socket, "dev_team_timetracking", DevTeamTimetracking.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:it_budget, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+  def handle_info({[:it_budget, _, _], _}, socket) do
+    update_app(socket, "it_budget", ItBudget.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:it_dashboard, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "it_dashboard", ItDashboard.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+  def handle_info({[:it_dashboard, _, _], _}, socket) do
+    update_app(socket, "it_dashboard", ItDashboard.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:procurement, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "procurement", Procurement.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+
+  @impl true
+  def handle_info({[:procurement, _, _], _}, socket) do
+    update_app(socket, "procurement", Procurement.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:reports, :streamlit_report_user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "reports", Reports.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+
+  @impl true
+  def handle_info({[:reports, _, _], _}, socket) do
+    update_app(socket, "reports", Reports.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:task_automation_controller, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "task_automation_controller", TaskAutomationController.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+  def handle_info({[:task_automation_controller, _, _], _}, socket) do
+    update_app(socket, "test_dashboard", TaskAutomationController.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+
+  @impl true
+  def handle_info({[:test_dashboard, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "task_automation_controller", TestDashboard.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+  def handle_info({[:test_dashboard, _, _], _}, socket) do
+    update_app(socket, "test_dashboard", TestDashboard.Authorize.list_pages(socket.assigns.current_user), false) |> res()
+  end
+  #################################################################################
+  # App user role updates                                                         #
+  #################################################################################
 
   @impl true
   def handle_info({[:user, _], user}, socket) do
@@ -383,10 +541,21 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   def handle_event("cancel", _, socket), do: socket |> set_modal() |> res()
 
   @impl true
-  def handle_event("select_app", %{"app" => app}, socket) do
-    %{selected_app: selected_app} = socket.assigns
+  def handle_event("select_section", %{"link" => link}, socket) do
+    %{selected_page: selected_page} = socket.assigns
+
+    link = link |> String.split(",")
+    temp_link = 
+      link
+      |> Enum.zip(selected_page)
+
+    link = cond do
+      !Enum.any?(temp_link, fn {x, y} -> x != y end) && length(link) <= length(selected_page) && length(selected_page) > 0 -> temp_link |> Enum.unzip() |> fn {x, _} -> x |> Enum.slice(0..-2) end.()
+      true -> link
+    end
+
     socket
-    |> assign(:selected_app, (if app == selected_app, do: nil, else: app))
+    |> assign(:selected_page, link)
     |> res()
   end
 
@@ -417,9 +586,9 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       current_user: %{admin_mode: admin_mode},
       session: stored_session
     } = socket.assigns
-    
+
     socket
-    |> assign(:session, 
+    |> assign(:session,
       stored_session
       |> Map.delete("admin")
       |> fn x -> if !admin_mode, do: Map.put(x, "admin", "true"), else: x end.()
@@ -429,7 +598,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   end
 
   @impl true
-  def handle_event("sign_out", _, socket) do 
+  def handle_event("sign_out", _, socket) do
     redirect(socket, to: ~p"/users/log_out", method: "delete") |> res()
   end
 

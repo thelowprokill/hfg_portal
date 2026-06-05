@@ -18,8 +18,8 @@
           <!-- Logo -->
           <div class="p-3">
             <.link navigate={~p"/"}>
-              <!-- this is apps/hfg_portal_web/priv/static/images/rook_logo.svg -->
-              <img src={"/images/rook_logo.svg"} width="150" />
+              <!-- this is apps/bnd_portal_web/priv/static/images/bnw_logo.svg -->
+              <img src={"/images/#{System.get_env("LOCATION") || "bnw"}_logo.svg"} width="200" />
             </.link>
           </div>
 
@@ -56,64 +56,11 @@
           <% end %>
 
           <!-- Apps -->
-          <div class="pt-2">
+          <div class="pt-2 overflow-y-auto h-[70vh]">
             <ul class="space-y-2 font-medium">
               <%= for app <- @apps do %>
                 <li>
-                  <%= cond do %>
-                    <% Map.get(app, :module) -> %>
-                      <.link 
-                         class="
-                           flex
-                           items-center
-                           p-2
-                           text-gray-900
-                           rounded-lg
-                           dark:text-white
-                           hover:bg-gray-100
-                           dark:hover:bg-gray-700"
-                        navigate={"/?app=#{app.id}#{if @current_user.admin_mode, do: "&admin=true"}"}>
-                        <%= app.name %>
-                      </.link>
-                    <% length(Map.get(app, :links, [])) > 0 -> %>
-                      <a phx-click="select_app"
-                         phx-value-app={app.id}
-                         class="
-                           flex
-                           items-center
-                           p-2
-                           text-gray-900
-                           rounded-lg
-                           dark:text-white
-                           hover:bg-gray-100
-                           dark:hover:bg-gray-700
-                         ">
-                        <%= app.name %>
-                      </a>
-                        <%= if app.id == @selected_app do %>
-                          <ul>
-                            <%= for link <- app.links do %>
-                              <li>
-                                <.link 
-                                  class="
-                                    flex
-                                    items-center
-                                    p-2
-                                    pl-8
-                                    text-gray-900
-                                    rounded-lg
-                                    dark:text-white
-                                    hover:bg-gray-100
-                                    dark:hover:bg-gray-700"
-                                  navigate={"/?app=#{app.id}&page=#{link.id}#{if @current_user.admin_mode, do: "&admin=true"}"}>
-                                  <%= link.name %>
-                                </.link>
-                              </li>
-                            <% end %>
-                          </ul>
-                        <% end %>
-                      <% true -> %><%= nil %>
-                  <% end %>
+                  <.page_links page={app} current_user={@current_user} selected_page={@selected_page} depth={@depths} />
                 </li>
               <% end %>
             </ul>
@@ -129,7 +76,9 @@
       </div>
     <% end %>
     <main class="px-4 py-10 sm:px-6 lg:px-8 h-screen" style={"width: calc(100vw - #{if @show_sidebar, do: "256px", else: "32px"});"}>
-      <%= live_render(@socket, @module, id: "root", session: @session) %>
+      <div class="h-full overflow-auto">
+        <%= live_render(@socket, @module, id: "root", session: @session) %>
+      </div>
     </main>
   <% else %>
     <!--
