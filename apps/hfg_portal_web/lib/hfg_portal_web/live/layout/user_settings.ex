@@ -45,7 +45,7 @@ defmodule HfgPortalWeb.Layout.UserSettings do
                   phx-target={@myself}
                 />
                 <div class="w-full cursor-pointer" phx-click="copy_jwt" phx-target={@myself} style="overflow-wrap: anywhere;">
-                  <%= @modal.opts.jwt %>
+                  <%= @modal |> Map.get(:opts, %{}) |> Map.get(:jwt) %>
                 </div>
               </div>
 
