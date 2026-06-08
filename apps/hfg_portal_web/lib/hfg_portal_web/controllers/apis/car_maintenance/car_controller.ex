@@ -62,7 +62,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
     car = 
       id |> String.to_integer()
       |> Cars.get()
-      |> Cars.preload_associations(%{preload: @preload})
+      |> Cars.preload(%{preload: @preload})
       |> fn x -> %{
         id:            x.id, 
         name:          x.name, 

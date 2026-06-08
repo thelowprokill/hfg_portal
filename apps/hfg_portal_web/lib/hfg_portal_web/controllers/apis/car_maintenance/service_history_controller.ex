@@ -68,7 +68,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
     service_history = 
       id |> String.to_integer()
       |> ServiceHistories.get()
-      |> ServiceHistories.preload_associations(%{preload: @preload})
+      |> ServiceHistories.preload(%{preload: @preload})
       |> fn x -> %{
         id:            x.id, 
         car_id:        x.car_id,
@@ -112,7 +112,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
     |> ServiceHistories.create_or_update(update_params)
     |> case do
       {:ok, sh} ->
-        sh = ServiceHistories.preload_associations(sh, %{preload: @preload})
+        sh = ServiceHistories.preload(sh, %{preload: @preload})
         conn
         |> put_status(:ok)
         |> json(%{
@@ -163,7 +163,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
     |> ServiceHistories.create_or_update(update_params)
     |> case do
       {:ok, sh} ->
-        sh = ServiceHistories.preload_associations(sh, %{preload: @preload})
+        sh = ServiceHistories.preload(sh, %{preload: @preload})
         conn
         |> put_status(:ok)
         |> json(%{
