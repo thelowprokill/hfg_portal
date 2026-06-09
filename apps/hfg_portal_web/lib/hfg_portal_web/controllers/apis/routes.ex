@@ -34,6 +34,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     IO.puts ""
     IO.puts ""
     IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{ user }}}}}}}}}}}}}}}}}}}}}}}}}}"
+    IO.inspect username
     IO.inspect user
     IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{ user }}}}}}}}}}}}}}}}}}}}}}}}}}"
     IO.puts ""
