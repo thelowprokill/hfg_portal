@@ -30,17 +30,6 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   def call(%{query_params: %{"username" => username, "password" => password}} = conn, params) do
     user = Accounts.get_active_user_by_username_and_password(username, password)
 
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{ user }}}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.inspect username
-    IO.inspect user
-    IO.puts "{{{{{{{{{{{{{{{{{{{{{{{{{{ user }}}}}}}}}}}}}}}}}}}}}}}}}}"
-    IO.puts ""
-    IO.puts ""
-    IO.puts ""
-
     case user do
       %User{id: id, username: username} ->
         token_config = Map.put(%{}, "scope", %Joken.Claim{
