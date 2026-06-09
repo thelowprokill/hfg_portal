@@ -57,7 +57,7 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
     maintenance_image = 
       id |> String.to_integer()
       |> MaintenanceImages.get()
-      |> MaintenanceImages.preload_associations(%{preload: @preload})
+      |> MaintenanceImages.preload(%{preload: @preload})
       |> fn x -> 
         base64_image = Base.encode64(x.image)
         %{
