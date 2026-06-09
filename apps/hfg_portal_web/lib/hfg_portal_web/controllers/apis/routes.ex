@@ -31,7 +31,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     user = Accounts.get_active_user_by_username_and_password(username, password)
 
     case user do
-      %User{id: id} ->
+      %User{id: id, username: username} ->
         token_config = Map.put(%{}, "scope", %Joken.Claim{
           generate: fn -> "user" end,
           validate: fn val, _claims, _context -> val in ["u", "a"] end
@@ -47,11 +47,11 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
         conn
         |> put_status(:ok)
-        |> json(%{jwt: jwt})
+        |> json(%{jwt: jwt, username: username})
       _ ->
         conn
         |> put_status(:ok)
-        |> json(%{jwt: nil})
+        |> json(%{jwt: nil, username: nil})
     end
   end
 
