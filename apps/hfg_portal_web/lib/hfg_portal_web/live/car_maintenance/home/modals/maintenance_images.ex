@@ -132,7 +132,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
     |> assign(
       :service_history, 
       CarMaintenance.ServiceHistories.get(service_history_id)
-      |> CarMaintenance.ServiceHistories.preload_associations(%{preload: [:maintenance_item]})
+      |> CarMaintenance.ServiceHistories.preload(%{preload: [:maintenance_item]})
     )
   end
 
@@ -169,7 +169,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
     cond do
       (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) || (image.fixed_service_history_id == socket.assigns.fixed_service_history_id && !is_nil(image.fixed_service_history_id)) ->
         %{images: images} = socket.assigns
-        socket |> assign(:images, [image |> @module.preload_associations(%{preload: @preload}) | images] |> Enum.uniq_by(&(&1.id)))
+        socket |> assign(:images, [image |> @module.preload(%{preload: @preload}) | images] |> Enum.uniq_by(&(&1.id)))
       true -> socket
     end |> res()
   end
@@ -178,7 +178,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
     cond do
       (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) || (image.fixed_service_history_id == socket.assigns.fixed_service_history_id && !is_nil(image.fixed_service_history_id)) ->
         %{images: images} = socket.assigns
-        socket |> assign(:images, Enum.map(images, &(if &1.id == image.id, do: image |> @module.preload_associations(%{preload: @preload}), else: &1)))
+        socket |> assign(:images, Enum.map(images, &(if &1.id == image.id, do: image |> @module.preload(%{preload: @preload}), else: &1)))
       true -> socket
     end |> res()
   end
