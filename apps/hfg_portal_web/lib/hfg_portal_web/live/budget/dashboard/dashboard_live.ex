@@ -150,7 +150,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     today = Date.utc_today()
 
     socket
-    |> bnw_verify_user_token(session, "Budget", "Dashboard")
+    |> bnw_verify_user_token(session, "Budget", "Dashboard test")
     |> assign(:session,          %{})
     |> assign(:buckets,          [])
     |> assign(:monthly_expenses,   %{})
