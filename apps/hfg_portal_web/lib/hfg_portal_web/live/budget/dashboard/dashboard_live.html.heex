@@ -144,6 +144,48 @@
 
     <h3 class="text-xl"><%= @page_title %></h3>
 
+    <%# ── Totals card ── %>
+    <% budget_buckets          = Enum.filter(@buckets, & &1.monthly_budget) %>
+    <% sinking_buckets         = Enum.filter(@buckets, & &1.monthly_contribution) %>
+    <% total_budgeted          = Enum.reduce(budget_buckets,  Decimal.new(0), fn b, acc -> Decimal.add(acc, b.monthly_budget) end) %>
+    <% total_expenses          = Enum.reduce(budget_buckets,  Decimal.new(0), fn b, acc -> Decimal.add(acc, Map.get(@monthly_expenses, b.id, Decimal.new(0))) end) %>
+    <% total_sinking_target    = Enum.reduce(sinking_buckets, Decimal.new(0), fn b, acc -> Decimal.add(acc, b.max_balance) end) %>
+    <% total_sinking_saved     = Enum.reduce(sinking_buckets, Decimal.new(0), fn b, acc -> Decimal.add(acc, Map.get(@month_end_balances, b.id, Decimal.new(0))) end) %>
+    <% total_sinking_remaining = Decimal.sub(total_sinking_target, total_sinking_saved) |> Decimal.max(Decimal.new(0)) %>
+    <% budget_over  = Decimal.compare(total_expenses, total_budgeted) == :gt %>
+    <% budget_pct   = if Decimal.compare(total_budgeted, Decimal.new(0)) == :gt, do: Decimal.div(total_expenses, total_budgeted) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+    <% sinking_pct  = if Decimal.compare(total_sinking_target, Decimal.new(0)) == :gt, do: Decimal.div(total_sinking_saved, total_sinking_target) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mt-4 grid grid-cols-2 divide-x divide-zinc-200 dark:divide-zinc-700">
+      <div class="flex flex-col gap-2 pr-4">
+        <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Monthly Budget</span>
+        <div class="flex justify-between text-sm">
+          <span class="text-zinc-500">Spent</span>
+          <span class={if budget_over, do: "text-red-500 font-medium", else: "text-zinc-600 dark:text-zinc-400"}>
+            $<%= total_expenses %> / $<%= total_budgeted %>
+          </span>
+        </div>
+        <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+          <div class={["h-2 rounded-full", if(budget_over, do: "bg-red-500", else: "bg-blue-500")]}
+               style={"width: #{Float.round(budget_pct, 1)}%"}></div>
+        </div>
+        <% budget_remaining = Decimal.sub(total_budgeted, total_expenses) %>
+        <div class="text-xs text-zinc-500">
+          <%= if budget_over do %>$<%= Decimal.abs(budget_remaining) %> over budget<% else %>$<%= budget_remaining %> remaining<% end %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2 pl-4">
+        <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Sinking Funds</span>
+        <div class="flex justify-between text-sm">
+          <span class="text-zinc-500">Saved</span>
+          <span class="font-medium">$<%= total_sinking_saved %> / $<%= total_sinking_target %></span>
+        </div>
+        <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
+          <div class="h-2 rounded-full bg-green-500" style={"width: #{Float.round(sinking_pct, 1)}%"}></div>
+        </div>
+        <div class="text-xs text-zinc-500">$<%= total_sinking_remaining %> remaining to fill</div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-6">
       <%= for bucket <- @buckets do %>
         <div phx-click="select_bucket"

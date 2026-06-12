@@ -196,17 +196,4 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
         })
     end
   end
-
-  #def delete_car(%{query_params: %{"id" => id}} = conn, _params) do
-  #  id |> String.to_integer()
-  #  |> Cars.delete()
-
-  #  conn
-  #  |> put_status(:ok)
-  #  |> json(%{
-  #    response: :ok, 
-  #    date: DateTime.utc_now(),
-  #    data: nil
-  #  })
-  #end
 end
