@@ -7,15 +7,15 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   @scopes [
     %{name: "hfg_portal",                         module: HfgPortalWeb.Apis.RoutesController},
 
-    %{name: "car_maintenance:cars",               module: HfgPortalWeb.Apis.CarMaintenance.CarController},
-    %{name: "car_maintenance:service_history",    module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController},
-    %{name: "car_maintenance:maintenance_items",  module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController},
-    %{name: "car_maintenance:maintenance_images", module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController},
+    %{name: "car_maintenance:cars",               module: HfgPortalWeb.Apis.CarMaintenance.CarController,               require_admin: false},
+    %{name: "car_maintenance:service_history",    module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController,    require_admin: false},
+    %{name: "car_maintenance:maintenance_items",  module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController,  require_admin: false},
+    %{name: "car_maintenance:maintenance_images", module: HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController, require_admin: false},
 
-    %{name: "budget",                             module: HfgPortalWeb.Apis.Budget.BudgetController,             require_admin: false},
-    %{name: "budget:buckets",                     module: HfgPortalWeb.Apis.Budget.BucketsController,            require_admin: false},
-    %{name: "budget:transactions",                module: HfgPortalWeb.Apis.Budget.TransactionsController,       require_admin: false},
-    %{name: "budget:scheduled_expenses",          module: HfgPortalWeb.Apis.Budget.ScheduledExpensesController,  require_admin: false},
+    %{name: "budget",                             module: HfgPortalWeb.Apis.Budget.BudgetController,            require_admin: false},
+    %{name: "budget:buckets",                     module: HfgPortalWeb.Apis.Budget.BucketsController,           require_admin: false},
+    %{name: "budget:transactions",                module: HfgPortalWeb.Apis.Budget.TransactionsController,      require_admin: false},
+    %{name: "budget:scheduled_expenses",          module: HfgPortalWeb.Apis.Budget.ScheduledExpensesController, require_admin: false},
   ]
 
   def scopes(conn, _params) do
@@ -45,18 +45,21 @@ defmodule HfgPortalWeb.Apis.RoutesController do
         })
         {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
 
+        apps = HfgPortalWeb.Layout.SidebarLive.list_apps(user) |> Enum.map(&(%{app: &1.name, role: app_role(&1.id, id)})) |> Enum.reject(&(is_nil(&1.role)))
+
         conn
         |> put_status(:ok)
-        |> json(%{jwt: jwt, username: username})
+        |> json(%{jwt: jwt, username: username, apps: apps})
       _ ->
         conn
         |> put_status(:ok)
-        |> json(%{jwt: nil, username: nil})
+        |> json(%{jwt: nil, username: nil, apps: []})
     end
   end
 
   def call(conn, params) do
-    case auth(conn) do
+    auth(conn)
+    |> case do
       {%{module: module}, user} ->
         conn
         |> assign(:current_api_user, user)
@@ -65,6 +68,25 @@ defmodule HfgPortalWeb.Apis.RoutesController do
         conn
         |> put_status(401)
         |> send_resp(:no_content, "")
+    end
+  end
+
+  defp app_role(app_id, user_id) do
+    user_roles_mod = case app_id do
+      "budget"          -> Budget.UserRoles
+      "car_maintenance" -> CarMaintenance.UserRoles
+      #"loan_repayment"  -> LoanRepayment.UserRoles
+      #"wife_time"       -> WifeTime.UserRoles
+      _                 -> nil
+    end
+
+    case user_roles_mod do
+      nil -> nil
+      mod ->
+        case mod.get(user_id, :user) do
+          nil       -> nil
+          user_role -> user_role.role
+        end
     end
   end
 
@@ -93,7 +115,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
             cond do
               require_admin && !admin && !user.portal_admin -> nil
-              true -> {scope, user}
+              true                                          -> {scope, user}
             end
           _ -> nil
         end

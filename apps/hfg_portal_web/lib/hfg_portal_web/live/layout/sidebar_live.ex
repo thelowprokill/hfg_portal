@@ -132,8 +132,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     """
   end
 
-  defp list_apps(socket) do
-    %{current_user: current_user} = socket.assigns
+  def list_apps(current_user) do
     system_apps = [
       %Page{
         name: "Home",
@@ -151,7 +150,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       #  links: AdminLogs.Authorize.list_pages(current_user),
       #},
       %Page{
-        name: "Dev Tools", 
+        name: "Dev Tools",
         id: "dev_tools",
         links: list_dev_tools(current_user),
       }
@@ -180,7 +179,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       },
     ]
 
-    assign(socket, :apps, system_apps ++ apps)
+    system_apps ++ apps
+  end
+
+  defp assign_apps(socket) do
+    assign(socket, :apps, list_apps(socket.assigns.current_user))
   end
 
   defp update_app(socket, app, links, show_admin) do
@@ -337,7 +340,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     |> assign(:depths,         @depths)
     |> assign(:module,         HfgPortalWeb.Home.HomeLive)
     |> assign(:render_success, false)
-    |> list_apps()
+    |> assign_apps()
     |> generate_token()
     |> res(:ok)
   end
@@ -350,7 +353,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       socket
       |> assign(:current_user, %{socket.assigns.current_user | admin_mode: admin == "true"})
       |> assign(:session, Map.merge(stored_session, %{"admin" => admin}))
-      |> list_apps()
+      |> assign_apps()
 
     handle_params(session |> Map.delete("admin"), uri, socket)
   end

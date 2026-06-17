@@ -2,16 +2,17 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
   use HfgPortalWeb, :controller
 
   @routes [
-    %{name: "cars", method: "GET",    function: &__MODULE__.get_cars/2,   description: "List all cars"},
-    %{name: "car",  method: "GET",    function: &__MODULE__.get_car/2,    description: "Get a car by id"},
-    %{name: "car",  method: "PUT",    function: &__MODULE__.put_car/2,    description: "Add or update a car"},
-    %{name: "car",  method: "DELETE", function: &__MODULE__.delete_car/2, description: "Delete a car"},
+    %{name: "cars", method: "GET",    function: &__MODULE__.get_cars/2,   role: :view,  description: "List all cars"},
+    %{name: "car",  method: "GET",    function: &__MODULE__.get_car/2,    role: :view,  description: "Get a car by id"},
+    %{name: "car",  method: "PUT",    function: &__MODULE__.put_car/2,    role: :edit,  description: "Add or update a car"},
+    %{name: "car",  method: "DELETE", function: &__MODULE__.delete_car/2, role: :admin, description: "Delete a car"},
   ]
 
   alias CarMaintenance.{
     Cars,
     ServiceHistories,
   }
+  alias HfgPortalWeb.Apis.CarMaintenance.AuthController
 
   @preload [service_history: ServiceHistories.service_history_mileage_query()]
 
@@ -22,12 +23,14 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-      %{function: fun} -> fun.(conn, params)
-      _ -> 
+      %{function: fun} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   fun.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
+      _ ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-
     end
   end
 

@@ -2,13 +2,14 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
   use HfgPortalWeb, :controller
 
   alias Budget.ScheduledExpenses
+  alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "scheduled_expenses", method: "GET",    function: &__MODULE__.get_scheduled_expenses/2,  description: "List scheduled expenses for the current user"},
-    %{name: "scheduled_expense",  method: "GET",    function: &__MODULE__.get_scheduled_expense/2,    description: "Get a scheduled expense by id"},
-    %{name: "scheduled_expense",  method: "PUT",    function: &__MODULE__.put_scheduled_expense/2,    description: "Create or update a scheduled expense"},
-    %{name: "scheduled_expense",  method: "DELETE", function: &__MODULE__.delete_scheduled_expense/2, description: "Delete a scheduled expense"},
-    %{name: "run_scheduled",      method: "PUT",    function: &__MODULE__.run_scheduled/2,             description: "Process due scheduled expenses and sinking fund contributions"},
+    %{name: "scheduled_expenses", method: "GET",    function: &__MODULE__.get_scheduled_expenses/2,   role: :view,  description: "List scheduled expenses for the current user"},
+    %{name: "scheduled_expense",  method: "GET",    function: &__MODULE__.get_scheduled_expense/2,    role: :view,  description: "Get a scheduled expense by id"},
+    %{name: "scheduled_expense",  method: "PUT",    function: &__MODULE__.put_scheduled_expense/2,    role: :admin, description: "Create or update a scheduled expense"},
+    %{name: "scheduled_expense",  method: "DELETE", function: &__MODULE__.delete_scheduled_expense/2, role: :admin, description: "Delete a scheduled expense"},
+    %{name: "run_scheduled",      method: "PUT",    function: &__MODULE__.run_scheduled/2,            role: :admin, description: "Process due scheduled expenses and sinking fund contributions"},
   ]
 
   @preload []
@@ -16,8 +17,11 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
   def call(%{method: method, query_params: %{"route" => route}} = conn, params) do
     Enum.find(@routes, &(&1.name == route && &1.method == method))
     |> case do
-      nil            -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
-      %{function: f} -> f.(conn, params)
+      nil                      -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
+      %{function: f} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   f.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
     end
   end
 

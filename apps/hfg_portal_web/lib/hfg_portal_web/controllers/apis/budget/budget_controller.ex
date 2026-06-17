@@ -2,17 +2,21 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
   use HfgPortalWeb, :controller
 
   alias Budget.{Buckets, Transactions, ScheduledExpenses}
+  alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "dashboard",    method: "GET", function: &__MODULE__.dashboard/2,      description: "Monthly summary for all user buckets"},
-    %{name: "run_scheduled", method: "PUT", function: &__MODULE__.run_scheduled/2,  description: "Process due scheduled expenses and sinking fund contributions"},
+    %{name: "dashboard",     method: "GET", function: &__MODULE__.dashboard/2,     role: :view,  description: "Monthly summary for all user buckets"},
+    %{name: "run_scheduled", method: "PUT", function: &__MODULE__.run_scheduled/2, role: :admin, description: "Process due scheduled expenses and sinking fund contributions"},
   ]
 
   def call(%{method: method, query_params: %{"route" => route}} = conn, params) do
     Enum.find(@routes, &(&1.name == route && &1.method == method))
     |> case do
-      nil            -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
-      %{function: f} -> f.(conn, params)
+      nil                      -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
+      %{function: f} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   f.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
     end
   end
 

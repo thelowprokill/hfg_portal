@@ -2,19 +2,23 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
   use HfgPortalWeb, :controller
 
   alias Budget.Buckets
+  alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "buckets",  method: "GET",    function: &__MODULE__.list_buckets/2,   description: "List all buckets for the current user"},
-    %{name: "bucket",   method: "GET",    function: &__MODULE__.get_bucket/2,     description: "Get a bucket by id"},
-    %{name: "bucket",   method: "PUT",    function: &__MODULE__.put_bucket/2,     description: "Create or update a bucket"},
-    %{name: "bucket",   method: "DELETE", function: &__MODULE__.delete_bucket/2,  description: "Delete a bucket"},
+    %{name: "buckets",  method: "GET",    function: &__MODULE__.list_buckets/2,  role: :view,  description: "List all buckets for the current user"},
+    %{name: "bucket",   method: "GET",    function: &__MODULE__.get_bucket/2,    role: :view,  description: "Get a bucket by id"},
+    %{name: "bucket",   method: "PUT",    function: &__MODULE__.put_bucket/2,    role: :admin, description: "Create or update a bucket"},
+    %{name: "bucket",   method: "DELETE", function: &__MODULE__.delete_bucket/2, role: :admin, description: "Delete a bucket"},
   ]
 
   def call(%{method: method, query_params: %{"route" => route}} = conn, params) do
     Enum.find(@routes, &(&1.name == route && &1.method == method))
     |> case do
-      nil            -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
-      %{function: f} -> f.(conn, params)
+      nil                      -> conn |> put_status(:not_found) |> json(%{error: "Route not found"})
+      %{function: f} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   f.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
     end
   end
 

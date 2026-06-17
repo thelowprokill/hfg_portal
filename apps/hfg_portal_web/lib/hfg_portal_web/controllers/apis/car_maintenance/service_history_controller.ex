@@ -2,15 +2,16 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
   use HfgPortalWeb, :controller
 
   @routes [
-    %{name: "service_histories", method: "GET",    function: &__MODULE__.get_service_histories/2,  description: "Get Service Histories by car"},
-    %{name: "service_history",   method: "GET",    function: &__MODULE__.get_service_history/2,    description: "Get a Service History by id"},
-    %{name: "service_history",   method: "PUT",    function: &__MODULE__.put_service_history/2,    description: "Add or update a cars Service History"},
-    #%{name: "service_history",   method: "DELETE", function: &__MODULE__.delete_service_history/2, description: "Delete a Service History"},
+    %{name: "service_histories", method: "GET",    function: &__MODULE__.get_service_histories/2,  role: :view, description: "Get Service Histories by car"},
+    %{name: "service_history",   method: "GET",    function: &__MODULE__.get_service_history/2,    role: :view, description: "Get a Service History by id"},
+    %{name: "service_history",   method: "PUT",    function: &__MODULE__.put_service_history/2,    role: :edit, description: "Add or update a cars Service History"},
+    #%{name: "service_history",   method: "DELETE", function: &__MODULE__.delete_service_history/2, role: :admin, description: "Delete a Service History"},
   ]
 
   alias CarMaintenance.{
     ServiceHistories,
   }
+  alias HfgPortalWeb.Apis.CarMaintenance.AuthController
 
   @preload [:maintenance_item]
 
@@ -21,12 +22,14 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-      %{function: fun} -> fun.(conn, params)
-      _ -> 
+      %{function: fun} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   fun.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
+      _ ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-
     end
   end
 

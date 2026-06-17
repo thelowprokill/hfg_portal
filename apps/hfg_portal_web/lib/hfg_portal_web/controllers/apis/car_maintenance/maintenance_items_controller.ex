@@ -2,12 +2,13 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController do
   use HfgPortalWeb, :controller
 
   @routes [
-    %{name: "maintenance_items", method: "GET",    function: &__MODULE__.get_maintenance_items/2,  description: "Get Maintenance Items by car"},
+    %{name: "maintenance_items", method: "GET", function: &__MODULE__.get_maintenance_items/2, role: :view, description: "Get Maintenance Items by car"},
   ]
 
   alias CarMaintenance.{
     MaintenanceItems,
   }
+  alias HfgPortalWeb.Apis.CarMaintenance.AuthController
 
   @preload []
 
@@ -18,12 +19,14 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceItemsController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-      %{function: fun} -> fun.(conn, params)
-      _ -> 
+      %{function: fun} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   fun.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
+      _ ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-
     end
   end
 

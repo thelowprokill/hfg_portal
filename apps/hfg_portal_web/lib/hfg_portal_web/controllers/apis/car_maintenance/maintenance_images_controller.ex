@@ -2,15 +2,16 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
   use HfgPortalWeb, :controller
 
   @routes [
-    %{name: "maintenance_images", method: "GET",    function: &__MODULE__.get_maintenance_images/2,   description: "Get Maintenance Images by car"},
-    %{name: "maintenance_image",  method: "GET",    function: &__MODULE__.get_maintenance_image/2,    description: "Get Maintenance Image by id"},
-    %{name: "maintenance_image",  method: "PUT",    function: &__MODULE__.put_maintenance_image/2,    description: "Add or update an image"},
-    %{name: "maintenance_image",  method: "DELETE", function: &__MODULE__.delete_maintenance_image/2, description: "Delete an image"},
+    %{name: "maintenance_images", method: "GET",    function: &__MODULE__.get_maintenance_images/2,   role: :view,  description: "Get Maintenance Images by car"},
+    %{name: "maintenance_image",  method: "GET",    function: &__MODULE__.get_maintenance_image/2,    role: :view,  description: "Get Maintenance Image by id"},
+    %{name: "maintenance_image",  method: "PUT",    function: &__MODULE__.put_maintenance_image/2,    role: :edit,  description: "Add or update an image"},
+    %{name: "maintenance_image",  method: "DELETE", function: &__MODULE__.delete_maintenance_image/2, role: :admin, description: "Delete an image"},
   ]
 
   alias CarMaintenance.{
     MaintenanceImages,
   }
+  alias HfgPortalWeb.Apis.CarMaintenance.AuthController
 
   @preload []
 
@@ -21,12 +22,14 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.MaintenanceImagesController do
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-      %{function: fun} -> fun.(conn, params)
-      _ -> 
+      %{function: fun} = route_config ->
+        if AuthController.authorized?(conn, route_config),
+          do:   fun.(conn, params),
+          else: conn |> put_status(401) |> json(%{error: "Unauthorized"})
+      _ ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Route not found"})
-
     end
   end
 
