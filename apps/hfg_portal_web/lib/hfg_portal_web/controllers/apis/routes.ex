@@ -45,7 +45,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
         })
         {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
 
-        apps = HfgPortalWeb.Layout.SidebarLive.list_apps(user) |> Enum.map(&(%{app: &1.name, role: app_role(&1.id, id)})) |> Enum.reject(&(is_nil(&1.role)))
+        apps = HfgPortalWeb.Layout.SidebarLive.list_apps(user) |> Enum.map(&(%{app: &1.name, role: app_role(&1.id, id)})) |> Enum.reject(&(is_nil(&1.role) || &1.role not in ["View", "Edit", "Admin"]))
 
         conn
         |> put_status(:ok)
