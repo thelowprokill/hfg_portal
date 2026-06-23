@@ -2,10 +2,10 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.RepaymentController do
   use HfgPortalWeb, :controller
 
   @routes [
-    %{name: "repayments", method: "GET",    function: &__MODULE__.get_repayments/2,   role: :view, description: "List repayments, optionally filtered by loan_id"},
-    %{name: "repayment",  method: "GET",    function: &__MODULE__.get_repayment/2,    role: :view, description: "Get a repayment by id"},
-    %{name: "repayment",  method: "PUT",    function: &__MODULE__.put_repayment/2,    role: :edit, description: "Add or update a repayment"},
-    %{name: "repayment",  method: "DELETE", function: &__MODULE__.delete_repayment/2, role: :edit, description: "Delete a repayment"},
+    %{name: "repayments", method: "GET",    function: &__MODULE__.get_repayments/2,   role: :view,  description: "List repayments, optionally filtered by loan_id"},
+    %{name: "repayment",  method: "GET",    function: &__MODULE__.get_repayment/2,    role: :view,  description: "Get a repayment by id"},
+    %{name: "repayment",  method: "PUT",    function: &__MODULE__.put_repayment/2,    role: :edit,  description: "Add or update a repayment"},
+    %{name: "repayment",  method: "DELETE", function: &__MODULE__.delete_repayment/2, role: :admin, description: "Delete a repayment"},
   ]
 
   alias LoanRepayment.Repayments

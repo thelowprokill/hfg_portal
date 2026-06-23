@@ -4,8 +4,8 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.LoanController do
   @routes [
     %{name: "loans", method: "GET",    function: &__MODULE__.get_loans/2,   role: :view,  description: "List all loans"},
     %{name: "loan",  method: "GET",    function: &__MODULE__.get_loan/2,    role: :view,  description: "Get a loan by id"},
-    %{name: "loan",  method: "PUT",    function: &__MODULE__.put_loan/2,    role: :edit,  description: "Add or update a loan"},
-    %{name: "loan",  method: "DELETE", function: &__MODULE__.delete_loan/2, role: :edit,  description: "Delete a loan"},
+    %{name: "loan",  method: "PUT",    function: &__MODULE__.put_loan/2,    role: :admin, description: "Add or update a loan"},
+    %{name: "loan",  method: "DELETE", function: &__MODULE__.delete_loan/2, role: :admin, description: "Delete a loan"},
   ]
 
   alias LoanRepayment.{Loans, Repayments}
