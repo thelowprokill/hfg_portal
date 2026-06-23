@@ -16,6 +16,9 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     %{name: "budget:buckets",                     module: HfgPortalWeb.Apis.Budget.BucketsController,           require_admin: false},
     %{name: "budget:transactions",                module: HfgPortalWeb.Apis.Budget.TransactionsController,      require_admin: false},
     %{name: "budget:scheduled_expenses",          module: HfgPortalWeb.Apis.Budget.ScheduledExpensesController, require_admin: false},
+
+    %{name: "loan_repayment:loans",               module: HfgPortalWeb.Apis.LoanRepayment.LoanController,       require_admin: false},
+    %{name: "loan_repayment:repayments",          module: HfgPortalWeb.Apis.LoanRepayment.RepaymentController,  require_admin: false},
   ]
 
   def scopes(conn, _params) do
@@ -75,7 +78,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     user_roles_mod = case app_id do
       "budget"          -> Budget.UserRoles
       "car_maintenance" -> CarMaintenance.UserRoles
-      #"loan_repayment"  -> LoanRepayment.UserRoles
+      "loan_repayment"  -> LoanRepayment.UserRoles
       #"wife_time"       -> WifeTime.UserRoles
       _                 -> nil
     end
