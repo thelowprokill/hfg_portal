@@ -11,7 +11,7 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.LoanController do
   alias LoanRepayment.{Loans, Repayments}
   alias HfgPortalWeb.Apis.LoanRepayment.AuthController
 
-  @preload [:repayment]
+  @preload [repayment: Repayments.repayment_query()]
 
   def call(%{method: method, query_params: %{"route" => route}} = conn, params) do
     Enum.find(@routes, &(&1.name == route && &1.method == method))
@@ -136,8 +136,8 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.LoanController do
       description:       loan.description,
       amount:            loan.amount,
       active:            loan.active,
-      paid_amount_tot:   (if repayment, do: repayment.paid_amount_tot),
-      remaining_balance: (if repayment, do: repayment.remaining_balance),
+      paid_amount_tot:   (if repayment, do: Map.get(repayment, :paid_amount_tot)),
+      remaining_balance: Decimal.sub(loan.amount, if(repayment, do: Map.get(repayment, :paid_amount_tot), else: Decimal.new(0))),
     }
   end
 end
