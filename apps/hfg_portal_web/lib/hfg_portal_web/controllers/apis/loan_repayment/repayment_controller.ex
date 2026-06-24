@@ -136,6 +136,7 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.RepaymentController do
       paid_amount:       repayment.paid_amount,
       paid_amount_tot:   repayment.paid_amount_tot,
       remaining_balance: repayment.remaining_balance,
+      inserted_at:       repayment.inserted_at,
     }
   end
 end
