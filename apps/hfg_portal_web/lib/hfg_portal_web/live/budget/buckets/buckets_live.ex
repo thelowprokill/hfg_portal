@@ -12,7 +12,7 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
       buckets:      buckets,
       search_stack: search_stack,
       sort_stack:   sort_stack,
-      current_user: %{id: user_id}
+      #current_user: %{id: user_id}
     } = socket.assigns
 
     fetched = Buckets.list(%{
@@ -21,7 +21,7 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
       search_stack: search_stack,
       sort_stack:   sort_stack,
     })
-    |> Enum.filter(&(&1.user_id == user_id))
+    #|> Enum.filter(&(&1.user_id == user_id))
 
     socket |> assign(:buckets, buckets ++ fetched)
   end

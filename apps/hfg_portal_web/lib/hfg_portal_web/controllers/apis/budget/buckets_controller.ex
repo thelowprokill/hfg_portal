@@ -23,8 +23,8 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
   end
 
   def list_buckets(conn, _params) do
-    %{id: user_id} = conn.assigns.current_api_user
-    buckets = Buckets.list_for_user(user_id) |> Enum.map(&serialize/1)
+    #%{id: user_id} = conn.assigns.current_api_user
+    buckets = Buckets.list() |> Enum.map(&serialize/1)
     conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: buckets})
   end
 
