@@ -215,17 +215,34 @@
               </div>
               <div class="text-sm text-zinc-500">$<%= remaining %> remaining to fill</div>
 
-              <div class="pt-1 border-t border-zinc-100 dark:border-zinc-700">
-                <div class="flex justify-between text-sm">
-                  <span class="text-zinc-500">This month</span>
-                  <span class={if target_met, do: "text-green-600 dark:text-green-400", else: "text-zinc-600 dark:text-zinc-400"}>
-                    $<%= deposited %> / $<%= bucket.monthly_contribution %>
-                  </span>
+              <div class="pt-1 border-t border-zinc-100 dark:border-zinc-700 space-y-2">
+                <% spent_this_month = Map.get(@monthly_expenses, bucket.id, Decimal.new(0)) %>
+                <% spent_over = Decimal.compare(spent_this_month, bucket.monthly_contribution) == :gt %>
+                <div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">Spent</span>
+                    <span class={if spent_over, do: "text-red-500 font-medium", else: "text-zinc-600 dark:text-zinc-400"}>
+                      $<%= spent_this_month %> / $<%= bucket.monthly_contribution %>
+                    </span>
+                  </div>
+                  <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mt-1">
+                    <% spct = if Decimal.compare(bucket.monthly_contribution, Decimal.new(0)) == :gt, do: Decimal.div(spent_this_month, bucket.monthly_contribution) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                    <div class={["h-1.5 rounded-full", if(spent_over, do: "bg-red-500", else: "bg-orange-400")]}
+                         style={"width: #{Float.round(spct, 1)}%"}></div>
+                  </div>
                 </div>
-                <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mt-1">
-                  <% mpct = if Decimal.compare(bucket.monthly_contribution, Decimal.new(0)) == :gt, do: Decimal.div(deposited, bucket.monthly_contribution) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
-                  <div class={["h-1.5 rounded-full", if(target_met, do: "bg-green-500", else: "bg-blue-400")]}
-                       style={"width: #{Float.round(mpct, 1)}%"}></div>
+                <div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-zinc-500">This month</span>
+                    <span class={if target_met, do: "text-green-600 dark:text-green-400", else: "text-zinc-600 dark:text-zinc-400"}>
+                      $<%= deposited %> / $<%= bucket.monthly_contribution %>
+                    </span>
+                  </div>
+                  <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5 mt-1">
+                    <% mpct = if Decimal.compare(bucket.monthly_contribution, Decimal.new(0)) == :gt, do: Decimal.div(deposited, bucket.monthly_contribution) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                    <div class={["h-1.5 rounded-full", if(target_met, do: "bg-green-500", else: "bg-blue-400")]}
+                         style={"width: #{Float.round(mpct, 1)}%"}></div>
+                  </div>
                 </div>
               </div>
 
