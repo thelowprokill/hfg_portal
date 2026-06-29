@@ -8,6 +8,8 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.RepaymentController do
     %{name: "repayment",  method: "DELETE", function: &__MODULE__.delete_repayment/2, role: :admin, description: "Delete a repayment"},
   ]
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias LoanRepayment.Repayments
   alias HfgPortalWeb.Apis.LoanRepayment.AuthController
 
@@ -36,21 +38,28 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.RepaymentController do
         id  -> String.to_integer(id)
       end
 
-    repayments =
-      Repayments.list(%{
-        page:     Map.get(query_params, "page"),
-        per_page: Map.get(query_params, "per_page"),
-        loan_id:  loan_id,
-      })
-      |> Enum.map(&serialize_repayment/1)
+    with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
+      repayments =
+        Repayments.list(%{
+          page:         Map.get(query_params, "page"),
+          per_page:     Map.get(query_params, "per_page"),
+          loan_id:      loan_id,
+          search_stack: search_stack,
+          sort_stack:   sort_stack,
+        })
+        |> Enum.map(&serialize_repayment/1)
 
-    conn
-    |> put_status(:ok)
-    |> json(%{
-      response: :ok,
-      date: DateTime.utc_now(),
-      data: repayments,
-    })
+      conn
+      |> put_status(:ok)
+      |> json(%{
+        response: :ok,
+        date: DateTime.utc_now(),
+        data: repayments,
+      })
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
 
   def get_repayment(%{query_params: %{"id" => id}} = conn, _params) do

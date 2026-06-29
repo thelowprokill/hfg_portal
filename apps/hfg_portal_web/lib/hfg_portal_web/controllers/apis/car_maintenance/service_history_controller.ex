@@ -8,6 +8,8 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
     #%{name: "service_history",   method: "DELETE", function: &__MODULE__.delete_service_history/2, role: :admin, description: "Delete a Service History"},
   ]
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias CarMaintenance.{
     ServiceHistories,
   }
@@ -34,37 +36,44 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController do
   end
 
   def get_service_histories(%{query_params: %{"car_id" => car_id} = query_params} = conn, _params) do
-    service_histories = 
-      ServiceHistories.list(%{
-        page:     Map.get(query_params, "page"),
-        per_page: Map.get(query_params, "per_page"),
-        car_id:   car_id, 
-        mileage:  false, 
-        preload:  @preload,
-      }) 
-      |> Enum.map(&(%{
-        id:            &1.id, 
-        car_id:        &1.car_id,
-        service_date:  &1.service_date, 
-        mileage:       &1.mileage, 
-        item:          (if &1.named_item, do: &1.name, else: &1.maintenance_item.name), 
-        next_service:  (
-          cond do
-            !&1.named_item && &1.maintenance_item.interval_miles  -> &1.mileage + &1.maintenance_item.interval_miles
-            !&1.named_item && &1.maintenance_item.interval_months -> &1.service_date |> Date.add(&1.maintenance_item.interval_months * 30)
-            true -> nil
-          end
-        ), 
-        notes:         &1.notes, 
-      }))
+    with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
+      service_histories =
+        ServiceHistories.list(%{
+          page:         Map.get(query_params, "page"),
+          per_page:     Map.get(query_params, "per_page"),
+          car_id:       car_id,
+          mileage:      false,
+          search_stack: search_stack,
+          sort_stack:   sort_stack,
+          preload:      @preload,
+        })
+        |> Enum.map(&(%{
+          id:            &1.id,
+          car_id:        &1.car_id,
+          service_date:  &1.service_date,
+          mileage:       &1.mileage,
+          item:          (if &1.named_item, do: &1.name, else: &1.maintenance_item.name),
+          next_service:  (
+            cond do
+              !&1.named_item && &1.maintenance_item.interval_miles  -> &1.mileage + &1.maintenance_item.interval_miles
+              !&1.named_item && &1.maintenance_item.interval_months -> &1.service_date |> Date.add(&1.maintenance_item.interval_months * 30)
+              true -> nil
+            end
+          ),
+          notes:         &1.notes,
+        }))
 
-    conn
-    |> put_status(:ok)
-    |> json(%{
-      response: :ok, 
-      date: DateTime.utc_now(),
-      data: service_histories
-    })
+      conn
+      |> put_status(:ok)
+      |> json(%{
+        response: :ok,
+        date: DateTime.utc_now(),
+        data: service_histories
+      })
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
 
   def get_service_history(%{query_params: %{"id" => id}} = conn, _params) do

@@ -1,6 +1,8 @@
 defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
   use HfgPortalWeb, :controller
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias Budget.ScheduledExpenses
   alias HfgPortalWeb.Apis.Budget.AuthController
 
@@ -29,14 +31,21 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
     #%{id: user_id} = conn.assigns.current_api_user
     #expenses = ScheduledExpenses.list_for_user(user_id) |> Enum.map(&serialize/1)
     #conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: expenses})
-    scheduled_expenses = 
-      ScheduledExpenses.list(%{
-        page:      Map.get(query_params, "page"),
-        per_page:  Map.get(query_params, "per_page"),
-        bucket_id: Map.get(query_params, "bucket_id"), 
-        preload:   @preload,
-      })
-    conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: scheduled_expenses |> Enum.map(&serialize(&1))})
+    with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
+      scheduled_expenses =
+        ScheduledExpenses.list(%{
+          page:         Map.get(query_params, "page"),
+          per_page:     Map.get(query_params, "per_page"),
+          bucket_id:    Map.get(query_params, "bucket_id"),
+          search_stack: search_stack,
+          sort_stack:   sort_stack,
+          preload:      @preload,
+        })
+      conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: scheduled_expenses |> Enum.map(&serialize(&1))})
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
   #def get_scheduled_expenses(conn, _params) do
   #  %{id: user_id} = conn.assigns.current_api_user

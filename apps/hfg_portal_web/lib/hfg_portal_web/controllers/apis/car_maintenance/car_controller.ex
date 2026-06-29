@@ -8,6 +8,8 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
     %{name: "car",  method: "DELETE", function: &__MODULE__.delete_car/2, role: :admin, description: "Delete a car"},
   ]
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias CarMaintenance.{
     Cars,
     ServiceHistories,
@@ -35,12 +37,16 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
   end
 
   def get_cars(%{query_params: query_params} = conn, _params) do
-    cars = 
+    with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
+    cars =
       Cars.list(%{
-        page:     Map.get(query_params, "page"),
-        per_page: Map.get(query_params, "per_page"),
-        preload:  @preload,
-      }) 
+        page:         Map.get(query_params, "page"),
+        per_page:     Map.get(query_params, "per_page"),
+        search_stack: search_stack,
+        sort_stack:   sort_stack,
+        preload:      @preload,
+      })
       |> Enum.map(&(%{
         id:            &1.id, 
         name:          &1.name, 
@@ -52,13 +58,16 @@ defmodule HfgPortalWeb.Apis.CarMaintenance.CarController do
         mileage:       (if &1.service_history, do: &1.service_history.mileage |> Number.Delimit.number_to_delimited(precision: 0), else: nil)
       }))
 
-    conn
-    |> put_status(:ok)
-    |> json(%{
-      response: :ok, 
-      date: DateTime.utc_now(),
-      data: cars
-    })
+      conn
+      |> put_status(:ok)
+      |> json(%{
+        response: :ok,
+        date: DateTime.utc_now(),
+        data: cars
+      })
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
 
   def get_car(%{query_params: %{"id" => id}} = conn, _params) do

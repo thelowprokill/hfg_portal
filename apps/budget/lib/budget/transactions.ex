@@ -140,6 +140,8 @@ defmodule Budget.Transactions do
         _ -> q
       end
     end)
+    |> search_stack(Map.get(opts, :search_stack))
+    |> sort_stack(Map.get(opts, :sort_stack))
     |> order_by([t], desc: t.transaction_date)
     |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> Repo.all()

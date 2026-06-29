@@ -1,6 +1,8 @@
 defmodule HfgPortalWeb.Apis.Budget.BucketsController do
   use HfgPortalWeb, :controller
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias Budget.Buckets
   alias HfgPortalWeb.Apis.Budget.AuthController
 
@@ -22,10 +24,21 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
     end
   end
 
-  def list_buckets(conn, _params) do
-    #%{id: user_id} = conn.assigns.current_api_user
-    buckets = Buckets.list() |> Enum.map(&serialize/1)
-    conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: buckets})
+  def list_buckets(%{query_params: query_params} = conn, _params) do
+    with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
+      buckets =
+        Buckets.list(%{
+          page:         Map.get(query_params, "page"),
+          per_page:     Map.get(query_params, "per_page"),
+          search_stack: search_stack,
+          sort_stack:   sort_stack,
+        })
+        |> Enum.map(&serialize/1)
+      conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: buckets})
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
 
   def get_bucket(%{query_params: %{"id" => id}} = conn, _params) do
@@ -89,4 +102,5 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
       end)
     end)
   end
+
 end

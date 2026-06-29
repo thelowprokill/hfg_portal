@@ -1,6 +1,8 @@
 defmodule HfgPortalWeb.Apis.Budget.TransactionsController do
   use HfgPortalWeb, :controller
 
+  import HfgPortalWeb.Apis.ApiHelpers
+
   alias Budget.Transactions
   alias HfgPortalWeb.Apis.Budget.AuthController
 
@@ -25,16 +27,22 @@ defmodule HfgPortalWeb.Apis.Budget.TransactionsController do
   def list_transactions(%{params: params} = conn, _params) do
     %{id: user_id} = conn.assigns.current_api_user
 
-    opts = %{
-      bucket_id: parse_int(Map.get(params, "bucket_id")),
-      year:      parse_int(Map.get(params, "year")),
-      month:     parse_int(Map.get(params, "month")),
-      page:      parse_int(Map.get(params, "page", "0")),
-      per_page:  parse_int(Map.get(params, "per_page", "50")),
-    }
-
-    transactions = Transactions.list_for_user(user_id, opts) |> Enum.map(&serialize/1)
-    conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: transactions})
+    with {:ok, search_stack} <- parse_search_stack(Map.get(params, "search_stack")),
+         {:ok, sort_stack}   <- parse_sort_stack(Map.get(params, "sort_stack")) do
+      opts = %{
+        bucket_id:    parse_int(Map.get(params, "bucket_id")),
+        year:         parse_int(Map.get(params, "year")),
+        month:        parse_int(Map.get(params, "month")),
+        page:         parse_int(Map.get(params, "page", "0")),
+        per_page:     parse_int(Map.get(params, "per_page", "50")),
+        search_stack: search_stack,
+        sort_stack:   sort_stack,
+      }
+      transactions = Transactions.list_for_user(user_id, opts) |> Enum.map(&serialize/1)
+      conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: transactions})
+    else
+      {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
+    end
   end
 
   def get_transaction(%{query_params: %{"id" => id}} = conn, _params) do
