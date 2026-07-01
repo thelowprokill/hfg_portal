@@ -25,8 +25,6 @@ defmodule HfgPortalWeb.Apis.Budget.TransactionsController do
   end
 
   def list_transactions(%{params: params} = conn, _params) do
-    %{id: user_id} = conn.assigns.current_api_user
-
     with {:ok, search_stack} <- parse_search_stack(Map.get(params, "search_stack")),
          {:ok, sort_stack}   <- parse_sort_stack(Map.get(params, "sort_stack")) do
       opts = %{
@@ -38,7 +36,7 @@ defmodule HfgPortalWeb.Apis.Budget.TransactionsController do
         search_stack: search_stack,
         sort_stack:   sort_stack,
       }
-      transactions = Transactions.list_for_user(user_id, opts) |> Enum.map(&serialize/1)
+      transactions = Transactions.list_filtered(opts) |> Enum.map(&serialize/1)
       conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: transactions})
     else
       {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})

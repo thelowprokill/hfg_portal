@@ -78,10 +78,7 @@ defmodule HfgPortalWeb.Budget.ScheduledExpenses.ScheduledExpensesLive do
     |> assign(:search_map,          %{})
     |> assign(:search_stack,        [])
     |> assign(:sort_stack,          [])
-    |> then(fn s ->
-      %{current_user: %{id: uid}} = s.assigns
-      assign(s, :buckets, Buckets.list_for_user(uid))
-    end)
+    |> assign(:buckets, Buckets.list())
     |> handle_params(session)
     |> fetch_scheduled_expenses()
     |> res(:ok)

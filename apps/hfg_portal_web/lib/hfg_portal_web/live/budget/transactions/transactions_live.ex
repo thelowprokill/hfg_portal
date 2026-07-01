@@ -81,10 +81,7 @@ defmodule HfgPortalWeb.Budget.Transactions.TransactionsLive do
     |> assign(:search_stack,     [])
     |> assign(:sort_stack,       [])
     |> assign(:filter_bucket_id, nil)
-    |> then(fn s ->
-      %{current_user: %{id: uid}} = s.assigns
-      assign(s, :buckets, Buckets.list_for_user(uid))
-    end)
+    |> assign(:buckets, Buckets.list())
     |> handle_params(session)
     |> fetch_transactions()
     |> res(:ok)

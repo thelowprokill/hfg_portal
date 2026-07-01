@@ -116,15 +116,8 @@ defmodule Budget.Transactions do
     |> Kernel.||(Decimal.new(0))
   end
 
-  def list_for_user(user_id, opts \\ %{}) do
-    bucket_ids =
-      Budget.Buckets.Bucket
-      |> where([b], b.user_id == ^user_id)
-      |> select([b], b.id)
-      |> Repo.all()
-
+  def list_filtered(opts \\ %{}) do
     @schema
-    |> where([t], t.bucket_id in ^bucket_ids)
     |> then(fn q ->
       case Map.get(opts, :bucket_id) do
         nil -> q

@@ -5,7 +5,7 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
   alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "dashboard",     method: "GET", function: &__MODULE__.dashboard/2,     role: :view,  description: "Monthly summary for all user buckets"},
+    %{name: "dashboard",     method: "GET", function: &__MODULE__.dashboard/2,     role: :view,  description: "Monthly summary for all buckets"},
     %{name: "run_scheduled", method: "PUT", function: &__MODULE__.run_scheduled/2, role: :admin, description: "Process due scheduled expenses and sinking fund contributions"},
   ]
 
@@ -21,12 +21,11 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
   end
 
   def dashboard(%{params: params} = conn, _params) do
-    %{id: user_id} = conn.assigns.current_api_user
     today = Date.utc_today()
     year  = parse_int(Map.get(params, "year"))  || today.year
     month = parse_int(Map.get(params, "month")) || today.month
 
-    buckets = Buckets.list_for_user(user_id)
+    buckets = Buckets.list()
 
     data =
       Enum.map(buckets, fn bucket ->

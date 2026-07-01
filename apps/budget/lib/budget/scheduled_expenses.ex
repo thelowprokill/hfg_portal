@@ -70,14 +70,6 @@ defmodule Budget.ScheduledExpenses do
     |> Repo.all()
   end
 
-  def list_for_user(user_id) do
-    @schema
-    |> join(:inner, [s], b in Budget.Buckets.Bucket, on: s.bucket_id == b.id)
-    |> where([s, b], b.user_id == ^user_id)
-    |> order_by([s], s.description)
-    |> Repo.all()
-  end
-
   def list_due(date) do
     @schema
     |> where([s], s.active == true and s.next_due_date <= ^date)
@@ -99,8 +91,11 @@ defmodule Budget.ScheduledExpenses do
   end
 
   defp shift_months(date, months, day_of_month) do
-    advanced = Date.shift(date, month: months)
-    max_day  = Date.days_in_month(advanced)
-    %{advanced | day: min(day_of_month, max_day)}
+    total_months = date.year * 12 + (date.month - 1) + months
+    year         = div(total_months, 12)
+    month        = rem(total_months, 12) + 1
+    max_day      = Date.new!(year, month, 1) |> Date.days_in_month()
+
+    Date.new!(year, month, min(day_of_month, max_day))
   end
 end

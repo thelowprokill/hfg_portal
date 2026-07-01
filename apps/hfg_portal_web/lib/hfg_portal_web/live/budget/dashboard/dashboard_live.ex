@@ -11,8 +11,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   }
 
   defp fetch_buckets(socket) do
-    %{current_user: %{id: user_id}} = socket.assigns
-    socket |> assign(:buckets, Buckets.list_for_user(user_id))
+    socket |> assign(:buckets, Buckets.list())
   end
 
   defp fetch_can_edit(socket) do

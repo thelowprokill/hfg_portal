@@ -7,7 +7,7 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
   alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "scheduled_expenses", method: "GET",    function: &__MODULE__.get_scheduled_expenses/2,   role: :view,  description: "List scheduled expenses for the current user"},
+    %{name: "scheduled_expenses", method: "GET",    function: &__MODULE__.get_scheduled_expenses/2,   role: :view,  description: "List scheduled expenses"},
     %{name: "scheduled_expense",  method: "GET",    function: &__MODULE__.get_scheduled_expense/2,    role: :view,  description: "Get a scheduled expense by id"},
     %{name: "scheduled_expense",  method: "PUT",    function: &__MODULE__.put_scheduled_expense/2,    role: :admin, description: "Create or update a scheduled expense"},
     %{name: "scheduled_expense",  method: "DELETE", function: &__MODULE__.delete_scheduled_expense/2, role: :admin, description: "Delete a scheduled expense"},
@@ -28,9 +28,6 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
   end
 
   def get_scheduled_expenses(%{query_params: query_params} = conn, _params) do
-    #%{id: user_id} = conn.assigns.current_api_user
-    #expenses = ScheduledExpenses.list_for_user(user_id) |> Enum.map(&serialize/1)
-    #conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: expenses})
     with {:ok, search_stack} <- parse_search_stack(Map.get(query_params, "search_stack")),
          {:ok, sort_stack}   <- parse_sort_stack(Map.get(query_params, "sort_stack")) do
       scheduled_expenses =
@@ -47,12 +44,6 @@ defmodule HfgPortalWeb.Apis.Budget.ScheduledExpensesController do
       {:error, msg} -> conn |> put_status(400) |> json(%{error: msg})
     end
   end
-  #def get_scheduled_expenses(conn, _params) do
-  #  %{id: user_id} = conn.assigns.current_api_user
-  #  expenses = ScheduledExpenses.list_for_user(user_id) |> Enum.map(&serialize/1)
-  #  conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: expenses})
-  #end
-
   def get_scheduled_expense(%{query_params: %{"id" => id}} = conn, _params) do
     expense = id |> String.to_integer() |> ScheduledExpenses.get() |> ScheduledExpenses.preload(%{preload: @preload})
     conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: serialize(expense)})

@@ -7,7 +7,7 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
   alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
-    %{name: "buckets",  method: "GET",    function: &__MODULE__.list_buckets/2,  role: :view,  description: "List all buckets for the current user"},
+    %{name: "buckets",  method: "GET",    function: &__MODULE__.list_buckets/2,  role: :view,  description: "List all buckets"},
     %{name: "bucket",   method: "GET",    function: &__MODULE__.get_bucket/2,    role: :view,  description: "Get a bucket by id"},
     %{name: "bucket",   method: "PUT",    function: &__MODULE__.put_bucket/2,    role: :admin, description: "Create or update a bucket"},
     %{name: "bucket",   method: "DELETE", function: &__MODULE__.delete_bucket/2, role: :admin, description: "Delete a bucket"},

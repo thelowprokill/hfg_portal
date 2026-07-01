@@ -14,20 +14,6 @@ defmodule Budget.Buckets do
     created: @created,
     deleted: @deleted
 
-  def list_for_user(user_id) do
-    @schema
-    |> where([b], b.user_id == ^user_id)
-    |> order_by([b], b.name)
-    |> Repo.all()
-  end
-
-  def list_sinking_funds(user_id) do
-    @schema
-    |> where([b], b.user_id == ^user_id and not is_nil(b.monthly_contribution))
-    |> order_by([b], b.name)
-    |> Repo.all()
-  end
-
   def list_all_sinking_funds do
     @schema
     |> where([b], not is_nil(b.monthly_contribution))

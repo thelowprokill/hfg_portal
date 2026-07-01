@@ -43,7 +43,7 @@
 
           <hr>
 
-          <%= if @current_user.portal_admin || @current_user.dev_admin || Enum.any?(@apps, &(&1.show_admin)) do %>
+          <%= if @current_user.portal_admin || @current_user.dev_admin do %>
             <!-- Admin Mode -->
             <div class="flex p-3 text-gray-900 dark:text-white">
               <lablel class="flex cursor-pointer" phx-click="toggle_admin_mode">
