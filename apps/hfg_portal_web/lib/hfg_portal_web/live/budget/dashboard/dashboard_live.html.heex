@@ -1,4 +1,16 @@
 <div>
+  <%# ── Total money card (always visible) ── %>
+  <% total_over = Decimal.compare(@total_money, Decimal.new(0)) == :lt %>
+  <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mt-4">
+    <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Total Money</span>
+    <div class={["text-3xl font-semibold", if(total_over, do: "text-red-500")]}>$<%= @total_money %></div>
+    <div class="flex flex-wrap gap-x-6 gap-y-1 pt-2 text-sm text-zinc-500">
+      <span>Debit accounts: $<%= @debit_total %></span>
+      <span>Credit accounts: −$<%= @credit_total %></span>
+      <span>Sinking funds: −$<%= @sinking_total %></span>
+    </div>
+  </div>
+
   <%# ── Month/year navigator (always visible) ── %>
   <div class="flex items-center gap-3 py-4">
     <button phx-click="prev_month"

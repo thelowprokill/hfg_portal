@@ -17,8 +17,7 @@ WORKDIR /app
 # Install Hex package manager.
 # By using `--force`, we don’t need to type “Y” to confirm the installation.
 RUN mix local.hex --force && \
-    mix local.rebar --force && \
-    mix archive.install hex phx_new --force
+    mix local.rebar --force
 
 # Install dependencies
 RUN mix deps.get

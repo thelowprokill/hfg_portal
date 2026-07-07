@@ -1,0 +1,56 @@
+<div>
+  <%# ── Month/year navigator ── %>
+  <div class="flex items-center gap-3 py-4">
+    <button phx-click="prev_month"
+            class="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors text-lg leading-none">
+      ‹
+    </button>
+    <span class="text-base font-medium w-36 text-center">
+      <%= get_month_name(@selected_month) %> <%= @selected_year %>
+    </span>
+    <button phx-click="next_month"
+            class="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors text-lg leading-none">
+      ›
+    </button>
+    <%= if @selected_month != Date.utc_today().month or @selected_year != Date.utc_today().year do %>
+      <button phx-click="reset_month"
+              class="ml-2 px-2 py-1 rounded text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 border border-zinc-300 dark:border-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+        Today
+      </button>
+    <% end %>
+  </div>
+
+  <h3 class="text-xl"><%= @page_title %></h3>
+  <p class="text-sm text-zinc-500 py-1">What's in each account at the start of this month.</p>
+
+  <.form for={%{}} phx-submit="save" class="max-w-md pt-4">
+    <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
+      <%= for account <- @accounts do %>
+        <div class="flex items-center justify-between py-3">
+          <div>
+            <div class="font-medium"><%= account.name %></div>
+            <div class="text-xs text-zinc-500 capitalize"><%= account.type %></div>
+          </div>
+          <div class="flex items-center">
+            <span class="px-1">$</span>
+            <input type="number"
+                   step="0.01"
+                   name={"balances[#{account.id}]"}
+                   value={Map.get(@balances, account.id, Decimal.new(0))}
+                   disabled={!@can_edit}
+                   class="mt-0 block w-32 rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6 dark:bg-zinc-800 dark:text-white border-zinc-300 focus:border-zinc-400" />
+          </div>
+        </div>
+      <% end %>
+      <%= if @accounts == [] do %>
+        <div class="py-8 text-center text-zinc-400">No accounts yet</div>
+      <% end %>
+    </div>
+
+    <%= if @can_edit do %>
+      <div class="pt-6"><.bnw_button_submit /></div>
+    <% else %>
+      <div class="pt-6 text-xs font-medium text-zinc-400 uppercase tracking-wide">View Only</div>
+    <% end %>
+  </.form>
+</div>
