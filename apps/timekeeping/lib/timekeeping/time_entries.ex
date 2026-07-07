@@ -28,14 +28,15 @@ defmodule Timekeeping.TimeEntries do
   end
 
   @doc """
-  Returns a MapSet of job_ids that currently have an open (running) time entry.
+  Returns a map of job_id => start_time for every job that currently has an
+  open (running) time entry.
   """
-  def open_job_ids do
+  def open_job_starts do
     @schema
     |> where([te], is_nil(te.end_time))
-    |> select([te], te.job_id)
+    |> select([te], {te.job_id, te.start_time})
     |> Repo.all()
-    |> MapSet.new()
+    |> Map.new()
   end
 
   @doc """

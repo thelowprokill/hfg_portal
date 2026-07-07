@@ -84,7 +84,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
     |> assign(:page,          0)
     |> assign(:per_page,      50)
     |> assign(:jobs,          [])
-    |> assign(:open_job_ids,  TimeEntries.open_job_ids())
+    |> assign(:open_job_starts, TimeEntries.open_job_starts())
     |> assign(:modal_stack,   [])
     |> assign(:search_map,    %{})
     |> assign(:search_stack,  [])
@@ -141,11 +141,11 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
     socket |> res()
   end
 
-  defp put_open_job(socket, %{job_id: job_id, end_time: nil}) do
-    assign(socket, :open_job_ids, MapSet.put(socket.assigns.open_job_ids, job_id))
+  defp put_open_job(socket, %{job_id: job_id, end_time: nil, start_time: start_time}) do
+    assign(socket, :open_job_starts, Map.put(socket.assigns.open_job_starts, job_id, start_time))
   end
   defp put_open_job(socket, %{job_id: job_id}) do
-    assign(socket, :open_job_ids, MapSet.delete(socket.assigns.open_job_ids, job_id))
+    assign(socket, :open_job_starts, Map.delete(socket.assigns.open_job_starts, job_id))
   end
 
   @impl true

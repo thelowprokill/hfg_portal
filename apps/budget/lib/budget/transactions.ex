@@ -15,7 +15,7 @@ defmodule Budget.Transactions do
     deleted: @deleted
 
   # Override to sync bucket balance after every write
-  def create_or_update(%Budget.Transactions.Transaction{} = item, attrs \\ %{}) do
+  def create_or_update(%Budget.Transactions.Transaction{} = item, attrs) do
     new_item = is_nil(item.id)
 
     result =
@@ -37,7 +37,7 @@ defmodule Budget.Transactions do
 
   def delete(id), do: get(id) |> delete()
 
-  def list(opts \\ %{}) do
+  def list(opts) do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
@@ -47,7 +47,7 @@ defmodule Budget.Transactions do
     |> preload(opts)
   end
 
-  def new_changeset(attrs \\ %{}) do
+  def new_changeset(attrs) do
     %@schema{transaction_date: Date.utc_today()}
     |> change(Map.put_new(attrs, :transaction_date, Date.utc_today()))
   end

@@ -30,7 +30,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   end
 
   # auth request
-  def call(%{query_params: %{"username" => username, "password" => password}} = conn, params) do
+  def call(%{query_params: %{"username" => username, "password" => password}} = conn, _params) do
     user = Accounts.get_active_user_by_username_and_password(username, password)
 
     case user do
@@ -101,13 +101,6 @@ defmodule HfgPortalWeb.Apis.RoutesController do
       is_nil(api_key) || is_nil(scope) -> nil
       true ->
         signer = Joken.Signer.create("HS256", System.get_env("JWT_SECRET"))
-
-        token_config = %{
-          "scope" => %Joken.Claim{
-            generate: fn -> "user" end,
-            validate: fn val, _claims, _context -> val in ["u", "a"] end
-          }
-        }
 
         {_, jwt} = api_key
 

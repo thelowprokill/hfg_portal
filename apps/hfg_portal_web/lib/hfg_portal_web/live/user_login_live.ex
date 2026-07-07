@@ -52,7 +52,7 @@ defmodule HfgPortalWeb.UserLoginLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    username = live_flash(socket.assigns.flash, :username)
+    username = Phoenix.Flash.get(socket.assigns.flash, :username)
     form = to_form(%{"username" => username}, as: "user")
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
   end

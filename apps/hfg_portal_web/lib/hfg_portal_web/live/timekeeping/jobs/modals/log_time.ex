@@ -57,7 +57,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
               </div>
               <.bnw_button_danger phx_click="stop" phx-target={@myself}>
                 <span class="inline-flex items-center gap-1.5">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
                     <line x1="12" y1="12" x2="12" y2="7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     <line

@@ -56,7 +56,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
   attr :service_history_id, :integer
   attr :user_id,             :integer
   attr :cancel,              :boolean, default: false
-  attr :uplads,              :any, required: true
+  attr :uploads,             :any, required: true
   def edit_form(assigns) do
     ~H"""
       <.bnw_input_hidden f={@f} field={:created_by_id} value={@user_id} />

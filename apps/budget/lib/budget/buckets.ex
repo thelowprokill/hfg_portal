@@ -21,7 +21,7 @@ defmodule Budget.Buckets do
     |> Repo.all()
   end
 
-  def list(opts \\ %{}) do
+  def list(opts) do
     @schema
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))

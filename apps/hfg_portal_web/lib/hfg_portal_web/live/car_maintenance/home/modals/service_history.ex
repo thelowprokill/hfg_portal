@@ -1,8 +1,6 @@
 defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   use HfgPortalWeb, :live_view
 
-  alias HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages
-
   @module  CarMaintenance.ServiceHistories
   @key     "service_history"
   @preload [:maintenance_item]
@@ -232,23 +230,6 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
       }
     ) |> Enum.uniq_by(&(&1.id)))
   end
-
-  defp set_modal(socket, type \\ nil, id \\ nil)
-  defp set_modal(socket, :images, id) do
-    %{
-      modal_stack:  modal_stack,
-      user:         user,
-    } = socket.assigns
-
-    socket |> assign(:modal_stack, [%Modal{
-      modal:  :images,
-      id:     :images,
-      module: ChangeMaintenanceImages,
-      live:   true,
-      user:   user
-    } | modal_stack])
-  end
-  defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
   @impl true
   def mount(_params, %{"modal" => modal, "parent" => parent}, socket) do

@@ -17,7 +17,7 @@ defmodule HfgPortalWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import HfgPortalWeb.Gettext
+  use Gettext, backend: HfgPortalWeb.Gettext
 
   @doc """
   Renders a modal.

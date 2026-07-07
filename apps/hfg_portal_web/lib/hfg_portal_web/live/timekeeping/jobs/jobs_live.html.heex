@@ -19,12 +19,30 @@
       <%= for job <- @jobs do %>
         <tr phx-click="log_time" phx-value-id={job.id} class={[
           "cursor-pointer",
-          MapSet.member?(@open_job_ids, job.id) && "bg-green-100 dark:bg-green-900/40"
+          Map.has_key?(@open_job_starts, job.id) && "bg-green-100 dark:bg-green-900/40"
         ]}>
           <td class="px-2">
             <%= job.name %>
-            <%= if MapSet.member?(@open_job_ids, job.id) do %>
-              <span class="ml-2 text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wide">Running</span>
+            <%= if start_time = Map.get(@open_job_starts, job.id) do %>
+              <span class="ml-2 inline-flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 scale-125 text-green-700 dark:text-green-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                  <line x1="12" y1="12" x2="12" y2="7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <line
+                    x1="12" y1="12" x2="15.5" y2="12"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    class="origin-center animate-spin"
+                    style="animation-duration: 2s"
+                  />
+                </svg>
+                <span class="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wide">Running</span>
+                <span
+                  class="font-mono text-xs tabular-nums text-green-700 dark:text-green-400"
+                  phx-hook="ElapsedTimer"
+                  id={"jobs_elapsed_#{job.id}"}
+                  data-start={DateTime.to_iso8601(start_time)}
+                >00:00:00</span>
+              </span>
             <% end %>
           </td>
           <td class="px-2"><%= job.client || "—" %></td>

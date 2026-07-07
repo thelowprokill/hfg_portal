@@ -43,7 +43,7 @@ defmodule HfgPortalWeb do
         layouts: [html: HfgPortalWeb.Layouts]
 
       import Plug.Conn
-      import HfgPortalWeb.Gettext
+      use Gettext, backend: HfgPortalWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -122,7 +122,7 @@ defmodule HfgPortalWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import HfgPortalWeb.CoreComponents
-      import HfgPortalWeb.Gettext
+      use Gettext, backend: HfgPortalWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

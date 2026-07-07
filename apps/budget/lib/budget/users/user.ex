@@ -16,6 +16,7 @@ defmodule Budget.Users.User do
     field :first_name, :string
     field :last_name,  :string
     field :role,       :map,     virtual: true
+    field :dev_admin,  :boolean
     field :admin_mode, :boolean, default: false, virtual: true
 
     has_one :user_role, Budget.Users.UserRole

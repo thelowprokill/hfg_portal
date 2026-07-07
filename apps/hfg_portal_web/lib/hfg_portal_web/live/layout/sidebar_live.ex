@@ -245,7 +245,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   end
 
   defp redirect_to(socket) do
-    %{apps: apps, selected_page: selected_page, session: session} = socket.assigns
+    %{apps: apps, selected_page: selected_page} = socket.assigns
 
     {module, error} = find_page(apps, selected_page)
 
@@ -333,6 +333,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       LoanRepayment.UserRoles.subscribe()
       WifeTime.UserRoles.subscribe()
       Budget.UserRoles.subscribe()
+      Timekeeping.UserRoles.subscribe()
     end
 
     socket
@@ -415,15 +416,15 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   #################################################################################
 
   @impl true
-  def handle_info({[:user, :updated], user}, socket) do
-    %{current_user: current_user} = socket.assigns
-
+  def handle_info({[:timekeeping, :user_role, _], user_role}, socket) do
     cond do
-      current_user.id == user.id -> socket |> assign(:current_user, user) |> res()
-      true -> socket |> res()
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "timekeeping", Timekeeping.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
     end
+    |> res()
   end
-  
+
   @impl true
   def handle_info({[:budget, :user_role, _], user_role}, socket) do
     cond do
