@@ -72,6 +72,16 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
+  config :timekeeping, Timekeeping.Repo,
+    # ssl: true,
+    hostname: mysql_host,
+    username: mysql_username,
+    password: mysql_password,
+    port:     mysql_port,
+    database: "hfg_portal_timekeeping",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
   config :hfg_portal, HfgPortal.Repo,
     # ssl: true,
     hostname: mysql_host,

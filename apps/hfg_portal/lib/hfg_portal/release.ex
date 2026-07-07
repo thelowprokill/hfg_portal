@@ -9,6 +9,7 @@ defmodule HfgPortal.Release do
     :loan_repayment,
     :wife_time,
     :budget,
+    :timekeeping,
   ]
 
   def migrate do

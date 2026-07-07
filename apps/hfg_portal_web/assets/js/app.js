@@ -171,6 +171,69 @@ Hooks.copy_to_clipboard = {
   }
 }
 
+// Renders a UTC ISO8601 timestamp (data-utc="...") in the browser's local
+// timezone. Read-only display - pair with LocalDatetimeInput for editing.
+Hooks.LocalTime = {
+  format() {
+    const utc = this.el.dataset.utc;
+    if (!utc) {
+      this.el.textContent = "";
+      return;
+    }
+    const date = new Date(utc);
+    if (isNaN(date.getTime())) {
+      this.el.textContent = "";
+      return;
+    }
+    this.el.textContent = date.toLocaleString(undefined, {dateStyle: "medium", timeStyle: "short"});
+  },
+  mounted() { this.format(); },
+  updated() { this.format(); }
+}
+
+function localDatetimeInputValue(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+// Pairs a visible <input type="datetime-local"> (this.el, edited/displayed in
+// the browser's local time) with a hidden input (referenced by
+// data-hidden-id) that holds the canonical UTC ISO8601 value actually
+// submitted to the server. Syncs hidden -> visible (UTC -> local) whenever
+// the hidden value changes from the server, and visible -> hidden
+// (local -> UTC) as the user edits.
+Hooks.LocalDatetimeInput = {
+  mounted() {
+    this.hidden = document.getElementById(this.el.dataset.hiddenId);
+    this.syncFromHidden();
+    this.el.addEventListener("input", () => this.syncToHidden());
+  },
+  updated() {
+    this.hidden = document.getElementById(this.el.dataset.hiddenId);
+    this.syncFromHidden();
+  },
+  syncFromHidden() {
+    if (!this.hidden) return;
+    const value = this.hidden.value;
+    if (value === this._lastHidden) return;
+    this._lastHidden = value;
+    if (!value) {
+      this.el.value = "";
+      return;
+    }
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return;
+    this.el.value = localDatetimeInputValue(date);
+  },
+  syncToHidden() {
+    if (!this.hidden || !this.el.value) return;
+    const date = new Date(this.el.value);
+    if (isNaN(date.getTime())) return;
+    this._lastHidden = date.toISOString();
+    this.hidden.value = this._lastHidden;
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks}, )
 

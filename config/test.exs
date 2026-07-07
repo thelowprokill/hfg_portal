@@ -44,6 +44,19 @@ config :loan_repayment, LoanRepayment.Repo,
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+config :timekeeping, Timekeeping.Repo,
+  username: "root",
+  password: "",
+  hostname: "localhost",
+  database: "timekeeping_test#{System.get_env("MIX_TEST_PARTITION")}",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2
+
+# Configure your database
+#
+# The MIX_TEST_PARTITION environment variable can be used
+# to provide built-in test partitioning in CI environment.
+# Run `mix help test` for more information.
 config :car_maintenance, CarMaintenance.Repo,
   username: "root",
   password: "",
@@ -140,3 +153,4 @@ config :swoosh, :api_client, false
 config :phoenix, :plug_init_mode, :runtime
 
 config :budget, env: :test
+config :timekeeping, env: :test

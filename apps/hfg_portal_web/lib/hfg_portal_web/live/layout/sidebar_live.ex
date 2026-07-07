@@ -177,6 +177,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         id: "wife_time",
         links: WifeTime.Authorize.list_pages(current_user),
       },
+      %Page{
+        name: "Timekeeping",
+        id: "timekeeping",
+        links: Timekeeping.Authorize.list_pages(current_user),
+      },
     ]
 
     system_apps ++ apps
