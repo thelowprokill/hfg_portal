@@ -39,10 +39,13 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
         Decimal.add(acc, Transactions.balance_as_of_month(bucket.id, year, month))
       end)
 
+    %{current_month_expenses: current_month_expenses} = socket.assigns
+
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
+      |> Decimal.sub(current_month_expenses)
 
     socket
     |> assign(:debit_total, debit_total)
@@ -77,10 +80,21 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
         {bucket.id, Transactions.balance_as_of_month(bucket.id, year, month)}
       end)
 
+    # Sinking-fund expenses are already netted into their bucket balance (and
+    # therefore into sinking_total), so only sum expenses for regular
+    # monthly-budget buckets here to avoid double-counting in total_money.
+    current_month_expenses =
+      buckets
+      |> Enum.filter(& &1.monthly_budget)
+      |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
+        Decimal.add(acc, Map.get(expense_totals, bucket.id, Decimal.new(0)))
+      end)
+
     socket
     |> assign(:monthly_expenses, expense_totals)
     |> assign(:monthly_deposits, deposit_totals)
     |> assign(:month_end_balances, month_end_balances)
+    |> assign(:current_month_expenses, current_month_expenses)
   end
 
   defp fetch_bucket_transactions(socket) do
@@ -232,6 +246,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> assign(:debit_total, Decimal.new(0))
     |> assign(:credit_total, Decimal.new(0))
     |> assign(:sinking_total, Decimal.new(0))
+    |> assign(:current_month_expenses, Decimal.new(0))
     |> assign(:total_money, Decimal.new(0))
     |> assign(:selected_bucket, nil)
     |> assign(:selected_year, today.year)

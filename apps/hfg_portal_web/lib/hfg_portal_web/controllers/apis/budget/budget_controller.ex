@@ -80,10 +80,21 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         Decimal.add(acc, Transactions.balance_as_of_month(bucket.id, year, month))
       end)
 
+    # Sinking-fund expenses are already netted into their bucket balance (and
+    # therefore into sinking_total), so only sum expenses for regular
+    # monthly-budget buckets here to avoid double-counting in total_money.
+    current_month_expenses =
+      Buckets.list()
+      |> Enum.filter(& &1.monthly_budget)
+      |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
+        Decimal.add(acc, Transactions.monthly_expense_total(bucket.id, year, month))
+      end)
+
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
+      |> Decimal.sub(current_month_expenses)
 
     conn
     |> put_status(:ok)
@@ -96,6 +107,7 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         debit_total: to_string(debit_total),
         credit_total: to_string(credit_total),
         sinking_total: to_string(sinking_total),
+        current_month_expenses: to_string(current_month_expenses),
         total_money: to_string(total_money)
       }
     })

@@ -8,6 +8,7 @@
       <span>Debit accounts: $<%= @debit_total %></span>
       <span>Credit accounts: −$<%= @credit_total %></span>
       <span>Sinking funds: −$<%= @sinking_total %></span>
+      <span>This month's expenses: −$<%= @current_month_expenses %></span>
     </div>
   </div>
 
@@ -160,7 +161,7 @@
     <% budget_buckets          = Enum.filter(@buckets, & &1.monthly_budget) %>
     <% sinking_buckets         = Enum.filter(@buckets, & &1.monthly_contribution) %>
     <% total_budgeted          = Enum.reduce(budget_buckets,  Decimal.new(0), fn b, acc -> Decimal.add(acc, b.monthly_budget) end) %>
-    <% total_expenses          = Enum.reduce(budget_buckets,  Decimal.new(0), fn b, acc -> Decimal.add(acc, Map.get(@monthly_expenses, b.id, Decimal.new(0))) end) %>
+    <% total_expenses          = @current_month_expenses %>
     <% total_sinking_target    = Enum.reduce(sinking_buckets, Decimal.new(0), fn b, acc -> Decimal.add(acc, b.max_balance) end) %>
     <% total_sinking_saved     = Enum.reduce(sinking_buckets, Decimal.new(0), fn b, acc -> Decimal.add(acc, Map.get(@month_end_balances, b.id, Decimal.new(0))) end) %>
     <% total_sinking_remaining = Decimal.sub(total_sinking_target, total_sinking_saved) |> Decimal.max(Decimal.new(0)) %>
