@@ -191,6 +191,38 @@ Hooks.LocalTime = {
   updated() { this.format(); }
 }
 
+// Renders a running HH:MM:SS elapsed-time readout counting up from a UTC
+// ISO8601 timestamp (data-start="..."). Ticks client-side every second so it
+// doesn't require a server round-trip.
+Hooks.ElapsedTimer = {
+  format(totalSeconds) {
+    const seconds = Math.max(0, Math.floor(totalSeconds));
+    const pad = (n) => String(n).padStart(2, "0");
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+  },
+  tick() {
+    if (!this.start) {
+      this.el.textContent = "00:00:00";
+      return;
+    }
+    this.el.textContent = this.format((Date.now() - this.start.getTime()) / 1000);
+  },
+  startTimer() {
+    const utc = this.el.dataset.start;
+    const date = utc ? new Date(utc) : null;
+    this.start = date && !isNaN(date.getTime()) ? date : null;
+    this.tick();
+    if (this.interval) clearInterval(this.interval);
+    this.interval = setInterval(() => this.tick(), 1000);
+  },
+  mounted() { this.startTimer(); },
+  updated() { this.startTimer(); },
+  destroyed() { if (this.interval) clearInterval(this.interval); }
+}
+
 function localDatetimeInputValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;

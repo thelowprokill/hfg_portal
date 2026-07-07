@@ -48,8 +48,28 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
                 <div class="text-sm text-zinc-500">
                   Since <span phx-hook="LocalTime" id="log_time_running_since" data-utc={DateTime.to_iso8601(@open_entry.start_time)}></span>
                 </div>
+                <div
+                  class="font-mono text-lg tabular-nums text-zinc-900 dark:text-white"
+                  phx-hook="ElapsedTimer"
+                  id={"log_time_elapsed_#{@open_entry.id}"}
+                  data-start={DateTime.to_iso8601(@open_entry.start_time)}
+                >00:00:00</div>
               </div>
-              <.bnw_button_danger phx_click="stop" phx-target={@myself}>Stop</.bnw_button_danger>
+              <.bnw_button_danger phx_click="stop" phx-target={@myself}>
+                <span class="inline-flex items-center gap-1.5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                    <line x1="12" y1="12" x2="12" y2="7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <line
+                      x1="12" y1="12" x2="15.5" y2="12"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      class="origin-center animate-spin"
+                      style="animation-duration: 2s"
+                    />
+                  </svg>
+                  Stop
+                </span>
+              </.bnw_button_danger>
             <% else %>
               <div class="text-sm text-zinc-500">Not currently running</div>
               <.bnw_button_success phx_click="start" phx-target={@myself}>Start</.bnw_button_success>
