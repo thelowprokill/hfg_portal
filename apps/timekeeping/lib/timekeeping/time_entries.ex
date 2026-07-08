@@ -28,6 +28,24 @@ defmodule Timekeeping.TimeEntries do
   end
 
   @doc """
+  Returns a map of job_id => total logged seconds (completed entries only)
+  for the given list of job_ids. Currently-running entries are excluded;
+  callers add their live elapsed time on top client-side.
+  """
+  def total_seconds_by_job(job_ids) do
+    @schema
+    |> where([te], te.job_id in ^job_ids and not is_nil(te.end_time))
+    |> group_by([te], te.job_id)
+    |> select([te], {te.job_id, fragment("SUM(TIMESTAMPDIFF(SECOND, ?, ?))", te.start_time, te.end_time)})
+    |> Repo.all()
+    |> Map.new(fn {job_id, total} -> {job_id, to_integer_seconds(total)} end)
+  end
+
+  defp to_integer_seconds(%Decimal{} = total), do: Decimal.to_integer(total)
+  defp to_integer_seconds(total) when is_integer(total), do: total
+  defp to_integer_seconds(nil), do: 0
+
+  @doc """
   Returns a map of job_id => start_time for every job that currently has an
   open (running) time entry.
   """

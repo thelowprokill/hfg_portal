@@ -23,6 +23,18 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
     socket
     |> assign(:open_entry, TimeEntries.get_open_for_job(job.id))
     |> assign(:history, TimeEntries.list_for_job(job.id))
+    |> assign_total_seconds()
+  end
+
+  defp assign_total_seconds(socket) do
+    total =
+      socket.assigns.history
+      |> Enum.reduce(0, fn
+        %{end_time: nil}, acc -> acc
+        %{start_time: start_time, end_time: end_time}, acc -> acc + DateTime.diff(end_time, start_time)
+      end)
+
+    assign(socket, :total_seconds, total)
   end
 
   defp assign_new_entry_form(socket) do
@@ -73,6 +85,21 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
             <% else %>
               <div class="text-sm text-zinc-500">Not currently running</div>
               <.bnw_button_success phx_click="start" phx-target={@myself}>Start</.bnw_button_success>
+            <% end %>
+          </div>
+
+          <div class="flex items-center justify-between px-1 pb-4 text-sm text-zinc-500">
+            <span>Total time logged</span>
+            <%= if @open_entry do %>
+              <span
+                class="font-mono text-base tabular-nums text-zinc-900 dark:text-white"
+                phx-hook="ElapsedTimer"
+                id={"log_time_total_#{@open_entry.id}"}
+                data-start={DateTime.to_iso8601(@open_entry.start_time)}
+                data-base-seconds={@total_seconds}
+              ><%= format_seconds(@total_seconds) %></span>
+            <% else %>
+              <span class="font-mono text-base tabular-nums text-zinc-900 dark:text-white"><%= format_seconds(@total_seconds) %></span>
             <% end %>
           </div>
 
@@ -173,6 +200,13 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
     hours   = div(seconds, 3600)
     minutes = div(rem(seconds, 3600), 60)
     "#{hours}h #{String.pad_leading(to_string(minutes), 2, "0")}m"
+  end
+
+  defp format_seconds(seconds) do
+    hours   = div(seconds, 3600)
+    minutes = div(rem(seconds, 3600), 60)
+    secs    = rem(seconds, 60)
+    :io_lib.format("~2..0B:~2..0B:~2..0B", [hours, minutes, secs]) |> IO.iodata_to_binary()
   end
 
   @impl true

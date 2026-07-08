@@ -13,6 +13,7 @@
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>Name</.bnw_table_header_filter></th>
         <th class="p-2">Client</th>
         <th class="p-2">Rate</th>
+        <th class="p-2">Total Time</th>
         <th class="p-2"></th>
         <th class="p-2"></th>
       </:header>
@@ -47,6 +48,18 @@
           </td>
           <td class="px-2"><%= job.client || "—" %></td>
           <td class="px-2"><%= if job.hourly_rate, do: "$#{job.hourly_rate}/hr", else: "—" %></td>
+          <td class="px-2 font-mono text-sm tabular-nums">
+            <%= if start_time = Map.get(@open_job_starts, job.id) do %>
+              <span
+                phx-hook="ElapsedTimer"
+                id={"jobs_total_#{job.id}"}
+                data-start={DateTime.to_iso8601(start_time)}
+                data-base-seconds={Map.get(@job_total_seconds, job.id, 0)}
+              ><%= format_seconds(Map.get(@job_total_seconds, job.id, 0)) %></span>
+            <% else %>
+              <%= format_seconds(Map.get(@job_total_seconds, job.id, 0)) %>
+            <% end %>
+          </td>
           <td class="px-2"><.bnw_button_edit phx-value-id={job.id} /></td>
           <td class="px-2"><.bnw_button_delete phx-value-id={job.id} /></td>
         </tr>

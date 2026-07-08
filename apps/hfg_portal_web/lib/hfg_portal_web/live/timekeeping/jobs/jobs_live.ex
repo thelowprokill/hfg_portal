@@ -7,11 +7,12 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
 
   defp fetch_jobs(socket) do
     %{
-      page:         page,
-      per_page:     per_page,
-      jobs:         jobs,
-      search_stack: search_stack,
-      sort_stack:   sort_stack,
+      page:               page,
+      per_page:           per_page,
+      jobs:               jobs,
+      search_stack:       search_stack,
+      sort_stack:         sort_stack,
+      job_total_seconds:  job_total_seconds,
     } = socket.assigns
 
     fetched = Jobs.list(%{
@@ -21,7 +22,11 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
       sort_stack:   sort_stack,
     })
 
-    socket |> assign(:jobs, jobs ++ fetched)
+    new_totals = TimeEntries.total_seconds_by_job(Enum.map(fetched, & &1.id))
+
+    socket
+    |> assign(:jobs, jobs ++ fetched)
+    |> assign(:job_total_seconds, Map.merge(job_total_seconds, new_totals))
   end
 
   defp reload_items(socket), do: socket |> assign(:jobs, []) |> assign(:page, 0) |> fetch_jobs()
@@ -71,6 +76,13 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
 
   defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
+  defp format_seconds(seconds) do
+    hours   = div(seconds, 3600)
+    minutes = div(rem(seconds, 3600), 60)
+    secs    = rem(seconds, 60)
+    :io_lib.format("~2..0B:~2..0B:~2..0B", [hours, minutes, secs]) |> IO.iodata_to_binary()
+  end
+
   @impl true
   def mount(_params, session, socket) do
     if connected?(socket) do
@@ -85,6 +97,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
     |> assign(:per_page,      50)
     |> assign(:jobs,          [])
     |> assign(:open_job_starts, TimeEntries.open_job_starts())
+    |> assign(:job_total_seconds, %{})
     |> assign(:modal_stack,   [])
     |> assign(:search_map,    %{})
     |> assign(:search_stack,  [])
@@ -128,9 +141,11 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
   end
 
   @impl true
-  def handle_info({[:time_entry, :created], entry}, socket), do: socket |> put_open_job(entry) |> res()
+  def handle_info({[:time_entry, :created], entry}, socket), do: socket |> refresh_job_time(entry.job_id) |> res()
   @impl true
-  def handle_info({[:time_entry, :updated], entry}, socket), do: socket |> put_open_job(entry) |> res()
+  def handle_info({[:time_entry, :updated], entry}, socket), do: socket |> refresh_job_time(entry.job_id) |> res()
+  @impl true
+  def handle_info({[:time_entry, :deleted], entry}, socket), do: socket |> refresh_job_time(entry.job_id) |> res()
 
   @impl true
   def handle_info(:cancel, socket), do: socket |> set_modal() |> res()
@@ -141,11 +156,22 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
     socket |> res()
   end
 
-  defp put_open_job(socket, %{job_id: job_id, end_time: nil, start_time: start_time}) do
-    assign(socket, :open_job_starts, Map.put(socket.assigns.open_job_starts, job_id, start_time))
+  defp refresh_job_time(socket, job_id) do
+    socket
+    |> refresh_open_job(job_id)
+    |> refresh_job_total(job_id)
   end
-  defp put_open_job(socket, %{job_id: job_id}) do
-    assign(socket, :open_job_starts, Map.delete(socket.assigns.open_job_starts, job_id))
+
+  defp refresh_open_job(socket, job_id) do
+    case TimeEntries.get_open_for_job(job_id) do
+      nil   -> assign(socket, :open_job_starts, Map.delete(socket.assigns.open_job_starts, job_id))
+      entry -> assign(socket, :open_job_starts, Map.put(socket.assigns.open_job_starts, job_id, entry.start_time))
+    end
+  end
+
+  defp refresh_job_total(socket, job_id) do
+    total = TimeEntries.total_seconds_by_job([job_id]) |> Map.get(job_id, 0)
+    assign(socket, :job_total_seconds, Map.put(socket.assigns.job_total_seconds, job_id, total))
   end
 
   @impl true

@@ -192,8 +192,9 @@ Hooks.LocalTime = {
 }
 
 // Renders a running HH:MM:SS elapsed-time readout counting up from a UTC
-// ISO8601 timestamp (data-start="..."). Ticks client-side every second so it
-// doesn't require a server round-trip.
+// ISO8601 timestamp (data-start="..."), optionally on top of a fixed
+// data-base-seconds offset (e.g. time already logged before this run).
+// Ticks client-side every second so it doesn't require a server round-trip.
 Hooks.ElapsedTimer = {
   format(totalSeconds) {
     const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -205,18 +206,19 @@ Hooks.ElapsedTimer = {
   },
   tick() {
     if (!this.start) {
-      this.el.textContent = "00:00:00";
+      this.el.textContent = this.format(this.base);
       return;
     }
-    this.el.textContent = this.format((Date.now() - this.start.getTime()) / 1000);
+    this.el.textContent = this.format(this.base + (Date.now() - this.start.getTime()) / 1000);
   },
   startTimer() {
     const utc = this.el.dataset.start;
     const date = utc ? new Date(utc) : null;
     this.start = date && !isNaN(date.getTime()) ? date : null;
+    this.base = parseFloat(this.el.dataset.baseSeconds || "0");
     this.tick();
     if (this.interval) clearInterval(this.interval);
-    this.interval = setInterval(() => this.tick(), 1000);
+    if (this.start) this.interval = setInterval(() => this.tick(), 1000);
   },
   mounted() { this.startTimer(); },
   updated() { this.startTimer(); },
