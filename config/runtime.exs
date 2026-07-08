@@ -32,6 +32,16 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
+  config :task_automation_controller, TaskAutomationController.Repo,
+    # ssl: true,
+    hostname: mysql_host,
+    username: mysql_username,
+    password: mysql_password,
+    port:     mysql_port,
+    database: "hfg_portal_task_automation_controller",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
   config :budget, Budget.Repo,
     # ssl: true,
     hostname: mysql_host,

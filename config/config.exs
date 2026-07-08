@@ -10,6 +10,19 @@
 import Config
 
 # Configure Mix tasks and generators
+config :task_automation_controller,
+  ecto_repos: [TaskAutomationController.Repo]
+
+# Configure the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :task_automation_controller, TaskAutomationController.Mailer, adapter: Swoosh.Adapters.Local
+
+# Configure Mix tasks and generators
 config :budget,
   ecto_repos: [Budget.Repo]
 

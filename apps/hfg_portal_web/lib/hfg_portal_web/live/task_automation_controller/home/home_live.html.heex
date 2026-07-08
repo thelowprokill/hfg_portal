@@ -1,0 +1,43 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new/></div>
+  <div class="py-3"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>
+  
+  <.form :let={s}
+    for={@search_map}
+    as={:search}
+    phx-change="search"
+    phx-submit="search">
+    <.bnw_table id="infinite_scroll_table" load_more={!Enum.any?(@search_stack, &(&1.show))}>
+      <:header>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:id}>ID</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:job_id}     type="select" list={[[key: "All Jobs", value: ""]]     ++ (@jobs     |> Enum.map(&([key: &1.name, value: &1.id])))}>Job Name</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:machine_id} type="select" list={[[key: "All Machines", value: ""]] ++ (@machines |> Enum.map(&([key: &1.name, value: &1.id])))}>Machine </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:address}>    Address </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:priority_id}>Priority</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:status} type="select" list={[[key: "All Statuses", value: ""]] ++ (Statuses.list() |> Enum.map(&([key: &1.name, value: &1.id])))}>Status</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:type}   type="select" list={[[key: "All Types", value: ""]]    ++ (Types.list()    |> Enum.map(&([key: &1.name, value: &1.id])))}>Type  </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:started_at}>  Start Time</.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:completed_at}>End Time  </.bnw_table_header_filter></th>
+        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:runtime}>     Runtime   </.bnw_table_header_filter></th>
+      </:header>
+      <%= for item <- @queued_items do %>
+        <tr>
+          <td><%= item.id %></td>
+          <td><%= item.job.name %></td>
+          <td><%= if item.machine, do: item.machine.name %></td>
+<td><%= if item.machine, do: "#{item.machine.address}" %>/<%= item.job.address %></td>
+          <td><%= item.job.priority.name %></td>
+          <td><%= item.status |> String.upcase() %></td>
+          <td><%= item.type %></td>
+          <td><%= item.started_at   |> fn x -> if x, do: x |> DateTime.from_naive!("Etc/UTC") |> DateTime.shift_zone!("America/Los_Angeles") |> Calendar.strftime("%Y-%m-%d %H:%M:%S") end.() %></td>
+          <td><%= item.completed_at |> fn x -> if x, do: x |> DateTime.from_naive!("Etc/UTC") |> DateTime.shift_zone!("America/Los_Angeles") |> Calendar.strftime("%Y-%m-%d %H:%M:%S") end.() %></td>
+          <td><%= item.runtime %></td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </.form>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

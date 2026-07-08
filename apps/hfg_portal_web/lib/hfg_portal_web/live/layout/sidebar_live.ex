@@ -182,6 +182,11 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
         id: "timekeeping",
         links: Timekeeping.Authorize.list_pages(current_user),
       },
+      %Page{
+        name: "Task Automation",
+        id: "task_automation_controller",
+        links: TaskAutomationController.Authorize.list_pages(current_user),
+      },
     ]
 
     system_apps ++ apps
@@ -334,6 +339,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       WifeTime.UserRoles.subscribe()
       Budget.UserRoles.subscribe()
       Timekeeping.UserRoles.subscribe()
+      TaskAutomationController.UserRoles.subscribe()
     end
 
     socket
@@ -420,6 +426,16 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
     cond do
       user_role.user_id == socket.assigns.current_user.id ->
         update_app(socket, "timekeeping", Timekeeping.Authorize.list_pages(socket.assigns.current_user), false)
+      true -> socket
+    end
+    |> res()
+  end
+
+  @impl true
+  def handle_info({[:task_automation_controller, :user_role, _], user_role}, socket) do
+    cond do
+      user_role.user_id == socket.assigns.current_user.id ->
+        update_app(socket, "task_automation_controller", TaskAutomationController.Authorize.list_pages(socket.assigns.current_user), false)
       true -> socket
     end
     |> res()

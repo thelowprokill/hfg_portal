@@ -10,6 +10,7 @@ defmodule HfgPortal.Release do
     :wife_time,
     :budget,
     :timekeeping,
+    :task_automation_controller,
   ]
 
   def migrate do

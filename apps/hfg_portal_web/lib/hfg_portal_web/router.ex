@@ -55,6 +55,10 @@ defmodule HfgPortalWeb.Router do
     put    "/call", Apis.RoutesController, :call
     delete "/call", Apis.RoutesController, :call
   end
+  scope "/apis/task_automation_controller/update", HfgPortalWeb do
+    pipe_through :api
+    get "/", Apis.TaskAutomationControllerApiController, :update
+  end
 
   ## Authentication routes
 

@@ -1,0 +1,27 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6"><.bnw_button_new /></div>
+  <!--<div class="py-3"><.bnw_button_primary phx_click="reset_filters">Reset Filters</.bnw_button_primary></div>-->
+  
+  <.bnw_table id="infinite_scroll_table" load_more={!Enum.any?(@search_stack, &(&1.show))}>
+    <:header>
+      <th class="p-2">Name</th>
+      <th class="p-2"></th>
+      <th class="p-2">Active</th>
+      <th class="p-2"></th>
+      <th class="p-2"></th>
+    </:header>
+    <%= for item <- @priorities do %>
+      <tr>
+        <td><%= item.name %></td>
+        <td><%= if item.order != Enum.min_by(@priorities, &(&1.order)).order do %><.bnw_button_down phx-value-id={item.id} /><% end %></td>
+        <td><.bnw_button_toggle_active active={item.active} phx-value-id={item.id} /></td>
+        <td><.bnw_button_edit   phx-value-id={item.id} /></td>
+        <td><.bnw_button_delete phx-value-id={item.id} /></td>
+      </tr>
+    <% end %>
+  </.bnw_table>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>
