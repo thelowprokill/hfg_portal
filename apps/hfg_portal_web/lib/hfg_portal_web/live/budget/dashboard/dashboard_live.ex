@@ -21,6 +21,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
 
     accounts = Accounts.list()
     account_totals = AccountBalances.map_for_month(year, month)
+    account_balances_as_of = AccountBalances.latest_date_for_month(year, month)
 
     sum_for_type = fn type ->
       accounts
@@ -39,19 +40,20 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
         Decimal.add(acc, Transactions.balance_as_of_month(bucket.id, year, month))
       end)
 
-    %{current_month_expenses: current_month_expenses} = socket.assigns
-
+    # Debit/credit balances are pulled live from the financial institutions,
+    # so they already reflect this month's spending - subtracting
+    # current_month_expenses again here would double-count it.
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
-      |> Decimal.sub(current_month_expenses)
 
     socket
     |> assign(:debit_total, debit_total)
     |> assign(:credit_total, credit_total)
     |> assign(:sinking_total, sinking_total)
     |> assign(:total_money, total_money)
+    |> assign(:account_balances_as_of, account_balances_as_of)
   end
 
   defp fetch_can_edit(socket) do
@@ -248,6 +250,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> assign(:sinking_total, Decimal.new(0))
     |> assign(:current_month_expenses, Decimal.new(0))
     |> assign(:total_money, Decimal.new(0))
+    |> assign(:account_balances_as_of, nil)
     |> assign(:selected_bucket, nil)
     |> assign(:selected_year, today.year)
     |> assign(:selected_month, today.month)

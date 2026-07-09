@@ -2,13 +2,17 @@
   <%# ── Total money card (always visible) ── %>
   <% total_over = Decimal.compare(@total_money, Decimal.new(0)) == :lt %>
   <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mt-4">
-    <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Total Money</span>
+    <div class="flex items-baseline justify-between">
+      <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Total Money</span>
+      <%= if @account_balances_as_of do %>
+        <span class="text-xs text-zinc-400">Accounts as of <%= @account_balances_as_of %></span>
+      <% end %>
+    </div>
     <div class={["text-3xl font-semibold", if(total_over, do: "text-red-500")]}>$<%= @total_money %></div>
     <div class="flex flex-wrap gap-x-6 gap-y-1 pt-2 text-sm text-zinc-500">
       <span>Debit accounts: $<%= @debit_total %></span>
       <span>Credit accounts: −$<%= @credit_total %></span>
       <span>Sinking funds: −$<%= @sinking_total %></span>
-      <span>This month's expenses: −$<%= @current_month_expenses %></span>
     </div>
   </div>
 

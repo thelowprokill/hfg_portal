@@ -90,11 +90,15 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         Decimal.add(acc, Transactions.monthly_expense_total(bucket.id, year, month))
       end)
 
+    # Debit/credit balances are pulled live from the financial institutions,
+    # so they already reflect this month's spending - subtracting
+    # current_month_expenses again here would double-count it.
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
-      |> Decimal.sub(current_month_expenses)
+
+    account_balances_as_of = AccountBalances.latest_date_for_month(year, month)
 
     conn
     |> put_status(:ok)
@@ -108,7 +112,8 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         credit_total: to_string(credit_total),
         sinking_total: to_string(sinking_total),
         current_month_expenses: to_string(current_month_expenses),
-        total_money: to_string(total_money)
+        total_money: to_string(total_money),
+        account_balances_as_of: account_balances_as_of
       }
     })
   end

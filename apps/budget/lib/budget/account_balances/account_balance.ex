@@ -15,9 +15,8 @@ defmodule Budget.AccountBalances.AccountBalance do
 
   schema "account_balances" do
     field(:account_id, :integer)
-    field(:year, :integer)
-    field(:month, :integer)
     field(:balance, :decimal, default: Decimal.new(0))
+    field(:date, :date)
 
     belongs_to(:account, Budget.Accounts.Account, define_field: false)
 
@@ -26,9 +25,8 @@ defmodule Budget.AccountBalances.AccountBalance do
 
   def changeset(account_balance, attrs \\ %{}) do
     account_balance
-    |> cast(attrs, [:account_id, :year, :month, :balance])
-    |> validate_required([:account_id, :year, :month, :balance])
-    |> validate_number(:month, greater_than_or_equal_to: 1, less_than_or_equal_to: 12)
-    |> unique_constraint([:account_id, :year, :month])
+    |> cast(attrs, [:account_id, :balance, :date])
+    |> validate_required([:account_id, :balance, :date])
+    |> unique_constraint([:account_id, :date])
   end
 end
