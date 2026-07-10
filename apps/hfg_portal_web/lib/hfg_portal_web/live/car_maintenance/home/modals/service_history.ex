@@ -38,10 +38,11 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
 
                       <tr id="new_item">
                         <%= if @new && @edit do %>
-                          <.edit_form 
-                            f={f} 
-                            car_id={@car_id} 
-                            user_id={@user.id} 
+                          <.edit_form
+                            f={f}
+                            car_id={@car_id}
+                            user_id={@user.id}
+                            new={true}
                             maintenance_items_list={@maintenance_items_list}
                           />
                         <% end %>
@@ -51,11 +52,10 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
                         <tr id={"item_#{item.id}"}>
                           <%= cond do %>
                             <% !@new && @edit && item.id == @changeset.data.id -> %>
-                              <.edit_form 
-                                f={f} 
-                                car_id={@car_id} 
-                                user_id={@user.id} 
-                                cancel={true} 
+                              <.edit_form
+                                f={f}
+                                car_id={@car_id}
+                                user_id={@user.id}
                                 maintenance_items_list={@maintenance_items_list}
                               />
                             <% true -> %>
@@ -123,11 +123,11 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   attr :car_id,            :integer
   attr :user_id,           :integer
   attr :user_name,         :string
-  attr :cancel,            :boolean, default: false
+  attr :new,               :boolean, default: false
   attr :maintenance_items_list, :list
   def edit_form(assigns) do
     ~H"""
-      <%= if @cancel do %>
+      <%= if @new do %>
         <.bnw_input_hidden f={@f} field={:created_by_id} value={@user_id} />
       <% end %>
       <.bnw_input_hidden f={@f} field={:car_id}        value={@car_id} />
