@@ -31,11 +31,18 @@ defmodule Budget.AccountBalances do
   forward the last known value if nothing has been recorded yet this month.
   """
   def map_for_month(year, month) do
-    end_date = Date.end_of_month(Date.new!(year, month, 1))
+    Date.new!(year, month, 1) |> Date.end_of_month() |> map_for_date()
+  end
 
+  @doc """
+  Returns a map of account_id => balance reflecting each account's most
+  recently recorded balance on or before `date`. Carries forward the last
+  known value if nothing has been recorded on `date` itself.
+  """
+  def map_for_date(date) do
     latest =
       from(b in @schema,
-        where: b.date <= ^end_date,
+        where: b.date <= ^date,
         group_by: b.account_id,
         select: %{account_id: b.account_id, date: max(b.date)}
       )
@@ -54,10 +61,16 @@ defmodule Budget.AccountBalances do
   before the end of `year`/`month`, or nil if nothing has been recorded yet.
   """
   def latest_date_for_month(year, month) do
-    end_date = Date.end_of_month(Date.new!(year, month, 1))
+    Date.new!(year, month, 1) |> Date.end_of_month() |> latest_date_as_of()
+  end
 
+  @doc """
+  Returns the most recent balance date on file across all accounts, on or
+  before `date`, or nil if nothing has been recorded yet.
+  """
+  def latest_date_as_of(date) do
     @schema
-    |> where([b], b.date <= ^end_date)
+    |> where([b], b.date <= ^date)
     |> select([b], max(b.date))
     |> Repo.one()
   end

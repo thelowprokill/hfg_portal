@@ -93,10 +93,12 @@ defmodule Budget.Transactions do
   end
 
   def balance_as_of_month(bucket_id, year, month) do
-    end_date = Date.end_of_month(Date.new!(year, month, 1))
+    Date.new!(year, month, 1) |> Date.end_of_month() |> then(&balance_as_of_date(bucket_id, &1))
+  end
 
+  def balance_as_of_date(bucket_id, date) do
     @schema
-    |> where([t], t.bucket_id == ^bucket_id and t.transaction_date <= ^end_date)
+    |> where([t], t.bucket_id == ^bucket_id and t.transaction_date <= ^date)
     |> select([t], fragment(
       "COALESCE(SUM(CASE WHEN type IN ('contribution','sinking_fund_deposit') THEN amount WHEN type = 'expense' THEN -amount ELSE 0 END), 0)"
     ))

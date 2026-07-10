@@ -268,6 +268,80 @@ Hooks.LocalDatetimeInput = {
   }
 }
 
+// Pairs with HfgPortalWeb.Helpers.Charts.bnw_chart_line/1. Reads a JSON list
+// of points (data-points, each {x, label, series: [{label, color, value}]})
+// precomputed server-side, and on mousemove shows a vertical crosshair plus
+// a tooltip for the nearest point - purely client-side, no server round-trip.
+Hooks.ChartHover = {
+  escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  },
+  tooltipHtml(point) {
+    const rows = point.series.map((s) => `
+      <div class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${s.color}"></span>
+          ${this.escapeHtml(s.label)}
+        </span>
+        <span class="font-medium">${this.escapeHtml(s.value)}</span>
+      </div>
+    `).join("");
+
+    return `<div class="font-semibold mb-1">${this.escapeHtml(point.label)}</div>${rows}`;
+  },
+  nearestPoint(svgX) {
+    return this.points.reduce((best, p) =>
+      Math.abs(p.x - svgX) < Math.abs(best.x - svgX) ? p : best
+    , this.points[0]);
+  },
+  handleMove(e) {
+    if (this.points.length === 0) return;
+
+    const rect = this.svg.getBoundingClientRect();
+    const svgX = (e.clientX - rect.left) * (this.viewBoxWidth / rect.width);
+    const point = this.nearestPoint(svgX);
+    const pxPerUnit = rect.width / this.viewBoxWidth;
+    const crosshairPx = point.x * pxPerUnit;
+
+    this.crosshair.setAttribute("x1", point.x);
+    this.crosshair.setAttribute("x2", point.x);
+    this.crosshair.classList.remove("hidden");
+
+    this.tooltip.innerHTML = this.tooltipHtml(point);
+    this.tooltip.classList.remove("hidden");
+
+    const containerWidth = this.el.getBoundingClientRect().width;
+    const maxLeft = Math.max(0, containerWidth - this.tooltip.offsetWidth);
+    this.tooltip.style.left = `${Math.min(Math.max(0, crosshairPx), maxLeft)}px`;
+  },
+  hide() {
+    this.crosshair.classList.add("hidden");
+    this.tooltip.classList.add("hidden");
+  },
+  mounted() {
+    this.points = JSON.parse(this.el.dataset.points || "[]");
+    this.viewBoxWidth = parseFloat(this.el.dataset.viewboxWidth);
+    this.svg = this.el.querySelector("svg");
+    this.crosshair = this.el.querySelector(".chart-crosshair");
+    this.tooltip = this.el.querySelector(".chart-tooltip");
+
+    this.onMove = (e) => this.handleMove(e);
+    this.onLeave = () => this.hide();
+    this.svg.addEventListener("mousemove", this.onMove);
+    this.svg.addEventListener("mouseleave", this.onLeave);
+  },
+  updated() {
+    this.points = JSON.parse(this.el.dataset.points || "[]");
+    this.viewBoxWidth = parseFloat(this.el.dataset.viewboxWidth);
+  },
+  destroyed() {
+    this.svg.removeEventListener("mousemove", this.onMove);
+    this.svg.removeEventListener("mouseleave", this.onLeave);
+  }
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks}, )
 

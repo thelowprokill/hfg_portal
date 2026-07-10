@@ -13,11 +13,11 @@ defmodule CarMaintenance.Cars.ServiceHistory do
   @schema_prefix prefix
 
   schema "service_history" do
-    field :service_date,    :date
-    field :mileage,         :integer
-    field :name,            :string
-    field :named_item,      :boolean, default: false
-    field :notes,           :string
+    field :service_date, :date
+    field :mileage,      :integer
+    field :name,         :string
+    field :named_item,   :boolean, default: false
+    field :notes,        :string
 
     belongs_to :car,              CarMaintenance.Cars.Car
     belongs_to :maintenance_item, CarMaintenance.Cars.MaintenanceItem

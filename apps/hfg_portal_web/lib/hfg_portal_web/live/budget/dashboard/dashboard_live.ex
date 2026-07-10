@@ -20,8 +20,29 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     %{selected_year: year, selected_month: month} = socket.assigns
 
     accounts = Accounts.list()
-    account_totals = AccountBalances.map_for_month(year, month)
+    sinking_buckets = Buckets.list_all_sinking_funds()
     account_balances_as_of = AccountBalances.latest_date_for_month(year, month)
+
+    %{debit: debit_total, credit: credit_total, sinking: sinking_total, total: total_money} =
+      totals_for_month(accounts, sinking_buckets, year, month)
+
+    socket
+    |> assign(:debit_total, debit_total)
+    |> assign(:credit_total, credit_total)
+    |> assign(:sinking_total, sinking_total)
+    |> assign(:total_money, total_money)
+    |> assign(:account_balances_as_of, account_balances_as_of)
+  end
+
+  # Debit/credit balances are pulled live from the financial institutions,
+  # so they already reflect this month's spending - subtracting
+  # current_month_expenses again here would double-count it.
+  defp totals_for_month(accounts, sinking_buckets, year, month) do
+    Date.new!(year, month, 1) |> Date.end_of_month() |> totals_for_date(accounts, sinking_buckets)
+  end
+
+  defp totals_for_date(date, accounts, sinking_buckets) do
+    account_totals = AccountBalances.map_for_date(date)
 
     sum_for_type = fn type ->
       accounts
@@ -35,25 +56,41 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     credit_total = sum_for_type.("credit")
 
     sinking_total =
-      Buckets.list_all_sinking_funds()
+      sinking_buckets
       |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
-        Decimal.add(acc, Transactions.balance_as_of_month(bucket.id, year, month))
+        Decimal.add(acc, Transactions.balance_as_of_date(bucket.id, date))
       end)
 
-    # Debit/credit balances are pulled live from the financial institutions,
-    # so they already reflect this month's spending - subtracting
-    # current_month_expenses again here would double-count it.
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
 
-    socket
-    |> assign(:debit_total, debit_total)
-    |> assign(:credit_total, credit_total)
-    |> assign(:sinking_total, sinking_total)
-    |> assign(:total_money, total_money)
-    |> assign(:account_balances_as_of, account_balances_as_of)
+    %{debit: debit_total, credit: credit_total, sinking: sinking_total, total: total_money}
+  end
+
+  defp account_history_points(from_date, to_date) do
+    accounts = Accounts.list()
+    sinking_buckets = Buckets.list_all_sinking_funds()
+
+    Date.range(from_date, to_date)
+    |> Enum.map(fn date ->
+      date
+      |> totals_for_date(accounts, sinking_buckets)
+      |> Map.put(:label, Calendar.strftime(date, "%b %d"))
+    end)
+  end
+
+  defp fetch_account_history(%{assigns: %{show_history: false}} = socket), do: socket
+
+  defp fetch_account_history(socket) do
+    %{history_from: from_date, history_to: to_date} = socket.assigns
+
+    if Date.compare(from_date, to_date) != :gt do
+      assign(socket, :account_history_points, account_history_points(from_date, to_date))
+    else
+      socket
+    end
   end
 
   defp fetch_can_edit(socket) do
@@ -224,6 +261,30 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> handle_params(session |> Map.delete("year") |> Map.delete("month"))
   end
 
+  defp handle_params(socket, %{"history" => _} = session) do
+    %{session: stored} = socket.assigns
+
+    socket
+    |> assign(:session, Map.put(stored, "history", "1"))
+    |> assign(:show_history, true)
+    |> handle_params(Map.delete(session, "history"))
+  end
+
+  defp handle_params(socket, %{"history_from" => from, "history_to" => to} = session) do
+    %{session: stored} = socket.assigns
+
+    with {:ok, from_date} <- Date.from_iso8601(from),
+         {:ok, to_date} <- Date.from_iso8601(to) do
+      socket
+      |> assign(:session, stored |> Map.put("history_from", from) |> Map.put("history_to", to))
+      |> assign(:history_from, from_date)
+      |> assign(:history_to, to_date)
+    else
+      _ -> socket
+    end
+    |> handle_params(session |> Map.delete("history_from") |> Map.delete("history_to"))
+  end
+
   defp handle_params(socket, _session), do: socket
 
   @impl true
@@ -255,6 +316,10 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> assign(:selected_year, today.year)
     |> assign(:selected_month, today.month)
     |> assign(:transactions, [])
+    |> assign(:show_history, false)
+    |> assign(:history_from, Date.add(today, -90))
+    |> assign(:history_to, today)
+    |> assign(:account_history_points, [])
     |> assign(:modal_stack, [])
     |> assign(:can_edit, false)
     |> fetch_buckets()
@@ -263,6 +328,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> res(:ok)
   end
 
@@ -280,6 +346,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> res()
   end
 
@@ -290,17 +357,18 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> res()
   end
 
   @impl true
   def handle_info({[:account, _], _account}, socket) do
-    socket |> fetch_account_totals() |> res()
+    socket |> fetch_account_totals() |> fetch_account_history() |> res()
   end
 
   @impl true
   def handle_info({[:account_balance, _], _account_balance}, socket) do
-    socket |> fetch_account_totals() |> res()
+    socket |> fetch_account_totals() |> fetch_account_history() |> res()
   end
 
   @impl true
@@ -321,6 +389,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> push_changes(:patch)
     |> res()
   end
@@ -335,6 +404,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> push_changes(:patch)
     |> res()
   end
@@ -349,6 +419,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> fetch_monthly_totals()
     |> fetch_account_totals()
     |> fetch_bucket_transactions()
+    |> fetch_account_history()
     |> push_changes(:patch)
     |> res()
   end
@@ -373,7 +444,12 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     socket
     |> assign(:selected_bucket, nil)
     |> assign(:transactions, [])
-    |> assign(:session, Map.delete(session, "bucket"))
+    |> assign(:show_history, false)
+    |> assign(:account_history_points, [])
+    |> assign(
+      :session,
+      session |> Map.delete("bucket") |> Map.delete("history") |> Map.delete("history_from") |> Map.delete("history_to")
+    )
     |> push_changes(:patch)
     |> res()
   end
@@ -391,6 +467,36 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   def handle_event("delete", %{"id" => id}, %{assigns: %{can_edit: true}} = socket) do
     Transactions.delete(String.to_integer(id))
     socket |> res()
+  end
+
+  @impl true
+  def handle_event("show_account_history", _, socket) do
+    %{session: session} = socket.assigns
+
+    socket
+    |> assign(:show_history, true)
+    |> assign(:session, Map.put(session, "history", "1"))
+    |> fetch_account_history()
+    |> push_changes(:patch)
+    |> res()
+  end
+
+  @impl true
+  def handle_event("update_history_range", %{"range" => %{"from" => from, "to" => to}}, socket) do
+    %{session: session} = socket.assigns
+
+    with {:ok, from_date} <- Date.from_iso8601(from),
+         {:ok, to_date} <- Date.from_iso8601(to) do
+      socket
+      |> assign(:history_from, from_date)
+      |> assign(:history_to, to_date)
+      |> assign(:session, session |> Map.put("history_from", from) |> Map.put("history_to", to))
+      |> fetch_account_history()
+      |> push_changes(:patch)
+      |> res()
+    else
+      _ -> socket |> res()
+    end
   end
 
   @impl true

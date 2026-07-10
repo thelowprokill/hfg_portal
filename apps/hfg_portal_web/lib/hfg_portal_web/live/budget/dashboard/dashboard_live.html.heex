@@ -1,7 +1,10 @@
 <div>
   <%# ── Total money card (always visible) ── %>
   <% total_over = Decimal.compare(@total_money, Decimal.new(0)) == :lt %>
-  <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mt-4">
+  <div
+    phx-click="show_account_history"
+    class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mt-4 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-500 hover:shadow-md transition-all"
+  >
     <div class="flex items-baseline justify-between">
       <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Total Money</span>
       <%= if @account_balances_as_of do %>
@@ -37,7 +40,8 @@
     <% end %>
   </div>
 
-  <%= if @selected_bucket do %>
+  <%= cond do %>
+  <% @selected_bucket -> %>
     <%# ── Bucket detail view ── %>
 
     <div class="py-4">
@@ -154,9 +158,37 @@
       </table>
     </div>
 
-    <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+  <% @show_history -> %>
+    <%# ── Account history view ── %>
 
-  <% else %>
+    <div class="py-4 flex items-center justify-between flex-wrap gap-3">
+      <button phx-click="back"
+              class="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+        ← Back
+      </button>
+
+      <.form :let={f} for={%{}} as={:range} phx-change="update_history_range" class="flex items-center gap-2 text-sm">
+        <.bnw_input_naked f={f} type="date" field={:from} value={Date.to_iso8601(@history_from)} display_name="From" />
+        <span class="text-zinc-400">–</span>
+        <.bnw_input_naked f={f} type="date" field={:to} value={Date.to_iso8601(@history_to)} display_name="To" />
+      </.form>
+    </div>
+
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 mb-6">
+      <span class="text-xs font-medium text-zinc-500 uppercase tracking-wide">Account Values</span>
+      <.bnw_chart_line
+        id="account_history_chart"
+        series={[
+          %{label: "Total",         color: "#3b82f6", values: Enum.map(@account_history_points, & &1.total)},
+          %{label: "Debits",        color: "#22c55e", values: Enum.map(@account_history_points, & &1.debit)},
+          %{label: "Credits",       color: "#ef4444", values: Enum.map(@account_history_points, & &1.credit)},
+          %{label: "Sinking Funds", color: "#a855f7", values: Enum.map(@account_history_points, & &1.sinking)}
+        ]}
+        x_labels={Enum.map(@account_history_points, & &1.label)}
+      />
+    </div>
+
+  <% true -> %>
     <%# ── Dashboard grid ── %>
 
     <h3 class="text-xl"><%= @page_title %></h3>
@@ -305,4 +337,6 @@
     </div>
 
   <% end %>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
 </div>
