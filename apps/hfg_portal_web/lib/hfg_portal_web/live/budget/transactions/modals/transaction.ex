@@ -27,8 +27,8 @@ defmodule HfgPortalWeb.Budget.Transactions.Modals.ChangeTransaction do
 
             <% bucket_list = Enum.map(@modal.opts.buckets, &[key: &1.name, value: &1.id]) %>
             <.bnw_input f={f} type="select" field={:bucket_id}        display_name="Bucket"           list={bucket_list} />
-            <.bnw_input f={f} field={:description}                    display_name="Description" />
             <.bnw_input f={f} type="money"  field={:amount}           display_name="Amount" />
+            <.bnw_input f={f} field={:description}                    display_name="Description" />
             <.bnw_input f={f} type="select" field={:type}             display_name="Type"             list={@types} />
             <.bnw_input f={f} type="date"   field={:transaction_date} display_name="Transaction Date" />
 
