@@ -1,0 +1,24 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-6">
+    <.bnw_table height="80vh">
+      <:header>
+        <th class="p-2">Account</th>
+        <th class="p-2">Type</th>
+        <th class="p-2">Balance</th>
+        <th class="p-2"></th>
+      </:header>
+      <%= for account <- @accounts do %>
+        <tr>
+          <td class="px-2"><%= account.name %></td>
+          <td class="px-2 capitalize"><%= account.type %></td>
+          <td class="px-2">$<%= Map.get(@balances, account.id, Decimal.new(0)) %></td>
+          <td class="px-2"><.bnw_button_default phx_click="set_balance" phx-value-id={account.id}>Set Balance</.bnw_button_default></td>
+        </tr>
+      <% end %>
+    </.bnw_table>
+  </div>
+
+  <.bnw_modal_render socket={@socket} modal_stack={@modal_stack} />
+</div>

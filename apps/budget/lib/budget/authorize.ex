@@ -12,6 +12,11 @@ defmodule Budget.Authorize do
       module: HfgPortalWeb.Budget.Dashboard.DashboardLive
     },
     %Page{
+      id: "balances",
+      name: "Balances",
+      module: HfgPortalWeb.Budget.Balances.BalancesLive
+    },
+    %Page{
       id: "manage",
       name: "Manage",
       links: [
@@ -47,8 +52,8 @@ defmodule Budget.Authorize do
     cond do
       dev_admin -> true
       role && role.admin && page not in ["reports"] -> true
-      role && role.edit && page in ["dashboard"] -> true
-      role && role.view && page in ["dashboard"] -> true
+      role && role.edit && page in ["dashboard", "balances"] -> true
+      role && role.view && page in ["dashboard", "balances"] -> true
       true -> false
     end
   end
