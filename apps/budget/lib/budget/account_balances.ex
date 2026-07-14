@@ -39,7 +39,15 @@ defmodule Budget.AccountBalances do
   recently recorded balance on or before `date`. Carries forward the last
   known value if nothing has been recorded on `date` itself.
   """
-  def map_for_date(date) do
+  def map_for_date(date), do: latest_for_date(date, :balance)
+
+  @doc """
+  Returns a map of account_id => date reflecting the date of each account's
+  most recently recorded balance on or before `date`.
+  """
+  def dates_for_date(date), do: latest_for_date(date, :date)
+
+  defp latest_for_date(date, field) do
     latest =
       from(b in @schema,
         where: b.date <= ^date,
@@ -50,7 +58,7 @@ defmodule Budget.AccountBalances do
     from(b in @schema,
       join: l in subquery(latest),
       on: b.account_id == l.account_id and b.date == l.date,
-      select: {b.account_id, b.balance}
+      select: {b.account_id, field(b, ^field)}
     )
     |> Repo.all()
     |> Map.new()

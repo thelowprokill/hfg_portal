@@ -36,17 +36,24 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
     |> assign(:modal_stack, [])
     |> assign(:accounts, Accounts.list(%{}))
     |> assign(:balances, AccountBalances.map_for_date(Date.utc_today()))
+    |> assign(:balance_dates, AccountBalances.dates_for_date(Date.utc_today()))
     |> res(:ok)
   end
 
   @impl true
   def handle_info({[:account_balance, :created], balance}, socket) do
-    socket |> assign(:balances, Map.put(socket.assigns.balances, balance.account_id, balance.balance)) |> res()
+    socket
+    |> assign(:balances, Map.put(socket.assigns.balances, balance.account_id, balance.balance))
+    |> assign(:balance_dates, Map.put(socket.assigns.balance_dates, balance.account_id, balance.date))
+    |> res()
   end
 
   @impl true
   def handle_info({[:account_balance, :updated], balance}, socket) do
-    socket |> assign(:balances, Map.put(socket.assigns.balances, balance.account_id, balance.balance)) |> res()
+    socket
+    |> assign(:balances, Map.put(socket.assigns.balances, balance.account_id, balance.balance))
+    |> assign(:balance_dates, Map.put(socket.assigns.balance_dates, balance.account_id, balance.date))
+    |> res()
   end
 
   @impl true
