@@ -11,10 +11,13 @@ defmodule Budget.Buckets.Bucket do
 
   @schema_prefix prefix
 
+  @types ~w(normal sinking_fund emergency_fund)
+
   schema "buckets" do
     field :user_id,              :integer
     field :name,                 :string
     field :description,          :string
+    field :type,                 :string, default: "normal"
     field :balance,              :decimal, default: Decimal.new(0)
     field :monthly_budget,       :decimal
     field :monthly_contribution, :decimal
@@ -32,24 +35,29 @@ defmodule Budget.Buckets.Bucket do
       :user_id,
       :name,
       :description,
+      :type,
       :balance,
       :monthly_budget,
       :monthly_contribution,
       :max_balance
     ])
     |> validate_required([:user_id, :name])
+    |> validate_inclusion(:type, @types)
     |> validate_sinking_fund_fields()
   end
 
+  # Only sinking funds have a fixed savings target - emergency funds accrue
+  # a monthly contribution indefinitely with no max_balance.
   defp validate_sinking_fund_fields(changeset) do
+    type         = get_field(changeset, :type)
     contribution = get_field(changeset, :monthly_contribution)
     max_balance  = get_field(changeset, :max_balance)
 
     cond do
-      not is_nil(contribution) and is_nil(max_balance) ->
+      type == "sinking_fund" and not is_nil(contribution) and is_nil(max_balance) ->
         add_error(changeset, :max_balance, "is required when monthly_contribution is set")
 
-      is_nil(contribution) and not is_nil(max_balance) ->
+      type == "sinking_fund" and is_nil(contribution) and not is_nil(max_balance) ->
         add_error(changeset, :monthly_contribution, "is required when max_balance is set")
 
       true ->

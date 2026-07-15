@@ -35,6 +35,7 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         %{
           id: bucket.id,
           name: bucket.name,
+          type: bucket.type,
           description: bucket.description,
           balance: to_string(bucket.balance),
           monthly_budget: decimal_or_nil(bucket.monthly_budget),
@@ -74,15 +75,20 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
     debit_total = sum_for_type.("debit")
     credit_total = sum_for_type.("credit")
 
-    sinking_total =
-      Buckets.list_all_sinking_funds()
+    sum_bucket_balances = fn buckets ->
+      buckets
       |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
         Decimal.add(acc, Transactions.balance_as_of_month(bucket.id, year, month))
       end)
+    end
 
-    # Sinking-fund expenses are already netted into their bucket balance (and
-    # therefore into sinking_total), so only sum expenses for regular
-    # monthly-budget buckets here to avoid double-counting in total_money.
+    sinking_total = sum_bucket_balances.(Buckets.list_all_sinking_funds())
+    emergency_total = sum_bucket_balances.(Buckets.list_all_emergency_funds())
+
+    # Sinking-fund/emergency-fund expenses are already netted into their bucket
+    # balance (and therefore into sinking_total/emergency_total), so only sum
+    # expenses for regular monthly-budget buckets here to avoid double-counting
+    # in total_money.
     current_month_expenses =
       Buckets.list()
       |> Enum.filter(& &1.monthly_budget)
@@ -97,6 +103,7 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
+      |> Decimal.sub(emergency_total)
 
     account_balances_as_of = AccountBalances.latest_date_for_month(year, month)
 
@@ -111,6 +118,7 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
         debit_total: to_string(debit_total),
         credit_total: to_string(credit_total),
         sinking_total: to_string(sinking_total),
+        emergency_total: to_string(emergency_total),
         current_month_expenses: to_string(current_month_expenses),
         total_money: to_string(total_money),
         account_balances_as_of: account_balances_as_of

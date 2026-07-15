@@ -21,15 +21,22 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
 
     accounts = Accounts.list()
     sinking_buckets = Buckets.list_all_sinking_funds()
+    emergency_buckets = Buckets.list_all_emergency_funds()
     account_balances_as_of = AccountBalances.latest_date_for_month(year, month)
 
-    %{debit: debit_total, credit: credit_total, sinking: sinking_total, total: total_money} =
-      totals_for_month(accounts, sinking_buckets, year, month)
+    %{
+      debit: debit_total,
+      credit: credit_total,
+      sinking: sinking_total,
+      emergency: emergency_total,
+      total: total_money
+    } = totals_for_month(accounts, sinking_buckets, emergency_buckets, year, month)
 
     socket
     |> assign(:debit_total, debit_total)
     |> assign(:credit_total, credit_total)
     |> assign(:sinking_total, sinking_total)
+    |> assign(:emergency_total, emergency_total)
     |> assign(:total_money, total_money)
     |> assign(:account_balances_as_of, account_balances_as_of)
   end
@@ -37,11 +44,13 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   # Debit/credit balances are pulled live from the financial institutions,
   # so they already reflect this month's spending - subtracting
   # current_month_expenses again here would double-count it.
-  defp totals_for_month(accounts, sinking_buckets, year, month) do
-    Date.new!(year, month, 1) |> Date.end_of_month() |> totals_for_date(accounts, sinking_buckets)
+  defp totals_for_month(accounts, sinking_buckets, emergency_buckets, year, month) do
+    Date.new!(year, month, 1)
+    |> Date.end_of_month()
+    |> totals_for_date(accounts, sinking_buckets, emergency_buckets)
   end
 
-  defp totals_for_date(date, accounts, sinking_buckets) do
+  defp totals_for_date(date, accounts, sinking_buckets, emergency_buckets) do
     account_totals = AccountBalances.map_for_date(date)
 
     sum_for_type = fn type ->
@@ -52,31 +61,42 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
       end)
     end
 
-    debit_total = sum_for_type.("debit")
-    credit_total = sum_for_type.("credit")
-
-    sinking_total =
-      sinking_buckets
+    sum_bucket_balances = fn buckets ->
+      buckets
       |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
         Decimal.add(acc, Transactions.balance_as_of_date(bucket.id, date))
       end)
+    end
+
+    debit_total = sum_for_type.("debit")
+    credit_total = sum_for_type.("credit")
+    sinking_total = sum_bucket_balances.(sinking_buckets)
+    emergency_total = sum_bucket_balances.(emergency_buckets)
 
     total_money =
       debit_total
       |> Decimal.sub(credit_total)
       |> Decimal.sub(sinking_total)
+      |> Decimal.sub(emergency_total)
 
-    %{debit: debit_total, credit: credit_total, sinking: sinking_total, total: total_money}
+    %{
+      debit: debit_total,
+      credit: credit_total,
+      sinking: sinking_total,
+      emergency: emergency_total,
+      total: total_money
+    }
   end
 
   defp account_history_points(from_date, to_date) do
     accounts = Accounts.list()
     sinking_buckets = Buckets.list_all_sinking_funds()
+    emergency_buckets = Buckets.list_all_emergency_funds()
 
     Date.range(from_date, to_date)
     |> Enum.map(fn date ->
       date
-      |> totals_for_date(accounts, sinking_buckets)
+      |> totals_for_date(accounts, sinking_buckets, emergency_buckets)
       |> Map.put(:label, Calendar.strftime(date, "%b %d"))
     end)
   end
@@ -309,6 +329,7 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
     |> assign(:debit_total, Decimal.new(0))
     |> assign(:credit_total, Decimal.new(0))
     |> assign(:sinking_total, Decimal.new(0))
+    |> assign(:emergency_total, Decimal.new(0))
     |> assign(:current_month_expenses, Decimal.new(0))
     |> assign(:total_money, Decimal.new(0))
     |> assign(:account_balances_as_of, nil)

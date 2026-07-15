@@ -39,7 +39,7 @@ defmodule Budget.ScheduledExpenses do
       end)
 
     sinking_results =
-      Budget.Buckets.list_all_sinking_funds()
+      (Budget.Buckets.list_all_sinking_funds() ++ Budget.Buckets.list_all_emergency_funds())
       |> Enum.reject(fn bucket ->
         Budget.Transactions.sinking_fund_deposit_this_month?(bucket.id, date.year, date.month)
       end)

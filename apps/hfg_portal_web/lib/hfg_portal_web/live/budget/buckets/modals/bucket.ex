@@ -6,10 +6,7 @@ defmodule HfgPortalWeb.Budget.Buckets.Modals.ChangeBucket do
 
   @impl true
   def update(assigns, socket) do
-    bucket_type =
-      if assigns.modal.changeset.data.monthly_contribution,
-        do: "sinking_fund",
-        else: "normal"
+    bucket_type = assigns.modal.changeset.data.type || "normal"
 
     socket
     |> assign(assigns)
@@ -32,6 +29,7 @@ defmodule HfgPortalWeb.Budget.Buckets.Modals.ChangeBucket do
           <.bnw_modal_body>
 
             <.bnw_input_hidden f={f} field={:user_id} value={@modal.user.id} />
+            <.bnw_input_hidden f={f} field={:type}    value={@bucket_type} />
 
             <.bnw_input f={f} field={:name}        display_name="Name" />
             <.bnw_input f={f} field={:description} type="textarea" display_name="Description" />
@@ -55,13 +53,25 @@ defmodule HfgPortalWeb.Budget.Buckets.Modals.ChangeBucket do
                        class="accent-blue-500" />
                 Sinking Fund
               </label>
+              <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <input type="radio"
+                       phx-click="set_type"
+                       phx-value-bucket_type="emergency_fund"
+                       phx-target={@myself}
+                       checked={@bucket_type == "emergency_fund"}
+                       class="accent-blue-500" />
+                Emergency Fund
+              </label>
             </div>
 
-            <%= if @bucket_type == "normal" do %>
-              <.bnw_input f={f} field={:monthly_budget} type="money" display_name="Monthly Budget" />
-            <% else %>
-              <.bnw_input f={f} field={:monthly_contribution} type="money" display_name="Monthly Contribution" />
-              <.bnw_input f={f} field={:max_balance}          type="money" display_name="Max Balance" />
+            <%= cond do %>
+              <% @bucket_type == "normal" -> %>
+                <.bnw_input f={f} field={:monthly_budget} type="money" display_name="Monthly Budget" />
+              <% @bucket_type == "sinking_fund" -> %>
+                <.bnw_input f={f} field={:monthly_contribution} type="money" display_name="Monthly Contribution" />
+                <.bnw_input f={f} field={:max_balance}          type="money" display_name="Max Balance" />
+              <% true -> %>
+                <.bnw_input f={f} field={:monthly_contribution} type="money" display_name="Monthly Contribution" />
             <% end %>
 
           </.bnw_modal_body>
@@ -98,9 +108,10 @@ defmodule HfgPortalWeb.Budget.Buckets.Modals.ChangeBucket do
 
     cleared_changes =
       case type do
-        "normal"       -> Map.merge(changeset.changes, %{monthly_contribution: nil, max_balance: nil})
-        "sinking_fund" -> Map.merge(changeset.changes, %{monthly_budget: nil})
-        _              -> changeset.changes
+        "normal"         -> Map.merge(changeset.changes, %{type: type, monthly_contribution: nil, max_balance: nil})
+        "sinking_fund"   -> Map.merge(changeset.changes, %{type: type, monthly_budget: nil})
+        "emergency_fund" -> Map.merge(changeset.changes, %{type: type, monthly_budget: nil, max_balance: nil})
+        _                -> changeset.changes
       end
 
     updated_changeset =

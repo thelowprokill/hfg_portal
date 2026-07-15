@@ -50,6 +50,7 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
     attrs = %{
       name:                 Map.get(params, "name"),
       description:          Map.get(params, "description"),
+      type:                 Map.get(params, "type"),
       monthly_budget:       Map.get(params, "monthly_budget"),
       monthly_contribution: Map.get(params, "monthly_contribution"),
       max_balance:          Map.get(params, "max_balance"),
@@ -83,6 +84,7 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
     %{
       id:                   b.id,
       name:                 b.name,
+      type:                 b.type,
       description:          b.description,
       balance:              to_string(b.balance),
       monthly_budget:       decimal_or_nil(b.monthly_budget),
