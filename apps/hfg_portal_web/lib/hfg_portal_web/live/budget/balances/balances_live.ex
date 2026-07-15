@@ -6,8 +6,9 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
   alias Budget.{Accounts, AccountBalances}
 
   defp set_modal(socket, :balance, id) when not is_nil(id) do
-    %{modal_stack: modal_stack, current_user: user} = socket.assigns
+    %{modal_stack: modal_stack, current_user: user, balances: balances} = socket.assigns
     account = Accounts.get(id)
+    balance = Map.get(balances, account.id, Decimal.new(0))
 
     socket
     |> assign(:modal_stack, [
@@ -15,7 +16,7 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
         modal: :balance,
         id: :balance,
         module: ChangeAccountBalance,
-        changeset: AccountBalances.new_changeset(%{account_id: account.id, date: Date.utc_today()}),
+        changeset: AccountBalances.new_changeset(%{account_id: account.id, date: Date.utc_today(), balance: balance}),
         live: false,
         user: user,
         opts: %{account: account}
