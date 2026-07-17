@@ -89,6 +89,7 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
       name:                 b.name,
       type:                 b.type,
       description:          b.description,
+      balance:              balance_or_nil(b),
       monthly_expenses:     to_string(Transactions.monthly_expense_total(b.id, year, month)),
       monthly_budget:       decimal_or_nil(b.monthly_budget),
       monthly_contribution: decimal_or_nil(b.monthly_contribution),
@@ -96,6 +97,9 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
       user_id:              b.user_id,
     }
   end
+
+  defp balance_or_nil(%{type: "normal"}), do: nil
+  defp balance_or_nil(b),                 do: to_string(b.balance)
 
   defp decimal_or_nil(nil), do: nil
   defp decimal_or_nil(d),   do: to_string(d)
