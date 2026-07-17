@@ -12,7 +12,7 @@
       <:header>
         <th class="p-2"><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>Name</.bnw_table_header_filter></th>
         <th class="p-2">Type</th>
-        <th class="p-2">Balance</th>
+        <th class="p-2">Monthly Expenses</th>
         <th class="p-2">Monthly Budget</th>
         <th class="p-2">Monthly Contribution</th>
         <th class="p-2">Max Balance</th>
@@ -23,7 +23,7 @@
         <tr>
           <td class="px-2"><%= bucket.name %></td>
           <td class="px-2 capitalize"><%= String.replace(bucket.type, "_", " ") %></td>
-          <td class="px-2">$<%= bucket.balance %></td>
+          <td class="px-2">$<%= Map.get(@monthly_expenses, bucket.id, Decimal.new(0)) %></td>
           <td class="px-2"><%= if bucket.monthly_budget, do: "$#{bucket.monthly_budget}", else: "—" %></td>
           <td class="px-2"><%= if bucket.monthly_contribution, do: "$#{bucket.monthly_contribution}", else: "—" %></td>
           <td class="px-2"><%= if bucket.max_balance, do: "$#{bucket.max_balance}", else: "—" %></td>

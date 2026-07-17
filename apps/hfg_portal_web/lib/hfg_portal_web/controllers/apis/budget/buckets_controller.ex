@@ -4,6 +4,7 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
   import HfgPortalWeb.Apis.ApiHelpers
 
   alias Budget.Buckets
+  alias Budget.Transactions
   alias HfgPortalWeb.Apis.Budget.AuthController
 
   @routes [
@@ -81,12 +82,14 @@ defmodule HfgPortalWeb.Apis.Budget.BucketsController do
 
   defp serialize(nil), do: nil
   defp serialize(b) do
+    %{year: year, month: month} = Date.utc_today()
+
     %{
       id:                   b.id,
       name:                 b.name,
       type:                 b.type,
       description:          b.description,
-      balance:              to_string(b.balance),
+      monthly_expenses:     to_string(Transactions.monthly_expense_total(b.id, year, month)),
       monthly_budget:       decimal_or_nil(b.monthly_budget),
       monthly_contribution: decimal_or_nil(b.monthly_contribution),
       max_balance:          decimal_or_nil(b.max_balance),

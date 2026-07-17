@@ -4,6 +4,7 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
   alias HfgPortalWeb.Budget.Buckets.Modals.ChangeBucket
 
   alias Budget.Buckets
+  alias Budget.Transactions
 
   defp fetch_buckets(socket) do
     %{
@@ -12,6 +13,7 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
       buckets:      buckets,
       search_stack: search_stack,
       sort_stack:   sort_stack,
+      monthly_expenses: monthly_expenses,
     } = socket.assigns
 
     fetched = Buckets.list(%{
@@ -21,10 +23,18 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
       sort_stack:   sort_stack,
     })
 
-    socket |> assign(:buckets, buckets ++ fetched)
+    %{year: year, month: month} = Date.utc_today()
+
+    fetched_expenses = Map.new(fetched, fn bucket ->
+      {bucket.id, Transactions.monthly_expense_total(bucket.id, year, month)}
+    end)
+
+    socket
+    |> assign(:buckets, buckets ++ fetched)
+    |> assign(:monthly_expenses, Map.merge(monthly_expenses, fetched_expenses))
   end
 
-  defp reload_items(socket), do: socket |> assign(:buckets, []) |> assign(:page, 0) |> fetch_buckets()
+  defp reload_items(socket), do: socket |> assign(:buckets, []) |> assign(:monthly_expenses, %{}) |> assign(:page, 0) |> fetch_buckets()
 
   defp set_modal(socket, type \\ nil, id \\ nil)
   defp set_modal(socket, :new, _) do
@@ -67,6 +77,7 @@ defmodule HfgPortalWeb.Budget.Buckets.BucketsLive do
     |> assign(:page,         0)
     |> assign(:per_page,     50)
     |> assign(:buckets,      [])
+    |> assign(:monthly_expenses, %{})
     |> assign(:modal_stack,  [])
     |> assign(:search_map,   %{})
     |> assign(:search_stack, [])
