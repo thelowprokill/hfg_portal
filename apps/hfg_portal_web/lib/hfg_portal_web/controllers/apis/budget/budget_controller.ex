@@ -82,7 +82,19 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
       end)
     end
 
-    sinking_total = sum_bucket_balances.(Buckets.list_all_sinking_funds())
+    # An overspent sinking fund (negative balance) shouldn't inflate
+    # total_money - floor each bucket at 0 before summing.
+    sum_non_negative_bucket_balances = fn buckets ->
+      buckets
+      |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
+        balance =
+          Transactions.balance_as_of_month(bucket.id, year, month) |> Decimal.max(Decimal.new(0))
+
+        Decimal.add(acc, balance)
+      end)
+    end
+
+    sinking_total = sum_non_negative_bucket_balances.(Buckets.list_all_sinking_funds())
     emergency_total = sum_bucket_balances.(Buckets.list_all_emergency_funds())
 
     # Sinking-fund/emergency-fund expenses are already netted into their bucket

@@ -68,9 +68,19 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
       end)
     end
 
+    # An overspent sinking fund (negative balance) shouldn't inflate
+    # total_money - floor each bucket at 0 before summing.
+    sum_non_negative_bucket_balances = fn buckets ->
+      buckets
+      |> Enum.reduce(Decimal.new(0), fn bucket, acc ->
+        balance = Transactions.balance_as_of_date(bucket.id, date) |> Decimal.max(Decimal.new(0))
+        Decimal.add(acc, balance)
+      end)
+    end
+
     debit_total = sum_for_type.("debit")
     credit_total = sum_for_type.("credit")
-    sinking_total = sum_bucket_balances.(sinking_buckets)
+    sinking_total = sum_non_negative_bucket_balances.(sinking_buckets)
     emergency_total = sum_bucket_balances.(emergency_buckets)
 
     total_money =
