@@ -71,8 +71,9 @@
             <span class="font-medium">$<%= month_balance %> / $<%= bucket.max_balance %></span>
           </div>
           <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
-            <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.div(month_balance, bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
-            <div class="h-2 rounded-full bg-green-500" style={"width: #{Float.round(pct, 1)}%"}></div>
+            <% overspent = Decimal.compare(month_balance, Decimal.new(0)) == :lt %>
+            <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.abs(month_balance) |> Decimal.div(bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+            <div class={["h-2 rounded-full", if(overspent, do: "bg-red-500", else: "bg-green-500")]} style={"width: #{Float.round(pct, 1)}%"}></div>
           </div>
           <div class="text-sm text-zinc-500">$<%= remaining %> remaining to fill</div>
           <div class="pt-1 border-t border-zinc-100 dark:border-zinc-700">
@@ -288,8 +289,9 @@
                 <span class="font-medium">$<%= month_balance %> / $<%= bucket.max_balance %></span>
               </div>
               <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
-                <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.div(month_balance, bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
-                <div class="h-2 rounded-full bg-green-500" style={"width: #{Float.round(pct, 1)}%"}></div>
+                <% overspent = Decimal.compare(month_balance, Decimal.new(0)) == :lt %>
+                <% pct = if Decimal.compare(bucket.max_balance, Decimal.new(0)) == :gt, do: Decimal.abs(month_balance) |> Decimal.div(bucket.max_balance) |> Decimal.mult(100) |> Decimal.to_float() |> min(100.0), else: 0.0 %>
+                <div class={["h-2 rounded-full", if(overspent, do: "bg-red-500", else: "bg-green-500")]} style={"width: #{Float.round(pct, 1)}%"}></div>
               </div>
               <div class="text-sm text-zinc-500">$<%= remaining %> remaining to fill</div>
 
