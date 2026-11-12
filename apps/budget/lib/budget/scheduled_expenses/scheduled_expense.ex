@@ -2,7 +2,7 @@ defmodule Budget.ScheduledExpenses.ScheduledExpense do
   use Ecto.Schema
   import Ecto.Changeset
 
-  prefix = "hfg_portal_budget"
+  prefix = "budget"
   prefix = case Application.compile_env(:budget, :env) do
     :dev  -> prefix <> "_dev"
     :test -> prefix <> "_test"

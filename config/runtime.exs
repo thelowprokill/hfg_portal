@@ -39,7 +39,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_task_automation_controller",
+    migration_default_prefix: "task_automation_controller",
     migration_source: "task_automation_controller_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
@@ -51,7 +51,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_budget",
+    migration_default_prefix: "budget",
     migration_source: "budget_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
@@ -63,7 +63,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_wife_time",
+    migration_default_prefix: "wife_time",
     migration_source: "wife_time_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
@@ -75,7 +75,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_car_maintenance",
+    migration_default_prefix: "car_maintenance",
     migration_source: "car_maintenance_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
@@ -87,7 +87,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_loan_repayment",
+    migration_default_prefix: "loan_repayment",
     migration_source: "loan_repayment_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
@@ -99,7 +99,7 @@ if config_env() == :prod do
     password: postgres_password,
     port:     postgres_port,
     database: "hfg_portal",
-    migration_default_prefix: "hfg_portal_timekeeping",
+    migration_default_prefix: "timekeeping",
     migration_source: "timekeeping_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6

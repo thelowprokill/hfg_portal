@@ -2,7 +2,7 @@ defmodule WifeTime.WifeTimes.WifeTime do
   use Ecto.Schema
   import Ecto.Changeset
 
-  prefix = "hfg_portal_wife_time"
+  prefix = "wife_time"
   prefix = case Application.compile_env(:wife_time, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"

@@ -7,10 +7,9 @@ services:
     environment:
       - LOCATION=bnw
       - POSTGRES_HOST=hull-family-games-postgres-prod
-      - POSTGRES_USERNAME=postgres
       - POSTGRES_PORT=5432
     ports:
-      - "4000:4000"
+      - "5000:4000"
         #- "443:4000"
     env_file:
       - ./docker/production/.env
@@ -25,13 +24,16 @@ services:
     environment:
       - POSTGRES_DB=hfg_portal
       - PGDATA=/var/lib/postgresql/data/pgdata
-    # Only POSTGRES_PASSWORD is needed from here.
+    # POSTGRES_USERNAME / POSTGRES_PASSWORD come from here; the image wants POSTGRES_USER.
     env_file:
       - ./docker/production/.env
+    entrypoint: ["sh", "-c", "POSTGRES_USER=$$POSTGRES_USERNAME exec docker-entrypoint.sh postgres -c max_connections=200"]
+    ports:
+      - "5432:5432"
     volumes:
       - ./db_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hfg_portal"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USERNAME\" -d hfg_portal"]
       interval: 5s
       timeout: 5s
       retries: 10
