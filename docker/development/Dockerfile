@@ -1,7 +1,7 @@
 # ./Dockerfile
 
 # Extend from the official Elixir image.
-FROM elixir:1.15.6-slim
+FROM elixir:1.20.4-slim
 
 ENV REFRESH_TOKEN="0"
 

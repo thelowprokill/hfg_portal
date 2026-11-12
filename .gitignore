@@ -37,3 +37,5 @@ credentials.json
 credentials.py
 
 __pycache__
+
+db_prod/

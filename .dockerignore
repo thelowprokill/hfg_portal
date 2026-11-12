@@ -6,3 +6,4 @@ db/
 .env*
 !.env.example 
 docker-compose.override.yml
+db_prod/
