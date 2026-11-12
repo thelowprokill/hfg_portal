@@ -39,7 +39,7 @@ defmodule CarMaintenance.MixProject do
       {:dns_cluster,    "~> 0.1.1"},
       {:phoenix_pubsub, "~> 2.1"},
       {:ecto_sql,       "~> 3.10"},
-      {:myxql,          ">= 0.0.0"},
+      {:postgrex,        ">= 0.0.0"},
       {:jason,          "~> 1.2"},
       {:swoosh,         "~> 1.5"},
       {:finch,          "~> 0.13"},

@@ -2,6 +2,8 @@ defmodule TaskAutomationController.Repo.Migrations.CreatePriorities do
   use Ecto.Migration
 
   def change do
+    execute("CREATE SCHEMA IF NOT EXISTS \"#{Application.get_env(:task_automation_controller, TaskAutomationController.Repo)[:migration_default_prefix]}\"", "")
+
     create table(:priorities) do
       add :name, :string
       add :order, :integer

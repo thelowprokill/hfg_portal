@@ -16,7 +16,7 @@ mix ecto.reset         # Drop, create, migrate, seed
 
 # Dev server
 mix phx.server         # Starts on port 4000 (exposed as 5000 in Docker)
-docker-compose up      # Full dev env with MySQL 8.1
+docker-compose up      # Full dev env with Postgres 16 (MySQL 8.1 kept alongside for data migration)
 
 # Testing
 mix test               # Runs all tests across all umbrella apps
@@ -50,7 +50,7 @@ This is an **Elixir/Phoenix umbrella project** with four sub-applications sharin
 | `loan_repayment` | Loan tracking | `LoanRepayment.Repo` |
 | `wife_time` | Time tracking | `WifeTime.Repo` |
 
-Each sub-app has its own MySQL database and Ecto repo. Migrations live in `apps/{app}/priv/repo/migrations/`.
+Each sub-app has its own Postgres database and Ecto repo. Migrations live in `apps/{app}/priv/repo/migrations/`.
 
 ### Authentication
 
@@ -74,11 +74,11 @@ Google OAuth is also supported via `elixir_auth_google`.
 - `config/dev.exs` — dev DB configs, file watchers
 - `config/prod.exs` — production settings
 - `config/runtime.exs` — env var binding (DB credentials, secrets, OAuth keys)
-- `docker/development/.env` — MySQL credentials for Docker dev environment
+- `docker/development/.env` — Postgres (and legacy MySQL) credentials for Docker dev environment
 
 ### Key Runtime Dependencies
 
-- MySQL 8.1 (via `myxql` driver)
+- PostgreSQL 16 (via `postgrex` driver)
 - Email via Swoosh (local adapter in dev)
 - Telemetry + LiveDashboard at `/dev/dashboard` (dev only)
 - PubSub for real-time pub/sub across LiveViews

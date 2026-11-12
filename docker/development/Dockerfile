@@ -6,7 +6,7 @@ FROM elixir:1.15.6-slim
 ENV REFRESH_TOKEN="0"
 
 RUN apt-get update && \
-    apt-get install -y default-mysql-client inotify-tools build-essential && \
+    apt-get install -y default-mysql-client postgresql-client inotify-tools build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 # Create app directory and copy the Elixir projects into it.

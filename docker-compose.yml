@@ -11,10 +11,22 @@ services:
       - .:/app
     depends_on:
       - hull-family-games-db
+      - hull-family-games-postgres
     environment:
       - LOCATION=bnw
     env_file:
       - "./docker/development/.env"
+  hull-family-games-postgres:
+    container_name: hull-family-games-postgres
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=sxkjad94
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "15432:5432"
+    volumes:
+      - ./db:/var/lib/postgresql/data
+  # Kept around only so existing MySQL data can be migrated over; remove once migration is done.
   hull-family-games-db:
     container_name: hull-family-games-db
     image: mysql:8.1

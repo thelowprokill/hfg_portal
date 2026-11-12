@@ -7,99 +7,113 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  mysql_host =
-    System.get_env("MYSQL_HOST") ||
+  postgres_host =
+    System.get_env("POSTGRES_HOST") ||
       raise """
-      environment variable MYSQL_HOST is missing.
+      environment variable POSTGRES_HOST is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  mysql_username =
-    System.get_env("MYSQL_USERNAME") ||
+  postgres_username =
+    System.get_env("POSTGRES_USERNAME") ||
       raise """
-      environment variable MYSQL_USERNAME is missing.
+      environment variable POSTGRES_USERNAME is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  mysql_password =
-    System.get_env("MYSQL_PASSWORD") ||
+  postgres_password =
+    System.get_env("POSTGRES_PASSWORD") ||
       raise """
-      environment variable MYSQL_PASSWORD is missing.
+      environment variable POSTGRES_PASSWORD is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  mysql_port = (System.get_env("MYSQL_PORT") || "3306") |> String.to_integer()
+  postgres_port = (System.get_env("POSTGRES_PORT") || "5432") |> String.to_integer()
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :task_automation_controller, TaskAutomationController.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_task_automation_controller",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_task_automation_controller",
+    migration_source: "task_automation_controller_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :budget, Budget.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_budget",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_budget",
+    migration_source: "budget_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :wife_time, WifeTime.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_wife_time",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_wife_time",
+    migration_source: "wife_time_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :car_maintenance, CarMaintenance.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_car_maintenance",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_car_maintenance",
+    migration_source: "car_maintenance_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :loan_repayment, LoanRepayment.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_loan_repayment",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_loan_repayment",
+    migration_source: "loan_repayment_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :timekeeping, Timekeeping.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
-    database: "hfg_portal_timekeeping",
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "hfg_portal_timekeeping",
+    migration_source: "timekeeping_schema_migrations",
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   config :hfg_portal, HfgPortal.Repo,
     # ssl: true,
-    hostname: mysql_host,
-    username: mysql_username,
-    password: mysql_password,
-    port:     mysql_port,
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
     database: "hfg_portal",
-    pool_size: String.to_integer(System.get_env("MYSQL_POOL_SIZE") || "10"),
+    migration_default_prefix: "hfg_portal",
+    migration_source: "hfg_portal_schema_migrations",
+    pool_size: String.to_integer(System.get_env("POSTGRES_POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
   # The secret key base is used to sign/encrypt cookies and other secrets.

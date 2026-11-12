@@ -2,6 +2,8 @@ defmodule Budget.Repo.Migrations.CreateBuckets do
   use Ecto.Migration
 
   def change do
+    execute("CREATE SCHEMA IF NOT EXISTS \"#{Application.get_env(:budget, Budget.Repo)[:migration_default_prefix]}\"", "")
+
     create table(:buckets) do
       add :user_id,              :integer, null: false
       add :name,                 :string,  null: false

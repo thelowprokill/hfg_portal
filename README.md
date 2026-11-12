@@ -1,12 +1,12 @@
 # How to add new app.
 
 ## Create new app.
-- dc run -w /app/apps app mix phx.new.ecto ${APP_NAME} --database mysql
+- dc run -w /app/apps app mix phx.new.ecto ${APP_NAME} --database postgres
 
 - set username, password, hostname, and database in config/dev.exs
--   username: System.get_env("MYSQL_USER",     "root"),
--   password: System.get_env("MYSQL_PASSWORD", "root"),
--   hostname: System.get_env("MYSQL_HOST",     "localhost"),
+-   username: System.get_env("POSTGRES_USERNAME", "postgres"),
+-   password: System.get_env("POSTGRES_PASSWORD", "postgres"),
+-   hostname: System.get_env("POSTGRES_HOST",     "localhost"),
 -   database: "hfg_portal_${APP_NAME}",
 
 - sudo chown -R $USER:$USER .

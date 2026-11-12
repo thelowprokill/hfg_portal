@@ -20,7 +20,7 @@ defmodule HfgPortal.Repo.Migrations.CreateApiUsersAuthTables do
 
     create table(:api_users_tokens) do
       add :api_user_id, references(:api_users, on_delete: :delete_all), null: false
-      add :token, :binary, null: false, size: 32
+      add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
       timestamps(updated_at: false)

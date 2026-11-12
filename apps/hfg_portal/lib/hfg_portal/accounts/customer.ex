@@ -2,6 +2,16 @@ defmodule HfgPortal.Accounts.Customer do
   use Ecto.Schema
   import Ecto.Changeset
 
+  prefix = "hfg_portal"
+  prefix = case Application.compile_env(:hfg_portal, :env) do
+    :dev   -> prefix <> "_dev"
+    :test  -> prefix <> "_test"
+    :trial -> prefix <> "_trial"
+    _      -> prefix
+  end
+
+  @schema_prefix prefix
+
   schema "customers" do
     field :email, :string
     field :password, :string, virtual: true, redact: true

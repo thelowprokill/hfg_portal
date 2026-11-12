@@ -6,10 +6,12 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :budget, Budget.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "budget_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_budget_test",
+  migration_source: "budget_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -19,10 +21,12 @@ config :budget, Budget.Repo,
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :wife_time, WifeTime.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "wife_time_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_wife_time_test",
+  migration_source: "wife_time_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -32,10 +36,12 @@ config :wife_time, WifeTime.Repo,
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :loan_repayment, LoanRepayment.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "loan_repayment_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_loan_repayment_test",
+  migration_source: "loan_repayment_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -45,10 +51,12 @@ config :loan_repayment, LoanRepayment.Repo,
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :timekeeping, Timekeeping.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "timekeeping_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_timekeeping_test",
+  migration_source: "timekeeping_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -58,10 +66,12 @@ config :timekeeping, Timekeeping.Repo,
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :car_maintenance, CarMaintenance.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "car_maintenance_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_car_maintenance_test",
+  migration_source: "car_maintenance_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -110,10 +120,12 @@ config :it_budget, ItBudget.Repo,
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :budget, Budget.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
-  database: "budget_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_budget_test",
+  migration_source: "budget_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
@@ -126,10 +138,12 @@ config :bcrypt_elixir, :log_rounds, 1
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :hfg_portal, HfgPortal.Repo,
-  username: "root",
-  password: "",
+  username: "postgres",
+  password: "postgres",
   hostname: "localhost",
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "hfg_portal_test",
+  migration_source: "hfg_portal_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
