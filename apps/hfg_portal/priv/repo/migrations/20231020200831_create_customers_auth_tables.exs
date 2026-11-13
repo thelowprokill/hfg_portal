@@ -14,7 +14,7 @@ defmodule HfgPortal.Repo.Migrations.CreateCustomersAuthTables do
 
     create table(:customers_tokens) do
       add :customer_id, references(:customers, on_delete: :delete_all), null: false
-      add :token, :binary, null: false, size: 32
+      add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
       timestamps(updated_at: false)

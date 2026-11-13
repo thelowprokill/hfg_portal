@@ -2,7 +2,7 @@ defmodule Timekeeping.Users.UserRole do
   use Ecto.Schema
   import Ecto.Changeset
 
-  prefix = "hfg_portal_timekeeping"
+  prefix = "timekeeping"
   prefix = case Application.compile_env(:timekeeping, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"

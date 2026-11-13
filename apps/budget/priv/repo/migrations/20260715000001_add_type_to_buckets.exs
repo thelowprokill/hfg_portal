@@ -6,7 +6,7 @@ defmodule Budget.Repo.Migrations.AddTypeToBuckets do
       add :type, :string, null: false, default: "normal"
     end
 
-    execute("UPDATE buckets SET type = 'sinking_fund' WHERE monthly_contribution IS NOT NULL")
+    execute(~s(UPDATE "#{Application.get_env(:budget, Budget.Repo)[:migration_default_prefix]}".buckets SET type = 'sinking_fund' WHERE monthly_contribution IS NOT NULL))
   end
 
   def down do

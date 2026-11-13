@@ -1,3 +1,7 @@
+
+/db
+/db_prod
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 
@@ -37,3 +41,5 @@ credentials.json
 credentials.py
 
 __pycache__
+
+db_prod/

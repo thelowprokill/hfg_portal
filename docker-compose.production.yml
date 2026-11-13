@@ -6,9 +6,34 @@ services:
       dockerfile: ./docker/production/Dockerfile
     environment:
       - LOCATION=bnw
+      - POSTGRES_HOST=hull-family-games-postgres-prod
+      - POSTGRES_PORT=5432
     ports:
       - "4000:4000"
         #- "443:4000"
     env_file:
       - ./docker/production/.env
     image: hfg-portal-production
+    depends_on:
+      hull-family-games-postgres-prod:
+        condition: service_healthy
+  hull-family-games-postgres-prod:
+    container_name: hull-family-games-postgres-prod
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_DB=hfg_portal
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    # POSTGRES_USERNAME / POSTGRES_PASSWORD come from here; the image wants POSTGRES_USER.
+    env_file:
+      - ./docker/production/.env
+    entrypoint: ["sh", "-c", "chmod 755 /var/lib/postgresql/data; chown -R postgres:postgres $$PGDATA; chmod -R u+rwX,go-rwx $$PGDATA; POSTGRES_USER=$$POSTGRES_USERNAME exec docker-entrypoint.sh postgres -c max_connections=200"]
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USERNAME\" -d hfg_portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

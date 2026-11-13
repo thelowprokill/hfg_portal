@@ -2,7 +2,7 @@ defmodule Budget.Repo.Migrations.DropYearMonthFromAccountBalances do
   use Ecto.Migration
 
   def up do
-    execute("UPDATE account_balances SET date = CURDATE() WHERE date IS NULL")
+    execute(~s(UPDATE #{Application.get_env(:budget, Budget.Repo)[:migration_default_prefix]}.account_balances SET date = CURRENT_DATE WHERE date IS NULL))
 
     drop(unique_index(:account_balances, [:account_id, :year, :month]))
 
@@ -25,8 +25,8 @@ defmodule Budget.Repo.Migrations.DropYearMonthFromAccountBalances do
     end
 
     execute("""
-    UPDATE account_balances
-    SET year = YEAR(date), month = MONTH(date)
+    UPDATE #{Application.get_env(:budget, Budget.Repo)[:migration_default_prefix]}.account_balances
+    SET year = EXTRACT(YEAR FROM date), month = EXTRACT(MONTH FROM date)
     WHERE date IS NOT NULL
     """)
 

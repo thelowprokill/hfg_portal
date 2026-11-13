@@ -1,12 +1,14 @@
+# Same as production, but runs HfgPortal.Release.migrate() before starting the app.
 services:
   app:
-    build:
-      context: .
-      dockerfile: ./docker/production/Dockerfile
-    environment: 
+    extends:
+      file: docker-compose.production.yml
+      service: app
+    environment:
       - INCLUDE_MIGRATIONS=true
-      - LOCATION=bnw
-    ports:
-      - "5000:4000"
-    env_file:
-      - ./docker/production/.env
+    ports: !override
+      - "4000:4000"
+  hull-family-games-postgres-prod:
+    extends:
+      file: docker-compose.production.yml
+      service: hull-family-games-postgres-prod

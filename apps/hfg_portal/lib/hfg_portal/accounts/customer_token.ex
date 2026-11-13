@@ -13,6 +13,16 @@ defmodule HfgPortal.Accounts.CustomerToken do
   @change_email_validity_in_days 7
   @session_validity_in_days 60
 
+  prefix = "hfg_portal"
+  prefix = case Application.compile_env(:hfg_portal, :env) do
+    :dev   -> prefix <> "_dev"
+    :test  -> prefix <> "_test"
+    :trial -> prefix <> "_trial"
+    _      -> prefix
+  end
+
+  @schema_prefix prefix
+
   schema "customers_tokens" do
     field :token, :binary
     field :context, :string

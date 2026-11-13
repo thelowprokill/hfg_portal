@@ -2,6 +2,8 @@ defmodule CarMaintenance.Repo.Migrations.CreateCars do
   use Ecto.Migration
 
   def change do
+    execute("CREATE SCHEMA IF NOT EXISTS \"#{Application.get_env(:car_maintenance, CarMaintenance.Repo)[:migration_default_prefix]}\"", "")
+
     create table(:cars) do
       add :name,          :string
       add :year,          :integer

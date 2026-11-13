@@ -2,7 +2,7 @@ defmodule LoanRepayment.Loans.Loan do
   use Ecto.Schema
   import Ecto.Changeset
 
-  prefix = "hfg_portal_loan_repayment"
+  prefix = "loan_repayment"
   prefix = case Application.compile_env(:loan_repayment, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"

@@ -5,11 +5,11 @@ set -e
 
 mix deps.get
 
-# Wait for MySQL to become available
-while ! mysql --host="$MYSQL_HOST" --user="$MYSQL_USERNAME" --password="$MYSQL_PASSWORD" -e "SELECT 1" >/dev/null 2>&1;
+# Wait for Postgres to become available
+export PGPASSWORD="$POSTGRES_PASSWORD"
+while ! pg_isready --host="$POSTGRES_HOST" --username="$POSTGRES_USERNAME" >/dev/null 2>&1;
 do
-    echo "Waiting for MySQL to be available..."
-    mysql --host="$MYSQL_HOST" --user="$MYSQL_USERNAME" --password="$MYSQL_PASSWORD" -e "SELECT 1"
+    echo "Waiting for Postgres to be available..."
     sleep 2
 done
 

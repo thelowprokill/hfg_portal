@@ -4,7 +4,7 @@ defmodule TaskAutomationController.Jobs.Priority do
   import Ecto.Query
   alias TaskAutomationController.Repo
 
-  prefix = "hfg_portal_task_automation_controller"
+  prefix = "task_automation_controller"
   prefix = case Application.compile_env(:task_automation_controller, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"

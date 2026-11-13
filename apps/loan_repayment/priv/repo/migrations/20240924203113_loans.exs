@@ -2,6 +2,8 @@ defmodule LoanRepayment.Repo.Migrations.Loans do
   use Ecto.Migration
 
   def change do
+    execute("CREATE SCHEMA IF NOT EXISTS \"#{Application.get_env(:loan_repayment, LoanRepayment.Repo)[:migration_default_prefix]}\"", "")
+
     create table(:loans) do
       add :paid_to,       :string
       add :for,           :string

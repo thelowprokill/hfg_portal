@@ -1,7 +1,9 @@
 .git/
 assets/node_modules/
+db/
 
 .dockerignore 
 .env*
 !.env.example 
 docker-compose.override.yml
+db_prod/
