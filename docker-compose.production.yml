@@ -27,7 +27,7 @@ services:
     # POSTGRES_USERNAME / POSTGRES_PASSWORD come from here; the image wants POSTGRES_USER.
     env_file:
       - ./docker/production/.env
-    entrypoint: ["sh", "-c", "POSTGRES_USER=$$POSTGRES_USERNAME exec docker-entrypoint.sh postgres -c max_connections=200"]
+    entrypoint: ["sh", "-c", "chmod 755 /var/lib/postgresql/data; chown -R postgres:postgres $$PGDATA; chmod -R u+rwX,go-rwx $$PGDATA; POSTGRES_USER=$$POSTGRES_USERNAME exec docker-entrypoint.sh postgres -c max_connections=200"]
     ports:
       - "5432:5432"
     volumes:
