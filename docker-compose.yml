@@ -22,6 +22,8 @@ services:
     environment:
       - POSTGRES_PASSWORD=sxkjad94
       - PGDATA=/var/lib/postgresql/data/pgdata
+    # Fix data dir ownership/permissions on every start (e.g. after copying ./db between machines).
+    entrypoint: ["sh", "-c", "chmod 755 /var/lib/postgresql/data; chown -R postgres:postgres $$PGDATA; chmod -R u+rwX,go-rwx $$PGDATA; exec docker-entrypoint.sh postgres"]
     ports:
       - "15432:5432"
     volumes:
