@@ -9,7 +9,7 @@ services:
       - POSTGRES_HOST=hull-family-games-postgres-prod
       - POSTGRES_PORT=5432
     ports:
-      - "5001:4000"
+      - "4000:4000"
         #- "443:4000"
     env_file:
       - ./docker/production/.env

@@ -7,7 +7,7 @@ services:
     environment:
       - INCLUDE_MIGRATIONS=true
     ports: !override
-      - "5000:4000"
+      - "4000:4000"
   hull-family-games-postgres-prod:
     extends:
       file: docker-compose.production.yml
