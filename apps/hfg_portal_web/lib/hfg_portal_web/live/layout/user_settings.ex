@@ -68,7 +68,8 @@ defmodule HfgPortalWeb.Layout.UserSettings do
 
     {:ok, claims} = Joken.generate_claims(token_config, %{
       user_id:    user_id,
-      updated_at: DateTime.utc_now(),
+      admin:      false,
+      updated_at: DateTime.utc_now() |> Calendar.strftime("%Y-%m-%dT%H:%M:%S"),
     })
     {:ok, jwt, _claims} = Joken.encode_and_sign(claims, signer)
     socket

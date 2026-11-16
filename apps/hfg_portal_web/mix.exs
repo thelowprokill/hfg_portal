@@ -64,6 +64,7 @@ defmodule HfgPortalWeb.MixProject do
       {:wife_time,                  in_umbrella: true},
       {:task_automation_controller, in_umbrella: true},
       {:timekeeping,                in_umbrella: true},
+      {:homm_saves,                 in_umbrella: true},
     ]
   end
 

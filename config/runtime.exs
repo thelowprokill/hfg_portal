@@ -104,6 +104,18 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
+  config :homm_saves, HommSaves.Repo,
+    # ssl: true,
+    hostname: postgres_host,
+    username: postgres_username,
+    password: postgres_password,
+    port:     postgres_port,
+    database: "hfg_portal",
+    migration_default_prefix: "homm_saves",
+    migration_source: "homm_saves_schema_migrations",
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6
+
   config :hfg_portal, HfgPortal.Repo,
     # ssl: true,
     hostname: postgres_host,

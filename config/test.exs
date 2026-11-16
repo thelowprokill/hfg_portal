@@ -60,6 +60,16 @@ config :timekeeping, Timekeeping.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+config :homm_saves, HommSaves.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "homm_saves_test",
+  migration_source: "homm_saves_schema_migrations",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -168,3 +178,4 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :budget, env: :test
 config :timekeeping, env: :test
+config :homm_saves, env: :test

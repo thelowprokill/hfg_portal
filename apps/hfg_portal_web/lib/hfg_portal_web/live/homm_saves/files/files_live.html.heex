@@ -1,0 +1,14 @@
+<div>
+  <h3 class="text-xl"><%= @page_title %></h3>
+
+  <div class="py-3 flex items-center gap-4">
+    <span>Last upload: <strong><%= format_dt(@last_upload) %></strong></span>
+    <.bnw_button_primary phx_click="refresh">Refresh</.bnw_button_primary>
+  </div>
+
+  <%= if @tree == %{} do %>
+    <p class="text-gray-500">No saves uploaded yet.</p>
+  <% else %>
+    <div class="-ml-4"><.tree tree={@tree} /></div>
+  <% end %>
+</div>

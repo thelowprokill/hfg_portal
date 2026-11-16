@@ -42,6 +42,7 @@ COPY apps/loan_repayment/mix.exs             apps/loan_repayment/
 COPY apps/wife_time/mix.exs                  apps/wife_time/
 COPY apps/task_automation_controller/mix.exs apps/task_automation_controller/
 COPY apps/timekeeping/mix.exs                apps/timekeeping/
+COPY apps/homm_saves/mix.exs                 apps/homm_saves/
 COPY cert/fullchain.pem                      /app/
 COPY cert/privkey.pem                        /app/
 

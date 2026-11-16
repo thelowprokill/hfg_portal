@@ -52,6 +52,18 @@ config :timekeeping, Timekeeping.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :homm_saves, HommSaves.Repo,
+  username: System.get_env("POSTGRES_USERNAME", "postgres"),
+  password: System.get_env("POSTGRES_PASSWORD", "postgres"),
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
+  database: "hfg_portal_dev",
+  migration_default_prefix: "homm_saves_dev",
+  migration_source: "homm_saves_schema_migrations",
+  port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
 # Configure your database
 config :loan_repayment, LoanRepayment.Repo,
   username: System.get_env("POSTGRES_USERNAME", "postgres"),
@@ -171,3 +183,4 @@ config :wife_time,                  env: :dev
 config :budget,                     env: :dev
 config :task_automation_controller, env: :dev
 config :timekeeping,                env: :dev
+config :homm_saves,                 env: :dev

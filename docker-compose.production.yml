@@ -14,6 +14,8 @@ services:
     env_file:
       - ./docker/production/.env
     image: hfg-portal-production
+    volumes:
+      - ~/.homm_saves:/homm_saves
     depends_on:
       hull-family-games-postgres-prod:
         condition: service_healthy

@@ -39,6 +39,9 @@ config :budget, Budget.Mailer, adapter: Swoosh.Adapters.Local
 config :timekeeping,
   ecto_repos: [Timekeeping.Repo]
 
+config :homm_saves,
+  ecto_repos: [HommSaves.Repo]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

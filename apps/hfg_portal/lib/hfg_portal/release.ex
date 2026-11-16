@@ -10,6 +10,7 @@ defmodule HfgPortal.Release do
     :wife_time,
     :budget,
     :timekeeping,
+    :homm_saves,
     :task_automation_controller,
   ]
 

@@ -19,6 +19,8 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
     %{name: "loan_repayment:loans",               module: HfgPortalWeb.Apis.LoanRepayment.LoanController,       require_admin: false},
     %{name: "loan_repayment:repayments",          module: HfgPortalWeb.Apis.LoanRepayment.RepaymentController,  require_admin: false},
+
+    %{name: "homm_saves",                         module: HfgPortalWeb.Apis.HommSavesController,                require_admin: false},
   ]
 
   def scopes(conn, _params) do
@@ -79,6 +81,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
       "budget"          -> Budget.UserRoles
       "car_maintenance" -> CarMaintenance.UserRoles
       "loan_repayment"  -> LoanRepayment.UserRoles
+      "homm_saves"      -> HommSaves.UserRoles
       #"wife_time"       -> WifeTime.UserRoles
       _                 -> nil
     end
