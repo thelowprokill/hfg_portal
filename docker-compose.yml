@@ -9,7 +9,7 @@ services:
         #- "4000:4000"
     volumes:
       - .:/app
-      - ~/.homm_saves:/homm_saves
+      - ./.homm_saves:/homm_saves
     depends_on:
       - hull-family-games-db
       - hull-family-games-postgres
