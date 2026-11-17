@@ -35,6 +35,8 @@ erl_crash.dump
 # vscode elixir files
 *.elixir_ls
 
+.homm_saves
+
 cert/
 
 credentials.json
