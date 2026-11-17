@@ -4,14 +4,22 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   alias HommSaves.SaveFiles
   alias HommSaves.SaveFiles.SaveFile
 
+  @section_titles [{"saves", "Save Games"}, {"templates", "RMG Templates"}]
+
   # ponytail: loads every row on mount; fine for a few hundred saves, paginate if it ever grows large
   defp fetch_files(socket) do
-    files = SaveFiles.list()
+    by_section = SaveFiles.list() |> Enum.group_by(& &1.section)
 
-    socket
-    |> assign(:tree,        build_tree(files))
-    |> assign(:last_upload, files |> Enum.map(& &1.updated_at) |> Enum.max(DateTime, fn -> nil end))
+    sections =
+      for {section, title} <- @section_titles do
+        files = Map.get(by_section, section, [])
+        %{id: section, title: title, tree: build_tree(files), last_upload: last_upload(files)}
+      end
+
+    socket |> assign(:sections, sections)
   end
+
+  defp last_upload(files), do: files |> Enum.map(& &1.updated_at) |> Enum.max(DateTime, fn -> nil end)
 
   # "a/b/c.GM1" -> %{"a" => %{"b" => %{"c.GM1" => %SaveFile{}}}}
   defp build_tree(files), do: Enum.reduce(files, %{}, &put_in_tree(&2, String.split(&1.path, "/"), &1))
@@ -25,8 +33,9 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   def format_dt(nil), do: "never"
   def format_dt(dt),  do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S UTC")
 
-  attr :tree,   :map,    required: true
-  attr :prefix, :string, default: ""
+  attr :tree,    :map,    required: true
+  attr :section, :string, required: true
+  attr :prefix,  :string, default: ""
   def tree(assigns) do
     ~H"""
     <ul class="pl-4">
@@ -37,15 +46,15 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
               <span class="font-mono"><%= name %></span>
               <span class="text-sm text-gray-500"><%= format_dt(entry.updated_at) %></span>
               <span class="text-sm text-gray-500"><%= entry.machine %></span>
-              <.bnw_button_delete phx-value-path={entry.path} data={[confirm: "Delete #{entry.path}?"]} />
+              <.bnw_button_delete phx-value-section={@section} phx-value-path={entry.path} data={[confirm: "Delete #{entry.path}?"]} />
             </div>
           <% else %>
             <details open>
               <summary class="cursor-pointer font-semibold py-0.5">
                 <%= name %>/
-                <.bnw_button_delete phx-value-path={@prefix <> name} data={[confirm: "Delete folder #{@prefix <> name} and everything in it?"]} />
+                <.bnw_button_delete phx-value-section={@section} phx-value-path={@prefix <> name} data={[confirm: "Delete folder #{@prefix <> name} and everything in it?"]} />
               </summary>
-              <.tree tree={entry} prefix={@prefix <> name <> "/"} />
+              <.tree tree={entry} section={@section} prefix={@prefix <> name <> "/"} />
             </details>
           <% end %>
         </li>
@@ -74,8 +83,8 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   end
 
   @impl true
-  def handle_event("delete", %{"path" => path}, socket) do
-    case SaveFiles.delete(path) do
+  def handle_event("delete", %{"section" => section, "path" => path}, socket) do
+    case SaveFiles.delete(section, path) do
       {:ok, _n} -> socket
       _error    -> socket |> put_flash(:error, "Could not delete #{path}")
     end

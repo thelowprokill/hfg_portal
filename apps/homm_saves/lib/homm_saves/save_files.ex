@@ -17,6 +17,7 @@ defmodule HommSaves.SaveFiles do
 
     @timestamps_opts [type: :utc_datetime_usec]
     schema "save_files" do
+      field :section, :string, default: "saves"
       field :path,    :string
       field :machine, :string
 
@@ -24,13 +25,16 @@ defmodule HommSaves.SaveFiles do
     end
   end
 
+  @sections ["saves", "templates"]
+  def sections, do: @sections
+
   def root, do: System.get_env("HOMM_SAVES_DIR", "/homm_saves")
 
-  def list, do: SaveFile |> order_by(:path) |> Repo.all()
+  def list, do: SaveFile |> order_by([:section, :path]) |> Repo.all()
 
-  def changed_since(since, machine) do
+  def changed_since(section, since, machine) do
     SaveFile
-    |> where([f], f.machine != ^machine)
+    |> where([f], f.section == ^section and f.machine != ^machine)
     |> then(fn q -> if since, do: where(q, [f], f.updated_at > ^since), else: q end)
     |> order_by(:path)
     |> Repo.all()
@@ -39,11 +43,11 @@ defmodule HommSaves.SaveFiles do
   @topic "homm_saves:save_files"
   def subscribe, do: Phoenix.PubSub.subscribe(HfgPortal.PubSub, @topic)
 
-  def upsert(path, machine) do
-    %SaveFile{path: path, machine: machine}
+  def upsert(section, path, machine) do
+    %SaveFile{section: section, path: path, machine: machine}
     |> Repo.insert(
       on_conflict:      {:replace, [:machine, :updated_at]},
-      conflict_target:  :path,
+      conflict_target:  [:section, :path],
       returning:        true
     )
     |> tap(fn
@@ -53,12 +57,15 @@ defmodule HommSaves.SaveFiles do
   end
 
   @doc "Deletes a file or a whole folder (disk + rows). Returns {:ok, rows_deleted} | :error | {:error, reason}."
-  def delete(path) do
-    with {:ok, rel, abs} <- abs_path(path),
+  def delete(section, path) do
+    with {:ok, rel, abs} <- abs_path(section, path),
          {:ok, _}        <- File.rm_rf(abs) do
       # escape LIKE wildcards: save folder names contain "_"
       children = String.replace(rel, ~r/[\\%_]/, "\\\\\\0") <> "/%"
-      {n, _} = SaveFile |> where([f], f.path == ^rel or like(f.path, ^children)) |> Repo.delete_all()
+      {n, _} =
+        SaveFile
+        |> where([f], f.section == ^section and (f.path == ^rel or like(f.path, ^children)))
+        |> Repo.delete_all()
 
       Phoenix.PubSub.broadcast(HfgPortal.PubSub, @topic, {[:homm_saves, :save_file, :deleted], rel})
       {:ok, n}
@@ -68,14 +75,14 @@ defmodule HommSaves.SaveFiles do
     end
   end
 
-  @doc "Relative client path -> {:ok, normalized_rel, abs} or :error if it escapes the root."
-  def abs_path(rel) when is_binary(rel) do
+  @doc "Section + relative client path -> {:ok, normalized_rel, abs} or :error if invalid or it escapes the section."
+  def abs_path(section, rel) when section in @sections and is_binary(rel) do
     rel = rel |> String.replace("\\", "/") |> String.trim_leading("/")
 
     case Path.safe_relative(rel) do
-      {:ok, safe} when safe not in ["", "."] -> {:ok, safe, Path.join(root(), safe)}
+      {:ok, safe} when safe not in ["", "."] -> {:ok, safe, Path.join([root(), section, safe])}
       _                                      -> :error
     end
   end
-  def abs_path(_), do: :error
+  def abs_path(_section, _rel), do: :error
 end

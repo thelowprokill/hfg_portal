@@ -12,7 +12,8 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
 
   # RoutesController forwards the router's action atom (:call) as the 2nd arg, so read params off the conn
   def call(%{method: method, query_params: %{"route" => route}} = conn, _action) do
-    params = conn.params
+    # section defaults to "saves" so clients written before sections existed keep working
+    params = Map.put_new(conn.params, "section", "saves")
 
     case Enum.find(@routes, &(&1.name == route && &1.method == method)) do
       nil ->
@@ -22,6 +23,8 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
         cond do
           not authorized?(conn, route_config) -> conn |> put_status(401) |> json(%{error: "Unauthorized"})
           blank?(params["machine"])           -> conn |> put_status(400) |> json(%{error: "machine is required"})
+          params["section"] not in SaveFiles.sections() ->
+            conn |> put_status(400) |> json(%{error: "section must be one of: #{Enum.join(SaveFiles.sections(), ", ")}"})
           true                                -> fun.(conn, params)
         end
     end
@@ -37,12 +40,12 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
 
   defp blank?(v), do: not is_binary(v) or String.trim(v) == ""
 
-  def get_changes(conn, %{"machine" => machine} = params) do
+  def get_changes(conn, %{"machine" => machine, "section" => section} = params) do
     case parse_since(params["since"]) do
       {:ok, since} ->
         files =
-          SaveFiles.changed_since(since, machine)
-          |> Enum.map(&%{path: &1.path, updated_at: &1.updated_at, machine: &1.machine})
+          SaveFiles.changed_since(section, since, machine)
+          |> Enum.map(&%{section: &1.section, path: &1.path, updated_at: &1.updated_at, machine: &1.machine})
 
         json(conn, %{response: :ok, date: DateTime.utc_now(), data: files})
 
@@ -61,7 +64,7 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
   end
 
   def get_file(conn, params) do
-    with {:ok, rel, abs} <- SaveFiles.abs_path(params["path"]),
+    with {:ok, rel, abs} <- SaveFiles.abs_path(params["section"], params["path"]),
          true            <- File.regular?(abs) do
       send_download(conn, {:file, abs}, filename: Path.basename(rel))
     else
@@ -70,13 +73,13 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
     end
   end
 
-  def put_file(conn, %{"machine" => machine} = params) do
-    with {:ok, rel, abs}                   <- SaveFiles.abs_path(params["path"]),
+  def put_file(conn, %{"machine" => machine, "section" => section} = params) do
+    with {:ok, rel, abs}                   <- SaveFiles.abs_path(section, params["path"]),
          %Plug.Upload{path: tmp}           <- params["file"],
          :ok                               <- File.mkdir_p(Path.dirname(abs)),
          :ok                               <- File.cp(tmp, abs),
-         {:ok, file}                       <- SaveFiles.upsert(rel, machine) do
-      json(conn, %{response: :ok, date: DateTime.utc_now(), data: %{path: file.path, updated_at: file.updated_at}})
+         {:ok, file}                       <- SaveFiles.upsert(section, rel, machine) do
+      json(conn, %{response: :ok, date: DateTime.utc_now(), data: %{section: file.section, path: file.path, updated_at: file.updated_at}})
     else
       :error            -> conn |> put_status(400) |> json(%{error: "invalid path"})
       {:error, reason}  -> conn |> put_status(500) |> json(%{error: inspect(reason)})
@@ -85,8 +88,8 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
   end
 
   def delete_file(conn, params) do
-    case SaveFiles.delete(params["path"]) do
-      {:ok, n}         -> json(conn, %{response: :ok, date: DateTime.utc_now(), data: %{path: params["path"], deleted: n}})
+    case SaveFiles.delete(params["section"], params["path"]) do
+      {:ok, n}         -> json(conn, %{response: :ok, date: DateTime.utc_now(), data: %{section: params["section"], path: params["path"], deleted: n}})
       :error           -> conn |> put_status(400) |> json(%{error: "invalid path"})
       {:error, reason} -> conn |> put_status(500) |> json(%{error: inspect(reason)})
     end
