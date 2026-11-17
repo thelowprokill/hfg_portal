@@ -30,7 +30,16 @@ defmodule HommSaves.SaveFiles do
 
   def root, do: System.get_env("HOMM_SAVES_DIR", "/homm_saves")
 
-  def list, do: SaveFile |> order_by([:section, :path]) |> Repo.all()
+  @doc "Most recently updated files in a section first."
+  def list(section, limit) do
+    SaveFile
+    |> where(section: ^section)
+    |> order_by(desc: :updated_at, asc: :path)
+    |> limit(^limit)
+    |> Repo.all()
+  end
+
+  def last_upload(section), do: SaveFile |> where(section: ^section) |> Repo.aggregate(:max, :updated_at)
 
   def changed_since(section, since, machine) do
     SaveFile

@@ -5,21 +5,30 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   alias HommSaves.SaveFiles.SaveFile
 
   @section_titles [{"saves", "Save Games"}, {"templates", "RMG Templates"}]
+  @per_page 50
 
-  # ponytail: loads every row on mount; fine for a few hundred saves, paginate if it ever grows large
+  # Each section tracks how many rows it has loaded (`limits`); reloading re-queries that many,
+  # so live updates and deletes stay consistent without merging pages.
   defp fetch_files(socket) do
-    by_section = SaveFiles.list() |> Enum.group_by(& &1.section)
+    limits = socket.assigns.limits
 
     sections =
       for {section, title} <- @section_titles do
-        files = Map.get(by_section, section, [])
-        %{id: section, title: title, tree: build_tree(files), last_upload: last_upload(files)}
+        limit = Map.fetch!(limits, section)
+        # fetch one extra row to know whether there is another page
+        files = SaveFiles.list(section, limit + 1)
+
+        %{
+          id:          section,
+          title:       title,
+          tree:        files |> Enum.take(limit) |> build_tree(),
+          has_more:    length(files) > limit,
+          last_upload: SaveFiles.last_upload(section),
+        }
       end
 
     socket |> assign(:sections, sections)
   end
-
-  defp last_upload(files), do: files |> Enum.map(& &1.updated_at) |> Enum.max(DateTime, fn -> nil end)
 
   # "a/b/c.GM1" -> %{"a" => %{"b" => %{"c.GM1" => %SaveFile{}}}}
   defp build_tree(files), do: Enum.reduce(files, %{}, &put_in_tree(&2, String.split(&1.path, "/"), &1))
@@ -27,8 +36,11 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   defp put_in_tree(tree, [name], file),       do: Map.put(tree, name, file)
   defp put_in_tree(tree, [dir | rest], file), do: Map.update(tree, dir, put_in_tree(%{}, rest, file), &put_in_tree(&1, rest, file))
 
-  # directories first, then files, each alphabetical
-  defp sorted_entries(tree), do: Enum.sort_by(tree, fn {name, v} -> {is_struct(v, SaveFile), name} end)
+  # most recent first; a folder sorts by its newest file
+  defp sorted_entries(tree), do: Enum.sort_by(tree, fn {_name, v} -> latest(v) end, {:desc, DateTime})
+
+  defp latest(%SaveFile{updated_at: dt}), do: dt
+  defp latest(dir), do: dir |> Map.values() |> Enum.map(&latest/1) |> Enum.max(DateTime)
 
   def format_dt(nil), do: "never"
   def format_dt(dt),  do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S UTC")
@@ -69,6 +81,7 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
 
     socket
     |> bnw_verify_user_token(session, "HoMM Saves")
+    |> assign(:limits, Map.new(@section_titles, fn {section, _} -> {section, @per_page} end))
     |> fetch_files()
     |> res(:ok)
   end
@@ -88,6 +101,14 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
       {:ok, _n} -> socket
       _error    -> socket |> put_flash(:error, "Could not delete #{path}")
     end
+    |> fetch_files()
+    |> res()
+  end
+
+  @impl true
+  def handle_event("load_more", %{"section" => section}, socket) do
+    socket
+    |> update(:limits, &Map.update!(&1, section, fn n -> n + @per_page end))
     |> fetch_files()
     |> res()
   end

@@ -17,6 +17,11 @@
         <p class="text-gray-500">Nothing uploaded yet.</p>
       <% else %>
         <div class="-ml-4"><.tree tree={section.tree} section={section.id} /></div>
+        <%!-- infinite scroll: loads the next page of this section when scrolled into view --%>
+        <%= if section.has_more do %>
+          <.bnw_button_load_more id={"load_more_#{section.id}"} phx-value-section={section.id} />
+          <p class="text-sm text-gray-500 py-2">Loading more…</p>
+        <% end %>
       <% end %>
     </section>
   <% end %>
