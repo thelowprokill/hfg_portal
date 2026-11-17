@@ -8,6 +8,8 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
     %{name: "dashboard",       method: "GET", function: &__MODULE__.dashboard/2,       role: :view,  description: "Monthly summary for all buckets" },
     %{name: "account_totals",  method: "GET", function: &__MODULE__.account_totals/2,  role: :view,  description: "Debit/credit account totals, sinking fund total, and net total money for a given month" },
     %{name: "account_history", method: "GET", function: &__MODULE__.account_history/2, role: :view,  description: "Account/bucket totals over a date range, one point per day or per month" },
+    %{name: "balances",        method: "GET", function: &__MODULE__.balances/2,        role: :view,  description: "Latest balance per account on or before `date` (default today)" },
+    %{name: "balance",         method: "PUT", function: &__MODULE__.put_balance/2,     role: :edit,  description: "Set an account's balance (account_id, balance, optional date; default today)" },
     %{name: "run_scheduled",   method: "PUT", function: &__MODULE__.run_scheduled/2,   role: :admin, description: "Process due scheduled expenses and sinking fund contributions" }
   ]
 
@@ -183,6 +185,43 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
     end
   end
 
+  def balances(%{params: params} = conn, _params) do
+    case parse_date(Map.get(params, "date"), Date.utc_today()) do
+      {:ok, date} ->
+        amounts = AccountBalances.map_for_date(date)
+        dates   = AccountBalances.dates_for_date(date)
+
+        data =
+          Accounts.list(%{})
+          |> Enum.map(&%{
+            account_id: &1.id,
+            name:       &1.name,
+            type:       &1.type,
+            balance:    decimal_or_nil(Map.get(amounts, &1.id)),
+            date:       Map.get(dates, &1.id)
+          })
+
+        conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: %{as_of: date, accounts: data}})
+
+      _ ->
+        conn |> put_status(:bad_request) |> json(%{error: "date must be an ISO8601 date"})
+    end
+  end
+
+  def put_balance(%{params: params} = conn, _params) do
+    with id when is_integer(id) <- parse_int_safe(Map.get(params, "account_id")),
+         %{} = account          <- Accounts.get(id),
+         {:ok, date}            <- parse_date(Map.get(params, "date"), Date.utc_today()),
+         {:ok, b}               <- AccountBalances.upsert(account.id, %{date: date, balance: Map.get(params, "balance")}) do
+      conn |> put_status(:ok) |> json(%{response: :ok, date: DateTime.utc_now(), data: %{account_id: b.account_id, balance: to_string(b.balance), date: b.date}})
+    else
+      {:error, %Ecto.Changeset{} = cs} ->
+        conn |> put_status(:bad_request) |> json(%{error: "invalid balance", errors: Ecto.Changeset.traverse_errors(cs, &elem(&1, 0))})
+      _ ->
+        conn |> put_status(:bad_request) |> json(%{error: "account_id must be an existing account, date an ISO8601 date"})
+    end
+  end
+
   def run_scheduled(conn, _params) do
     %{scheduled_expenses: expenses, sinking_contributions: sinking} =
       ScheduledExpenses.run_scheduled()
@@ -200,6 +239,15 @@ defmodule HfgPortalWeb.Apis.Budget.BudgetController do
   defp parse_int(nil), do: nil
   defp parse_int(s) when is_binary(s), do: String.to_integer(s)
   defp parse_int(i) when is_integer(i), do: i
+
+  defp parse_int_safe(i) when is_integer(i), do: i
+  defp parse_int_safe(s) when is_binary(s) do
+    case Integer.parse(s) do
+      {i, ""} -> i
+      _       -> nil
+    end
+  end
+  defp parse_int_safe(_), do: nil
 
   defp decimal_or_nil(nil), do: nil
   defp decimal_or_nil(d), do: to_string(d)
