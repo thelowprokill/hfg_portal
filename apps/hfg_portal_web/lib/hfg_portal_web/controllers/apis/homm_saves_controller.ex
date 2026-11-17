@@ -6,7 +6,8 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
   @routes [
     %{name: "changes", method: "GET", function: &__MODULE__.get_changes/2, role: :edit, description: "List files changed since `since` by other machines"},
     %{name: "file",    method: "GET", function: &__MODULE__.get_file/2,    role: :edit, description: "Download a save file by `path`"},
-    %{name: "file",    method: "PUT", function: &__MODULE__.put_file/2,    role: :edit, description: "Upload (create or overwrite) a save file"},
+    %{name: "file",    method: "PUT",    function: &__MODULE__.put_file/2,    role: :edit, description: "Upload (create or overwrite) a save file"},
+    %{name: "file",    method: "DELETE", function: &__MODULE__.delete_file/2, role: :edit, description: "Delete a save file or a whole folder by `path`"},
   ]
 
   # RoutesController forwards the router's action atom (:call) as the 2nd arg, so read params off the conn
@@ -80,6 +81,14 @@ defmodule HfgPortalWeb.Apis.HommSavesController do
       :error            -> conn |> put_status(400) |> json(%{error: "invalid path"})
       {:error, reason}  -> conn |> put_status(500) |> json(%{error: inspect(reason)})
       _                 -> conn |> put_status(400) |> json(%{error: "file upload is required"})
+    end
+  end
+
+  def delete_file(conn, params) do
+    case SaveFiles.delete(params["path"]) do
+      {:ok, n}         -> json(conn, %{response: :ok, date: DateTime.utc_now(), data: %{path: params["path"], deleted: n}})
+      :error           -> conn |> put_status(400) |> json(%{error: "invalid path"})
+      {:error, reason} -> conn |> put_status(500) |> json(%{error: inspect(reason)})
     end
   end
 end

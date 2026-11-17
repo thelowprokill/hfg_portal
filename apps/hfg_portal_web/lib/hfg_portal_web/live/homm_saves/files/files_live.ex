@@ -25,7 +25,8 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   def format_dt(nil), do: "never"
   def format_dt(dt),  do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S UTC")
 
-  attr :tree, :map, required: true
+  attr :tree,   :map,    required: true
+  attr :prefix, :string, default: ""
   def tree(assigns) do
     ~H"""
     <ul class="pl-4">
@@ -36,11 +37,15 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
               <span class="font-mono"><%= name %></span>
               <span class="text-sm text-gray-500"><%= format_dt(entry.updated_at) %></span>
               <span class="text-sm text-gray-500"><%= entry.machine %></span>
+              <.bnw_button_delete phx-value-path={entry.path} data={[confirm: "Delete #{entry.path}?"]} />
             </div>
           <% else %>
             <details open>
-              <summary class="cursor-pointer font-semibold py-0.5"><%= name %>/</summary>
-              <.tree tree={entry} />
+              <summary class="cursor-pointer font-semibold py-0.5">
+                <%= name %>/
+                <.bnw_button_delete phx-value-path={@prefix <> name} data={[confirm: "Delete folder #{@prefix <> name} and everything in it?"]} />
+              </summary>
+              <.tree tree={entry} prefix={@prefix <> name <> "/"} />
             </details>
           <% end %>
         </li>
@@ -66,6 +71,16 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   def handle_info(info, socket) do
     print_unhandled(info, __MODULE__)
     socket |> res()
+  end
+
+  @impl true
+  def handle_event("delete", %{"path" => path}, socket) do
+    case SaveFiles.delete(path) do
+      {:ok, _n} -> socket
+      _error    -> socket |> put_flash(:error, "Could not delete #{path}")
+    end
+    |> fetch_files()
+    |> res()
   end
 
   @impl true

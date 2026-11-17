@@ -12,3 +12,7 @@ services:
     extends:
       file: docker-compose.production.yml
       service: hull-family-games-postgres-prod
+  homm-saves-permissions:
+    extends:
+      file: docker-compose.production.yml
+      service: homm-saves-permissions

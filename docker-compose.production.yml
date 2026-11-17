@@ -19,6 +19,15 @@ services:
     depends_on:
       hull-family-games-postgres-prod:
         condition: service_healthy
+      homm-saves-permissions:
+        condition: service_completed_successfully
+  # The app runs as `nobody` (uid 65534), but Docker creates the bind-mounted host dir as root.
+  # Fix ownership on every start, same idea as the postgres entrypoint below.
+  homm-saves-permissions:
+    image: busybox:1.36
+    command: ["chown", "-R", "65534:65534", "/homm_saves"]
+    volumes:
+      - ./.homm_saves:/homm_saves
   hull-family-games-postgres-prod:
     container_name: hull-family-games-postgres-prod
     image: postgres:16

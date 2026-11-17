@@ -52,6 +52,22 @@ defmodule HommSaves.SaveFiles do
     end)
   end
 
+  @doc "Deletes a file or a whole folder (disk + rows). Returns {:ok, rows_deleted} | :error | {:error, reason}."
+  def delete(path) do
+    with {:ok, rel, abs} <- abs_path(path),
+         {:ok, _}        <- File.rm_rf(abs) do
+      # escape LIKE wildcards: save folder names contain "_"
+      children = String.replace(rel, ~r/[\\%_]/, "\\\\\\0") <> "/%"
+      {n, _} = SaveFile |> where([f], f.path == ^rel or like(f.path, ^children)) |> Repo.delete_all()
+
+      Phoenix.PubSub.broadcast(HfgPortal.PubSub, @topic, {[:homm_saves, :save_file, :deleted], rel})
+      {:ok, n}
+    else
+      {:error, reason, _file} -> {:error, reason}
+      :error                  -> :error
+    end
+  end
+
   @doc "Relative client path -> {:ok, normalized_rel, abs} or :error if it escapes the root."
   def abs_path(rel) when is_binary(rel) do
     rel = rel |> String.replace("\\", "/") |> String.trim_leading("/")
