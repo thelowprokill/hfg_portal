@@ -40,7 +40,8 @@ defmodule HfgPortalWeb.Endpoint do
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
+    # multipart default is 8MB; RMG templates can be larger. Keep in sync with nginx client_max_body_size.
+    parsers: [:urlencoded, {:multipart, length: 50_000_000}, :json],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
