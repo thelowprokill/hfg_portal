@@ -22,11 +22,14 @@ defmodule TaskAutomationController.Jobs do
     if has_admin do
       query
     else
-      query
-      |> join(:inner, [j], rj in TaskAutomationController.Users.RoleJob, on: j.id == rj.job_id)
-      |> join(:inner, [_, rj], r in TaskAutomationController.Users.Role, on: rj.role_id == r.id)
-      |> join(:inner, [_, _, r], ur in TaskAutomationController.Users.UserRole, on: r.id == ur.role_id)
-      |> where([_, _, _, ur], ur.user_id == ^user_id)
+      # a subquery, not joins, so a job linked through several of the user's roles is listed once
+      job_ids =
+        TaskAutomationController.Users.RoleJob
+        |> join(:inner, [rj], ur in TaskAutomationController.Users.UserRole, on: rj.role_id == ur.role_id)
+        |> where([_, ur], ur.user_id == ^user_id)
+        |> select([rj], rj.job_id)
+
+      query |> where([j], j.id in subquery(job_ids))
     end
   end
   defp filter_user_jobs(query, _), do: query

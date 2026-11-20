@@ -216,7 +216,6 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
   defp list_dev_tools(%{dev_admin: true, admin_mode: true}) do
     [
       %Page{id: "expand",          name: "Expand",          links: [
-        %Page{id: "archive",         name: "Archive",         module: HfgPortalWeb.DevTools.Archive.ArchiveLive},
         %Page{id: "button_gallery",  name: "Button Gallery",  module: HfgPortalWeb.DevTools.ButtonGallery.ButtonGalleryLive},
         %Page{id: "icon_gallery",    name: "Icon Gallery",    module: HfgPortalWeb.DevTools.IconGallery.IconGallery},
       ]},

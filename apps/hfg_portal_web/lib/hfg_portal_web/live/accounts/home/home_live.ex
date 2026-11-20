@@ -143,6 +143,10 @@ defmodule HfgPortalWeb.Accounts.Home.HomeLive do
   def handle_event("delete", %{"id" => id}, socket) do 
     id |> String.to_integer |> Accounts.delete()
     socket |> res()
+  rescue
+    # app roles and records still reference the user; deactivate instead
+    Ecto.ConstraintError ->
+      socket |> put_flash(:error, "This user still has app roles or records and can't be deleted. Deactivate them instead.") |> res()
   end
 
   @impl true

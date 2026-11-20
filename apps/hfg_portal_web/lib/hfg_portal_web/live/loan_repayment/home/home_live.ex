@@ -92,7 +92,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
       module:    ChangeRepayment,
       live:      true,
       user:      user,
-      opts:      %{loan: loan}
+      opts:      %{loan: loan, can_edit: socket.assigns.can_edit}
     } | modal_stack])
   end
 
@@ -187,7 +187,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
 
     socket
     |> bnw_verify_user_token(session, "Loan Repayment", "Home")
-    #|> fetch_user_role()
+    |> then(&assign(&1, :can_edit, LoanRepayment.Authorize.can_edit?(&1.assigns.current_user)))
     |> assign(:session,       %{})
     |> assign(:page,          0)
     |> assign(:per_page,      50)
@@ -298,13 +298,13 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
   def handle_event("repayment", %{"id" => id}, socket), do: socket |> set_modal(:repayment, id |> String.to_integer) |> res()
 
   @impl true
-  def handle_event("add_new", _, socket), do: socket |> set_modal(:new) |> res()
+  def handle_event("add_new", _, %{assigns: %{can_edit: true}} = socket), do: socket |> set_modal(:new) |> res()
 
   @impl true
-  def handle_event("edit", %{"id" => id}, socket), do: socket |> set_modal(:edit, id |> String.to_integer) |> res()
+  def handle_event("edit", %{"id" => id}, %{assigns: %{can_edit: true}} = socket), do: socket |> set_modal(:edit, id |> String.to_integer) |> res()
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do 
+  def handle_event("delete", %{"id" => id}, %{assigns: %{can_edit: true}} = socket) do 
     Loans.delete(id) 
     socket |> res()
   end

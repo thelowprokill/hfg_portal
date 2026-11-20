@@ -36,7 +36,7 @@ defmodule Timekeeping.TimeEntries do
     @schema
     |> where([te], te.job_id in ^job_ids and not is_nil(te.end_time))
     |> group_by([te], te.job_id)
-    |> select([te], {te.job_id, fragment("SUM(TIMESTAMPDIFF(SECOND, ?, ?))", te.start_time, te.end_time)})
+    |> select([te], {te.job_id, fragment("CAST(SUM(EXTRACT(EPOCH FROM (? - ?))) AS bigint)", te.end_time, te.start_time)})
     |> Repo.all()
     |> Map.new(fn {job_id, total} -> {job_id, to_integer_seconds(total)} end)
   end

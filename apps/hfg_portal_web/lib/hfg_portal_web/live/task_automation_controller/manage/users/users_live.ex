@@ -34,31 +34,6 @@ defmodule HfgPortalWeb.TaskAutomationController.Manage.Users.UsersLive do
   defp fetch_roles(socket), do: socket |> assign(:roles, socket.assigns.roles_module.list() |> fn x -> [[key: "All", value: ""]] ++ Enum.map(x, &([value: &1.name, key: &1.name])) end.())
 
   defp set_modal(socket, type \\ nil, id \\ nil)
-  defp set_modal(socket, :edit, id) do
-    %{
-      module:       module,
-      roles_module: roles_module,
-      current_user: user,
-      modal_stack:  modal_stack
-    } = socket.assigns
-
-    changeset = 
-      id
-      |> module.get(:user)
-      |> case do
-        nil  -> module.new_changeset()
-        user -> module.change(user)
-      end
-
-    socket |> assign(:modal_stack, [%Modal{
-      id: id,
-      modal:     :edit,
-      module:    ChangeUserRoles,
-      changeset: changeset,
-      user:      user,
-      opts:      %{module: module, roles_module: roles_module, user_id: id, user: HfgPortal.Accounts.get(id)}
-    } | modal_stack])
-  end
   defp set_modal(socket, :change_roles, id) do
     %{
       users:        users,
@@ -66,16 +41,19 @@ defmodule HfgPortalWeb.TaskAutomationController.Manage.Users.UsersLive do
       modal_stack:  modal_stack
     } = socket.assigns
 
-    socket
-    |> assign(:modal_stack, [%Modal{
-      modal:     :change_roles,
-      id:        id,
-      module:    ChangeRoles,
-      live:      true,
-      user:      user,
-      opts:      %{user: Enum.find(users, &(&1.id == id))},
-    } | modal_stack])
-    
+    case Enum.find(users, &(&1.id == id)) do
+      nil -> socket
+      target ->
+        socket
+        |> assign(:modal_stack, [%Modal{
+          modal:     :change_roles,
+          id:        id,
+          module:    ChangeRoles,
+          live:      true,
+          user:      user,
+          opts:      %{user: target},
+        } | modal_stack])
+    end
   end
   defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
 
@@ -172,7 +150,8 @@ defmodule HfgPortalWeb.TaskAutomationController.Manage.Users.UsersLive do
   end
 
   @impl true
-  def handle_event("edit", %{"id" => id}, socket), do: socket |> set_modal(:edit, id |> String.to_integer) |> res()
+  # a row click opens the same roles modal as its Roles button
+  def handle_event("edit", %{"id" => id}, socket), do: socket |> set_modal(:change_roles, id |> String.to_integer) |> res()
 
   @impl true
   def handle_event("change_roles", %{"id" => id}, socket), do: socket |> set_modal(:change_roles, id |> String.to_integer) |> res()

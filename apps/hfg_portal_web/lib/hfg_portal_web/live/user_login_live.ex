@@ -20,9 +20,6 @@ defmodule HfgPortalWeb.UserLoginLive do
 
         <:actions>
           <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
-          <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
-            Forgot your password?
-          </.link>
         </:actions>
         <:actions>
           <.bnw_button_primary_pill phx-disable-with="Signing in..." type="submit" class="w-full">
@@ -39,25 +36,5 @@ defmodule HfgPortalWeb.UserLoginLive do
     username = Phoenix.Flash.get(socket.assigns.flash, :username)
     form = to_form(%{"username" => username}, as: "user")
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
-  end
-
-  @impl true
-  def handle_params(params, url, socket) do
-    base_url =
-      case Application.get_env(:hfg_portal_web, :environment) do
-        "production" ->
-          HfgPortalWeb.Endpoint.url()
-          |> String.replace("http:", "https:")
-          |> String.replace(":4000", "")
-        _ ->
-          HfgPortalWeb.Endpoint.url()
-      end
-    socket =
-      socket
-      |> assign(:url, url)
-      |> assign(:params, params)
-      |> assign(:google_auth_url, ElixirAuthGoogle.generate_oauth_url(base_url))
-
-    {:noreply, socket}
   end
 end

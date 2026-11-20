@@ -5,7 +5,6 @@ defmodule HfgPortal.Authorize do
 
   @pages [
     %Page{id: "home",         name: "Home",      module: HfgPortalWeb.Accounts.Home.HomeLive},
-    %Page{id: "api_accounts", name: "API Accounts", module: HfgPortalWeb.Accounts.ApiAccounts.ApiAccountsLive},
   ]
 
   # pattern match on user struct

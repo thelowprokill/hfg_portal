@@ -20,11 +20,20 @@ defmodule LoanRepayment.Authorize do
   def list_pages(_, true),  do: @pages
   def list_pages(_, false), do: []
 
+  def can_edit?(%HfgPortal.Accounts.User{} = user), do: (user.dev_admin && user.admin_mode) || can_edit?(user.id)
+  def can_edit?(user_id) when is_integer(user_id) do
+    case LoanRepayment.UserRoles.get(user_id, :user) do
+      nil       -> false
+      user_role -> Roles.get(user_role.role).edit
+    end
+  end
+
   def authorize(role, page, dev_admin \\ false)
   def authorize(%LoanRepayment.Users.Roles{} = role, page, dev_admin) do
     cond do
       #user.dev_admin -> true
       dev_admin -> true
+      role && role.admin -> true
       role && role.edit  && page     in ["home", "reports"]    -> true
       role && role.view  && page     in ["home", "reports"]    -> true
       true -> false

@@ -9,7 +9,7 @@
                w-64
                h-screen"
              aria-label="Sidebar">
-        <div class={"h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 #{if @current_user.admin_mode && (@current_user.portal_admin || @current_user.dev_admin || Enum.any?(@apps, &(&1.show_admin))), do: "bg-red-300 dark:bg-red-800"}"}>
+        <div class={"h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 #{if @current_user.admin_mode && (@current_user.portal_admin || @current_user.dev_admin || Enum.any?(@apps, &Map.get(&1, :show_admin))), do: "bg-red-300 dark:bg-red-800"}"}>
           <!-- sidebar toggle -->
           <div class="flex justify-end">
             <.bnw_button_icon bnw_icon="hamburger" phx_click="hide_sidebar" />

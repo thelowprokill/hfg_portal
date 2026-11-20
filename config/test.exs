@@ -8,7 +8,7 @@ import Config
 config :budget, Budget.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "budget_test",
   migration_source: "budget_schema_migrations",
@@ -23,7 +23,7 @@ config :budget, Budget.Repo,
 config :wife_time, WifeTime.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "wife_time_test",
   migration_source: "wife_time_schema_migrations",
@@ -38,7 +38,7 @@ config :wife_time, WifeTime.Repo,
 config :loan_repayment, LoanRepayment.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "loan_repayment_test",
   migration_source: "loan_repayment_schema_migrations",
@@ -53,17 +53,27 @@ config :loan_repayment, LoanRepayment.Repo,
 config :timekeeping, Timekeeping.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "timekeeping_test",
   migration_source: "timekeeping_schema_migrations",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+config :task_automation_controller, TaskAutomationController.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
+  database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
+  migration_default_prefix: "task_automation_controller_test",
+  migration_source: "task_automation_controller_schema_migrations",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2
+
 config :homm_saves, HommSaves.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "homm_saves_test",
   migration_source: "homm_saves_schema_migrations",
@@ -78,7 +88,7 @@ config :homm_saves, HommSaves.Repo,
 config :car_maintenance, CarMaintenance.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "car_maintenance_test",
   migration_source: "car_maintenance_schema_migrations",
@@ -132,7 +142,7 @@ config :it_budget, ItBudget.Repo,
 config :budget, Budget.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "budget_test",
   migration_source: "budget_schema_migrations",
@@ -150,7 +160,7 @@ config :bcrypt_elixir, :log_rounds, 1
 config :hfg_portal, HfgPortal.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
   database: "hfg_portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   migration_default_prefix: "hfg_portal_test",
   migration_source: "hfg_portal_schema_migrations",
@@ -167,15 +177,14 @@ config :hfg_portal_web, HfgPortalWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warning
 
-# In test we don't send emails.
-config :hfg_portal, HfgPortal.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters.
-config :swoosh, :api_client, false
-
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :budget, env: :test
-config :timekeeping, env: :test
-config :homm_saves, env: :test
+config :hfg_portal,                 env: :test
+config :car_maintenance,            env: :test
+config :loan_repayment,             env: :test
+config :wife_time,                  env: :test
+config :budget,                     env: :test
+config :task_automation_controller, env: :test
+config :timekeeping,                env: :test
+config :homm_saves,                 env: :test

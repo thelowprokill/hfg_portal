@@ -14,7 +14,6 @@ defmodule TaskAutomationController.Users.User do
 
   schema "users" do
     field :username,     :string
-    field :email,        :string
     field :first_name,   :string
     field :last_name,    :string
     field :role,         :map, virtual: true
@@ -23,7 +22,7 @@ defmodule TaskAutomationController.Users.User do
     field :admin_mode,   :boolean, default: false, virtual: true
     field :active,       :boolean
 
-    has_many :user_roles, TestDashboard.Users.UserRole, foreign_key: :user_id
+    has_many :user_roles, TaskAutomationController.Users.UserRole, foreign_key: :user_id
 
     timestamps()
   end

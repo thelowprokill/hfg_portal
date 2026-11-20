@@ -124,18 +124,22 @@ defmodule HfgPortal.Helpers.DefaultCrud do
           |> limit(1)
           |> Repo.one()
 
-        Ecto.Multi.new()
-        |> Ecto.Multi.insert_or_update(:item,      item      |> change(%{order: prev_item.order}))
-        |> Ecto.Multi.insert_or_update(:prev_item, prev_item |> change(%{order: item.order}))
-        |> Repo.transaction(timeout: 300_000)
-        |> case do
-          {:ok, data} ->
-            notify_subscribers({:ok, data.item},      @updated)
-            notify_subscribers({:ok, data.prev_item}, @updated)
-          {:error, _, _} ->
-            :error
-          _ ->
-            :error
+        if is_nil(prev_item) do
+          {:ok, item}
+        else
+          Ecto.Multi.new()
+          |> Ecto.Multi.insert_or_update(:item,      item      |> change(%{order: prev_item.order}))
+          |> Ecto.Multi.insert_or_update(:prev_item, prev_item |> change(%{order: item.order}))
+          |> Repo.transaction(timeout: 300_000)
+          |> case do
+            {:ok, data} ->
+              notify_subscribers({:ok, data.item},      @updated)
+              notify_subscribers({:ok, data.prev_item}, @updated)
+            {:error, _, _} ->
+              :error
+            _ ->
+              :error
+          end
         end
       end
 
@@ -164,7 +168,7 @@ defmodule HfgPortal.Helpers.DefaultCrud do
         Enum.reduce(search_stack, query, fn(search, query) ->
           cond do
             search.field in [:inserted_at, :updated_at] -> query |> where([r], field(r, ^search.field) >= ^search.val)
-            search.field in @schema.__schema__(:fields) -> query |> where([r], like(field(r, ^search.field), ^"%#{search.val}%") or ^search.val == "")
+            search.field in @schema.__schema__(:fields) -> query |> where([r], fragment("CAST(? AS TEXT) LIKE ?", field(r, ^search.field), ^"%#{search.val}%") or ^search.val == "")
             true -> query
           end
         end)
@@ -250,8 +254,9 @@ defmodule HfgPortal.Helpers.DefaultCrud do
             item
             |> Map.from_struct()
             |> Map.drop([:__meta__, :id, :inserted_at, :updated_at])
-            |> Map.merge(attrs, fn _, _, v -> v end) 
-            |> Map.put(:item_id, item.id)
+            |> Map.new(fn {k, v} -> {to_string(k), v} end)
+            |> Map.merge(Map.new(attrs, fn {k, v} -> {to_string(k), v} end))
+            |> Map.put("item_id", item.id)
 
           %@archive{}
           |> @archive.changeset(new_attrs)

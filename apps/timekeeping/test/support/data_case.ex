@@ -36,8 +36,27 @@ defmodule Timekeeping.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Timekeeping.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    # the contexts write through HfgPortal.Repo (DefaultCrud/DefaultUser), so both are sandboxed
+    for repo <- [Timekeeping.Repo, HfgPortal.Repo] do
+      pid = Ecto.Adapters.SQL.Sandbox.start_owner!(repo, shared: not tags[:async])
+      on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    end
+  end
+
+  @doc "Inserts a portal user (hfg_portal users table) the way an admin adds one."
+  def user_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      HfgPortal.Accounts.create_or_update(
+        %HfgPortal.Accounts.User{},
+        Enum.into(attrs, %{
+          username:         "user#{System.unique_integer([:positive])}",
+          password:         "hello world!",
+          password_confirm: "hello world!",
+          active:           true
+        })
+      )
+
+    user
   end
 
   @doc """

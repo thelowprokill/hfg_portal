@@ -98,12 +98,14 @@ defmodule HfgPortalWeb.TaskAutomationController.Home.Modals.AddJob do
   def handle_event("save", params, socket) do
     %{modal: %{changeset: changeset} = modal} = socket.assigns
 
-    params = params |> IO.inspect |> Map.get(@key, %{})
+    params = params |> Map.get(@key, %{})
 
-    #job = Map.get(params, "job_id") |> String.to_integer() |> Jobs.get() |> Jobs.preload(%{preload: [:priority]})
+    # only the jobs offered in the select (the user's roles', or all for a dev admin in admin mode)
+    job_id = Map.get(params, "job_id")
+    job_id = if Enum.any?(socket.assigns.jobs, &("#{&1[:value]}" == "#{job_id}")), do: job_id
 
     params = %{
-      job_id:        Map.get(params, "job_id"),
+      job_id:        job_id,
       status:        "unassigned",
       type:          "user",
       user_id:       modal.user.id,

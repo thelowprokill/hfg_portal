@@ -20,7 +20,6 @@ defmodule HfgPortalWeb.Accounts.Home.Modals.ChangeAccounts do
             <.bnw_input_hidden f={f} field={:user_id} value={@modal.user.id} />
 
             <.bnw_input        f={f} field={:username}       display_name="Username"/>
-            <.bnw_input        f={f} field={:email}          display_name="Email"        type="email"/>
             <.bnw_input        f={f} field={:first_name}     display_name="First Name"/>
             <.bnw_input        f={f} field={:middle_name}    display_name="Middle Name"/>
             <.bnw_input        f={f} field={:last_name}      display_name="Last Name"/>

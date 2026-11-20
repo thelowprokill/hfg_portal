@@ -13,9 +13,11 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
       search_stack:       search_stack,
       sort_stack:         sort_stack,
       job_total_seconds:  job_total_seconds,
+      current_user:       user,
     } = socket.assigns
 
     fetched = Jobs.list(%{
+      user_id:      user.id,
       page:         page,
       per_page:     per_page,
       search_stack: search_stack,
@@ -46,21 +48,21 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
     } | modal_stack])
   end
 
-  defp set_modal(socket, :edit, id) when not is_nil(id) do
+  defp set_modal(socket, :edit, %Jobs.Job{} = job) do
     %{modal_stack: modal_stack, current_user: user} = socket.assigns
 
     socket |> assign(:modal_stack, [%Modal{
       modal:     :edit,
       id:        :edit,
       module:    ChangeJob,
-      changeset: Jobs.get(id) |> Jobs.change(),
+      changeset: job |> Jobs.change(),
       live:      false,
       user:      user,
       opts:      %{}
     } | modal_stack])
   end
 
-  defp set_modal(socket, :log_time, id) when not is_nil(id) do
+  defp set_modal(socket, :log_time, %Jobs.Job{} = job) do
     %{modal_stack: modal_stack, current_user: user} = socket.assigns
 
     socket |> assign(:modal_stack, [%Modal{
@@ -70,11 +72,15 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
       changeset: nil,
       live:      false,
       user:      user,
-      opts:      %{job: Jobs.get(id)}
+      opts:      %{job: job}
     } | modal_stack])
   end
 
+  defp set_modal(socket, type, nil) when type in [:edit, :log_time], do: socket
   defp set_modal(socket, _, _), do: socket |> assign(:modal_stack, stack_pop(socket.assigns.modal_stack))
+
+  # nil unless the job belongs to the current user
+  defp own_job(socket, id), do: Jobs.get_for_user(String.to_integer(id), socket.assigns.current_user.id)
 
   defp format_seconds(seconds) do
     hours   = div(seconds, 3600)
@@ -129,7 +135,11 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
 
   @impl true
   def handle_info({[:job, :created], job}, socket) do
-    socket |> assign(:jobs, [job | socket.assigns.jobs]) |> res()
+    if job.user_id == socket.assigns.current_user.id do
+      socket |> assign(:jobs, [job | socket.assigns.jobs])
+    else
+      socket
+    end |> res()
   end
   @impl true
   def handle_info({[:job, :updated], job}, socket) do
@@ -177,12 +187,12 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.JobsLive do
   @impl true
   def handle_event("add_new", _, socket),                      do: socket |> set_modal(:new) |> res()
   @impl true
-  def handle_event("edit", %{"id" => id}, socket),             do: socket |> set_modal(:edit, String.to_integer(id)) |> res()
+  def handle_event("edit", %{"id" => id}, socket),             do: socket |> set_modal(:edit, own_job(socket, id)) |> res()
   @impl true
-  def handle_event("log_time", %{"id" => id}, socket),         do: socket |> set_modal(:log_time, String.to_integer(id)) |> res()
+  def handle_event("log_time", %{"id" => id}, socket),         do: socket |> set_modal(:log_time, own_job(socket, id)) |> res()
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    Jobs.delete(String.to_integer(id))
+    if job = own_job(socket, id), do: Jobs.delete(job.id)
     socket |> res()
   end
   @impl true

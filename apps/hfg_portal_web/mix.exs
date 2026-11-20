@@ -41,7 +41,7 @@ defmodule HfgPortalWeb.MixProject do
       {:phoenix_html,               "~> 3.3"},
       {:phoenix_live_reload,        "~> 1.2",    only: :dev},
       {:phoenix_live_view,          "~> 0.20.17"},
-      #{:floki,                      "~> 0.36.1", only: :test},
+      {:floki,                      "~> 0.36", only: :test},
       {:phoenix_live_dashboard,     "~> 0.8.0"},
       {:esbuild,                    "~> 0.7",    runtime: Mix.env() == :dev},
       {:tailwind,                   "~> 0.2.0",  runtime: Mix.env() == :dev},
@@ -51,7 +51,6 @@ defmodule HfgPortalWeb.MixProject do
       {:jason,                      "~> 1.2"},
       {:plug_cowboy,                "~> 2.5"},
       {:number,                     "~> 1.0.4"},
-      {:elixir_auth_google,         "~> 1.6.9"},
       {:qrcode_ex,                  "~> 0.1.1"},
       {:jose,                       "~> 1.11"},
       {:joken,                      "~> 2.6.2"},
@@ -74,7 +73,8 @@ defmodule HfgPortalWeb.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "assets.setup", "assets.build"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      # the pages read every app's tables, so migrate them all (hfg_portal first: they reference its users)
+      test: ["ecto.create --quiet", "ecto.migrate --quiet -r HfgPortal.Repo -r Budget.Repo -r CarMaintenance.Repo -r LoanRepayment.Repo -r WifeTime.Repo -r Timekeeping.Repo -r TaskAutomationController.Repo -r HommSaves.Repo", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]

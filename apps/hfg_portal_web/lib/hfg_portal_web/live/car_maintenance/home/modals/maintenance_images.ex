@@ -38,7 +38,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
                 <%= for image <- @images do %>
                   <tr id={"image_#{image.id}"}>
                     <td class="px-2"><%= image.name %></td>
-                    <td class="px-2"><img src={~p"/car_maitenance_images/#{image.id}/image"} width="500" /></td>
+                    <td class="px-2"><img src={~p"/car_maintenance_images/#{image.id}/image"} width="500" /></td>
                     <td class="px-2"><.bnw_button_delete phx-value-id={image.id} /></td>
                   </tr>
                 <% end %>
@@ -167,7 +167,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
   @impl true
   def handle_info({[_, :created], image}, socket) do
     cond do
-      (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) || (image.fixed_service_history_id == socket.assigns.fixed_service_history_id && !is_nil(image.fixed_service_history_id)) ->
+      (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) ->
         %{images: images} = socket.assigns
         socket |> assign(:images, [image |> @module.preload(%{preload: @preload}) | images] |> Enum.uniq_by(&(&1.id)))
       true -> socket
@@ -176,7 +176,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
   @impl true
   def handle_info({[_, :updated], image}, socket) do
     cond do
-      (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) || (image.fixed_service_history_id == socket.assigns.fixed_service_history_id && !is_nil(image.fixed_service_history_id)) ->
+      (image.service_history_id == socket.assigns.service_history_id && !is_nil(image.service_history_id)) ->
         %{images: images} = socket.assigns
         socket |> assign(:images, Enum.map(images, &(if &1.id == image.id, do: image |> @module.preload(%{preload: @preload}), else: &1)))
       true -> socket
@@ -221,12 +221,22 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMaintenanceImages do
     end)
     |> Enum.at(0)
 
-    binary = File.read!(uploaded_file.dest)
-    File.rm(uploaded_file.dest)
+    params = params |> Map.get(@key, %{})
 
     changeset =
-      changeset.data
-      |> @module.change(params |> Map.get(@key, %{}) |> Map.put("image", binary) |> Map.put("image_content_type", String.trim_leading(uploaded_file.type, ".")))
+      case uploaded_file do
+        nil ->
+          changeset.data
+          |> @module.change(params)
+          |> Ecto.Changeset.add_error(:image, "can't be blank")
+
+        %{dest: dest, type: type} ->
+          binary = File.read!(dest)
+          File.rm(dest)
+
+          changeset.data
+          |> @module.change(params |> Map.put("image", binary) |> Map.put("image_content_type", String.trim_leading(type, ".")))
+      end
       |> Map.put(:action, :insert)
 
     socket

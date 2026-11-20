@@ -24,7 +24,11 @@ defmodule Budget.Transactions do
       |> Repo.insert_or_update()
       |> notify_subscribers(if new_item, do: @created, else: @updated)
 
-    with {:ok, transaction} <- result, do: sync_bucket_balance(transaction.bucket_id)
+    with {:ok, transaction} <- result do
+      sync_bucket_balance(transaction.bucket_id)
+      if item.bucket_id && item.bucket_id != transaction.bucket_id, do: sync_bucket_balance(item.bucket_id)
+    end
+
     result
   end
 
@@ -43,9 +47,13 @@ defmodule Budget.Transactions do
     |> sort_stack(Map.get(opts, :sort_stack))
     |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
     |> filter_active(Map.get(opts, :active))
+    |> filter_bucket(Map.get(opts, :bucket_id))
     |> Repo.all()
     |> preload(opts)
   end
+
+  defp filter_bucket(query, nil), do: query
+  defp filter_bucket(query, bucket_id), do: where(query, [t], t.bucket_id == ^bucket_id)
 
   def new_changeset(attrs) do
     %@schema{transaction_date: Date.utc_today()}

@@ -13,7 +13,9 @@ defmodule HfgPortalWeb.Budget.Dashboard.DashboardLive do
   }
 
   defp fetch_buckets(socket) do
-    socket |> assign(:buckets, Buckets.list())
+    # monthly_contribution is optional; the cards compare against it, so nil reads as 0
+    buckets = Enum.map(Buckets.list(), &%{&1 | monthly_contribution: &1.monthly_contribution || Decimal.new(0)})
+    socket |> assign(:buckets, buckets)
   end
 
   defp fetch_account_totals(socket) do

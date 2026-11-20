@@ -115,7 +115,6 @@ defmodule HfgPortalWeb.Helpers.SortSearch do
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:username}>  User Name </.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:first_name}>First Name</.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:last_name}> Last Name </.bnw_table_header_filter></th>
-        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:email}>     Email     </.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:role} type="select" list={@roles}>Role</.bnw_table_header_filter></th>
         <th class="p-2"></th>
       </:header>

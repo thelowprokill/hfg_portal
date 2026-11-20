@@ -13,7 +13,6 @@
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:username}>  User Name </.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:first_name}>First Name</.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:last_name}> Last Name </.bnw_table_header_filter></th>
-        <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:email}>     Email     </.bnw_table_header_filter></th>
         <th class="p-2"><.bnw_table_header_filter f={s} search_stack={@search_stack} sort_stack={@sort_stack} field={:role} type="select" list={@roles}>Role</.bnw_table_header_filter></th>
         <th class="p-2"></th>
       </:header>
@@ -22,7 +21,6 @@
           <td class="px-2"><%= user.username %></td>
           <td class="px-2"><%= user.first_name %></td>
           <td class="px-2"><%= user.last_name %></td>
-          <td class="px-2"><%= user.email %></td>
           <td class="px-2"><%= user.role.name %></td>
           <td class="px-2"><%= if @current_user.id != user.id || @current_user.admin_mode do %><.bnw_button_edit phx-value-id={user.id} /><% end %></td>
         </tr>

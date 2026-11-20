@@ -41,8 +41,6 @@ defmodule LoanRepayment.MixProject do
       {:ecto_sql,       "~> 3.10"},
       {:postgrex,        ">= 0.0.0"},
       {:jason,          "~> 1.2"},
-      {:swoosh,         "~> 1.5"},
-      {:finch,          "~> 0.13"},
       {:hfg_portal,     in_umbrella: true},
     ]
   end
@@ -55,7 +53,8 @@ defmodule LoanRepayment.MixProject do
       setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run #{__DIR__}/priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      # migrate hfg_portal first: this app's tables reference its users
+      test: ["ecto.create --quiet", "ecto.migrate --quiet -r HfgPortal.Repo -r LoanRepayment.Repo", "test"]
     ]
   end
 end

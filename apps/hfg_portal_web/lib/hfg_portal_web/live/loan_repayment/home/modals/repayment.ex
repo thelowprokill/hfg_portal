@@ -47,7 +47,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
                           user_id={@user.id} 
                           cancel={true} 
                           loan_amount={@modal.opts.loan.amount}
-                          last_item={@items |> Enum.max_by(&(&1.paid_amount_tot), fn -> %{paid_amount_tot: 0, remaining_balance: @moadl.opts.loan.amount} end)}
+                          last_item={@items |> Enum.max_by(&(&1.paid_amount_tot), fn -> %{paid_amount_tot: 0, remaining_balance: @modal.opts.loan.amount} end)}
                         />
                       <% true -> %>
                         <td class="px-2 text-right"><%= item.paid_amount |> Number.Currency.number_to_currency(precision: 0) %></td>
@@ -167,7 +167,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
     |> assign(:items,            [])
     |> assign(:changeset,        @module.new_changeset())
     |> assign(:new,              true)
-    |> assign(:edit,             true)
+    |> assign(:edit,             Map.get(modal.opts, :can_edit, false))
     |> assign(:view,             true)
     |> fetch_items()
     |> res(:ok)
@@ -176,7 +176,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
   @impl true
   def handle_info({[_, :created], item}, socket) do
     cond do
-      (item.loan_id == socket.assigns.loan_id && !is_nil(item.loan_id)) || (item.fixed_loan_id == socket.assigns.fixed_loan_id && !is_nil(item.fixed_loan_id)) ->
+      item.loan_id == socket.assigns.loan_id ->
         %{items: items} = socket.assigns
         socket |> assign(:items, [item |> @module.preload(%{preload: @preload}) | items] |> Enum.uniq_by(&(&1.id)))
       true -> socket
@@ -185,9 +185,9 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
   @impl true
   def handle_info({[_, :updated], item}, socket) do
     cond do
-      (item.loan_id == socket.assigns.loan_id && !is_nil(item.loan_id)) || (item.fixed_loan_id == socket.assigns.fixed_loan_id && !is_nil(item.fixed_loan_id)) ->
+      item.loan_id == socket.assigns.loan_id ->
         %{items: items} = socket.assigns
-        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload(%{preload: @preload}), else: &1))) |> res()
+        socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload(%{preload: @preload}), else: &1)))
       true -> socket
     end |> res()
   end
@@ -217,7 +217,7 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
   end
 
   @impl true
-  def handle_event("save", params, socket) do
+  def handle_event("save", params, %{assigns: %{edit: true}} = socket) do
     %{changeset: changeset} = socket.assigns
 
     changeset =
@@ -232,13 +232,13 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
   end
 
   @impl true
-  def handle_event("edit", %{"id" => id}, socket) do
+  def handle_event("edit", %{"id" => id}, %{assigns: %{edit: true}} = socket) do
     changeset = id |> String.to_integer() |> @module.get() |> @module.change()
     socket |> assign(:changeset, changeset) |> assign(:new, false) |> res()
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
+  def handle_event("delete", %{"id" => id}, %{assigns: %{edit: true}} = socket) do
     id |> String.to_integer() |> @module.delete()
     socket |> res()
   end
@@ -260,13 +260,13 @@ defmodule HfgPortalWeb.LoanRepayment.Home.Modals.ChangeRepayment do
   end
 
   @impl true
-  def handle_event("deactivate", %{"id" => id}, socket) do
+  def handle_event("deactivate", %{"id" => id}, %{assigns: %{edit: true}} = socket) do
     id |> String.to_integer() |> @module.deactivate()
     socket |> res()
   end
 
   @impl true
-  def handle_event("activate", %{"id" => id}, socket) do
+  def handle_event("activate", %{"id" => id}, %{assigns: %{edit: true}} = socket) do
     id |> String.to_integer() |> @module.activate()
     socket |> res()
   end

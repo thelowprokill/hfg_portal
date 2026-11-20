@@ -31,8 +31,25 @@ defmodule HfgPortalWeb.ConnCase do
     end
   end
 
+  # Every app has its own repo on the same database; pages touch several of them.
+  @other_repos [
+    Budget.Repo,
+    CarMaintenance.Repo,
+    LoanRepayment.Repo,
+    WifeTime.Repo,
+    Timekeeping.Repo,
+    TaskAutomationController.Repo,
+    HommSaves.Repo
+  ]
+
   setup tags do
     HfgPortal.DataCase.setup_sandbox(tags)
+
+    for repo <- @other_repos do
+      pid = Ecto.Adapters.SQL.Sandbox.start_owner!(repo, shared: not tags[:async])
+      on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    end
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
@@ -60,57 +77,5 @@ defmodule HfgPortalWeb.ConnCase do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_token, token)
-  end
-
-  @doc """
-  Setup helper that registers and logs in api_users.
-
-      setup :register_and_log_in_api_user
-
-  It stores an updated connection and a registered api_user in the
-  test context.
-  """
-  def register_and_log_in_api_user(%{conn: conn}) do
-    api_user = HfgPortal.AccountsFixtures.api_user_fixture()
-    %{conn: log_in_api_user(conn, api_user), api_user: api_user}
-  end
-
-  @doc """
-  Logs the given `api_user` into the `conn`.
-
-  It returns an updated `conn`.
-  """
-  def log_in_api_user(conn, api_user) do
-    token = HfgPortal.Accounts.generate_api_user_session_token(api_user)
-
-    conn
-    |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:api_user_token, token)
-  end
-
-  @doc """
-  Setup helper that registers and logs in customers.
-
-      setup :register_and_log_in_customer
-
-  It stores an updated connection and a registered customer in the
-  test context.
-  """
-  def register_and_log_in_customer(%{conn: conn}) do
-    customer = HfgPortal.AccountsFixtures.customer_fixture()
-    %{conn: log_in_customer(conn, customer), customer: customer}
-  end
-
-  @doc """
-  Logs the given `customer` into the `conn`.
-
-  It returns an updated `conn`.
-  """
-  def log_in_customer(conn, customer) do
-    token = HfgPortal.Accounts.generate_customer_session_token(customer)
-
-    conn
-    |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:customer_token, token)
   end
 end

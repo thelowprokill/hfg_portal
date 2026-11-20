@@ -11,8 +11,6 @@ defmodule Timekeeping.Application do
       Timekeeping.Repo,
       {DNSCluster, query: Application.get_env(:timekeeping, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Timekeeping.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: Timekeeping.Finch}
       # Start a worker by calling: Timekeeping.Worker.start_link(arg)
       # {Timekeeping.Worker, arg}
     ]

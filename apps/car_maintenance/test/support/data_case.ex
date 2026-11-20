@@ -36,8 +36,26 @@ defmodule CarMaintenance.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(CarMaintenance.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    # The contexts read and write through HfgPortal.Repo (see HfgPortal.Helpers.DefaultCrud),
+    # so both repos are checked out.
+    for repo <- [CarMaintenance.Repo, HfgPortal.Repo] do
+      pid = Ecto.Adapters.SQL.Sandbox.start_owner!(repo, shared: not tags[:async])
+      on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    end
+  end
+
+  @doc """
+  Inserts a portal user (hfg_portal users table) and returns it as the app's own user schema.
+  """
+  def user_fixture(attrs \\ %{}) do
+    user =
+      struct(
+        HfgPortal.Accounts.User,
+        Map.merge(%{username: "user#{System.unique_integer([:positive])}", hashed_password: "x"}, attrs)
+      )
+      |> HfgPortal.Repo.insert!()
+
+    HfgPortal.Repo.get!(CarMaintenance.Users.User, user.id)
   end
 
   @doc """

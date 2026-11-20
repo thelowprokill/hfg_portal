@@ -48,7 +48,6 @@ defmodule TaskAutomationController.UserRoles do
   """
   def list(opts) do
     User
-    |> join(:left, [u], ur in @schema, on: ur.user_id == u.id)
     |> search_stack(Map.get(opts, :search_stack))
     |> sort_stack(Map.get(opts, :sort_stack))
     |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))

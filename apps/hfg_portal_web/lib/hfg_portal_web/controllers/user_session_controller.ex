@@ -4,12 +4,6 @@ defmodule HfgPortalWeb.UserSessionController do
   alias HfgPortal.Accounts
   alias HfgPortalWeb.UserAuth
 
-  def create(conn, %{"_action" => "password_updated"} = params) do
-    conn
-    |> put_session(:user_return_to, ~p"/users/settings")
-    |> create(params, "Password updated successfully!")
-  end
-
   def create(conn, params) do
     create(conn, params, "Welcome back!")
   end
@@ -22,7 +16,7 @@ defmodule HfgPortalWeb.UserSessionController do
       |> put_flash(:info, info)
       |> UserAuth.log_in_user(user, user_params)
     else
-      # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
+      # In order to prevent user enumeration attacks, don't disclose whether the username exists.
       conn
       |> put_flash(:error, "Invalid username or password")
       |> put_flash(:username, String.slice(username, 0, 160))

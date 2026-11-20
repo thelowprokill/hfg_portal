@@ -1,0 +1,40 @@
+# Runs the test suite against its own throwaway Postgres, apart from the dev and prod ones:
+#
+#   docker compose -f docker-compose.test.yml run --rm test                           # everything
+#   docker compose -f docker-compose.test.yml run --rm test mix test apps/homm_saves  # one app or file
+#   docker compose -f docker-compose.test.yml down                                    # stop the database
+#
+# The exit code is the suite's. The source is mounted, so the tests run the working tree as it is
+# (add --build only after changing the Dockerfile or deps). The database is in tmpfs and keeps
+# nothing between `down`s; `mix test` creates and migrates it each run.
+name: hfg_portal_test  # its own project: the dev stack's `app` and databases are left alone
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: ./docker/development/Dockerfile
+    command: mix test
+    volumes:
+      - .:/app
+    environment:
+      - MIX_ENV=test
+      - LOCATION=bnw
+      - POSTGRES_HOST=test-postgres
+      - JWT_SECRET=test-only-jwt-secret  # the sidebar signs a JWT on mount
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+
+  test-postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    command: -c max_connections=500  # nine repos, each with its own sandbox pool
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

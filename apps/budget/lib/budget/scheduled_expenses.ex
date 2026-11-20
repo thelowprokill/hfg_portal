@@ -63,6 +63,20 @@ defmodule Budget.ScheduledExpenses do
     %{scheduled_expenses: expense_results, sinking_contributions: sinking_results}
   end
 
+  def list(opts \\ %{}) do
+    @schema
+    |> search_stack(Map.get(opts, :search_stack))
+    |> sort_stack(Map.get(opts, :sort_stack))
+    |> hfg_paginate(Map.get(opts, :page), Map.get(opts, :per_page))
+    |> filter_active(Map.get(opts, :active))
+    |> filter_bucket(Map.get(opts, :bucket_id))
+    |> Repo.all()
+    |> preload(opts)
+  end
+
+  defp filter_bucket(query, nil), do: query
+  defp filter_bucket(query, bucket_id), do: where(query, [s], s.bucket_id == ^bucket_id)
+
   def list_for_bucket(bucket_id) do
     @schema
     |> where([s], s.bucket_id == ^bucket_id)

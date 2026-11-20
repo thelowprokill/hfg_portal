@@ -48,18 +48,13 @@ defmodule LoanRepayment.Loans.Repayment do
     loan_amount      = get_field(changeset, :loan_amount)
     last_paid_amount = get_field(changeset, :last_paid_amount)
 
-    cond do
-      paid_amount && last_paid_amount && loan_amount ->
-        changeset
-        |> put_change(:paid_amount_tot,   Decimal.add(paid_amount, last_paid_amount))
-        |> put_change(:remaining_balance, Decimal.sub(loan_amount, Decimal.add(paid_amount, last_paid_amount)))
-      paid_amount && loan_amount ->
-        changeset
-        |> put_change(:paid_amount_tot,   paid_amount)
-        |> put_change(:remaining_balance, Decimal.sub(loan_amount, paid_amount))
-      true -> 
-        changeset
-        |> put_change(:paid_amount_tot,   paid_amount)
+    # nothing to recompute (e.g. an update without the virtual fields): keep the stored totals
+    if is_nil(paid_amount) or (is_nil(loan_amount) and is_nil(last_paid_amount) and is_nil(get_change(changeset, :paid_amount))) do
+      changeset
+    else
+      total     = Decimal.add(paid_amount, last_paid_amount || 0)
+      changeset = put_change(changeset, :paid_amount_tot, total)
+      if loan_amount, do: put_change(changeset, :remaining_balance, Decimal.sub(loan_amount, total)), else: changeset
     end
   end
 end

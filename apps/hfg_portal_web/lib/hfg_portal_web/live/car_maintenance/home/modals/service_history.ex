@@ -267,7 +267,8 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   @impl true
   def handle_info({[_, :created], item}, socket) do
     cond do
-      (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) ->
+      # mileage logs (no name, no maintenance item) aren't listed here, as in fetch_items' mileage: false
+      item.car_id == socket.assigns.car_id && !is_nil(item.car_id) && (!is_nil(item.name) || !is_nil(item.maintenance_item_id)) ->
         %{items: items} = socket.assigns
         socket |> assign(:items, [item |> @module.preload(%{preload: @preload}) | items] |> Enum.uniq_by(&(&1.id)))
       true -> socket
@@ -276,7 +277,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeServiceHistory do
   @impl true
   def handle_info({[_, :updated], item}, socket) do
     cond do
-      (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) || (item.fixed_car_id == socket.assigns.fixed_car_id && !is_nil(item.fixed_car_id)) ->
+      (item.car_id == socket.assigns.car_id && !is_nil(item.car_id)) ->
         %{items: items} = socket.assigns
         socket |> assign(:items, Enum.map(items, &(if &1.id == item.id, do: item |> @module.preload(%{preload: @preload}), else: &1)))
       true -> socket

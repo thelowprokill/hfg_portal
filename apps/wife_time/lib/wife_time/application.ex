@@ -11,8 +11,6 @@ defmodule WifeTime.Application do
       WifeTime.Repo,
       {DNSCluster, query: Application.get_env(:wife_time, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: WifeTime.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: WifeTime.Finch}
       # Start a worker by calling: WifeTime.Worker.start_link(arg)
       # {WifeTime.Worker, arg}
     ]

@@ -12,7 +12,6 @@ defmodule Budget.Users.User do
 
   schema "users" do
     field :username,   :string
-    field :email,      :string
     field :first_name, :string
     field :last_name,  :string
     field :role,       :map,     virtual: true

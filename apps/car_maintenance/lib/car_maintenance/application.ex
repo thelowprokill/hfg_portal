@@ -11,8 +11,6 @@ defmodule CarMaintenance.Application do
       CarMaintenance.Repo,
       {DNSCluster, query: Application.get_env(:car_maintenance, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: CarMaintenance.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: CarMaintenance.Finch}
       # Start a worker by calling: CarMaintenance.Worker.start_link(arg)
       # {CarMaintenance.Worker, arg}
     ]

@@ -13,27 +13,9 @@ import Config
 config :task_automation_controller,
   ecto_repos: [TaskAutomationController.Repo]
 
-# Configure the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :task_automation_controller, TaskAutomationController.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure Mix tasks and generators
 config :budget,
   ecto_repos: [Budget.Repo]
-
-# Configure the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :budget, Budget.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure Mix tasks and generators
 config :timekeeping,
@@ -42,66 +24,21 @@ config :timekeeping,
 config :homm_saves,
   ecto_repos: [HommSaves.Repo]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :timekeeping, Timekeeping.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure Mix tasks and generators
 config :wife_time,
   ecto_repos: [WifeTime.Repo]
-
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :wife_time, WifeTime.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure Mix tasks and generators
 config :loan_repayment,
   ecto_repos: [LoanRepayment.Repo]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :loan_repayment, LoanRepayment.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure Mix tasks and generators
 config :car_maintenance,
   ecto_repos: [CarMaintenance.Repo]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :car_maintenance, CarMaintenance.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure Mix tasks and generators
 config :hfg_portal,
   ecto_repos: [HfgPortal.Repo]
-
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :hfg_portal, HfgPortal.Mailer, adapter: Swoosh.Adapters.Local
 
 config :hfg_portal_web,
   ecto_repos: [HfgPortal.Repo],
@@ -148,11 +85,6 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
-
-# Configure Google Auth
-config :elixir_auth_google,
-  client_id: System.get_env("GOOGLE_CLIENT_ID"),
-  client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

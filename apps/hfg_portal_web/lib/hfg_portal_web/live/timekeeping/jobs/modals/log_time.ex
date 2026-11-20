@@ -209,6 +209,14 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
     :io_lib.format("~2..0B:~2..0B:~2..0B", [hours, minutes, secs]) |> IO.iodata_to_binary()
   end
 
+  # only entries of this modal's job (which JobsLive already checked belongs to the user)
+  defp job_entry(socket, id) do
+    case TimeEntries.get(String.to_integer(id)) do
+      %{job_id: job_id} = entry when job_id == socket.assigns.job.id -> entry
+      _ -> nil
+    end
+  end
+
   @impl true
   def handle_event("start", _, socket) do
     %{job: job, modal: %{user: user}} = socket.assigns
@@ -228,13 +236,15 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
 
   @impl true
   def handle_event("edit_entry", %{"id" => id}, socket) do
-    changeset = id |> String.to_integer() |> TimeEntries.get() |> TimeEntries.change()
-    socket |> assign(:entry_changeset, changeset) |> res()
+    case job_entry(socket, id) do
+      nil   -> socket
+      entry -> socket |> assign(:entry_changeset, TimeEntries.change(entry))
+    end |> res()
   end
 
   @impl true
   def handle_event("delete_entry", %{"id" => id}, socket) do
-    TimeEntries.delete(String.to_integer(id))
+    if entry = job_entry(socket, id), do: TimeEntries.delete(entry)
     socket |> fetch_entries() |> res()
   end
 
@@ -246,7 +256,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
   @impl true
   def handle_event("validate", params, socket) do
     %{entry_changeset: changeset} = socket.assigns
-    params = Map.get(params, @key, %{})
+    params = params |> Map.get(@key, %{}) |> Map.put("job_id", socket.assigns.job.id)
     changeset = changeset.data |> TimeEntries.change(params) |> Map.put(:action, :insert)
     socket |> assign(:entry_changeset, changeset) |> res()
   end
@@ -254,7 +264,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.LogTime do
   @impl true
   def handle_event("save", params, socket) do
     %{entry_changeset: changeset} = socket.assigns
-    params = Map.get(params, @key, %{})
+    params = params |> Map.get(@key, %{}) |> Map.put("job_id", socket.assigns.job.id)
     changeset = changeset.data |> TimeEntries.change(params) |> Map.put(:action, :insert)
 
     if changeset.valid? do

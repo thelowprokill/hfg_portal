@@ -132,6 +132,7 @@ defmodule HfgPortalWeb.TaskAutomationController.Home.HomeLive do
       per_page:     per_page,
       #search_stack: search_stack,
       sort_stack:   sort_stack,
+      complete:     complete,
     } = socket.assigns
 
     queued_items = Enum.map(queued_items, fn x -> QueuedItems.get(x.id) |> QueuedItems.preload(%{preload: @preload}) end)
@@ -142,6 +143,7 @@ defmodule HfgPortalWeb.TaskAutomationController.Home.HomeLive do
       search_stack: [%HfgPortal.Helpers.Search{field: :status, val: "unassigned"}],
       sort_stack:   sort_stack,
       preload:      @preload,
+      complete:     complete,
     })
     |> Enum.filter(fn x -> !Enum.any?(queued_items, &(&1.id == x.id)) end)
 
@@ -151,8 +153,12 @@ defmodule HfgPortalWeb.TaskAutomationController.Home.HomeLive do
   end
   @impl true 
   def handle_info({[:queued_item, :created], item}, socket) do 
-    socket 
-    |> assign(:queued_items, socket.assigns.queued_items ++ [item |> QueuedItems.preload(%{preload: @preload})])
+    # only items that belong on this page (open on home, finished on completed jobs)
+    if (item.status in ["completed", "failed"]) == socket.assigns.complete do
+      socket |> assign(:queued_items, socket.assigns.queued_items ++ [item |> QueuedItems.preload(%{preload: @preload})])
+    else
+      socket
+    end
     |> res()
   end
 

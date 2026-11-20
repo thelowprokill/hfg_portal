@@ -3,7 +3,10 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
 
   alias HfgPortalWeb.Budget.Balances.Modals.ChangeAccountBalance
 
-  alias Budget.{Accounts, AccountBalances}
+  alias Budget.{Accounts, AccountBalances, Authorize, UserRoles}
+
+  defp fetch_can_edit(socket),
+    do: assign(socket, :can_edit, Authorize.can_edit?(socket.assigns.current_user))
 
   defp set_modal(socket, :balance, id) when not is_nil(id) do
     %{modal_stack: modal_stack, current_user: user, balances: balances} = socket.assigns
@@ -30,10 +33,14 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
 
   @impl true
   def mount(_params, session, socket) do
-    if connected?(socket), do: AccountBalances.subscribe()
+    if connected?(socket) do
+      AccountBalances.subscribe()
+      UserRoles.subscribe()
+    end
 
     socket
     |> bnw_verify_user_token(session, "Budget", "Balances")
+    |> fetch_can_edit()
     |> assign(:modal_stack, [])
     |> assign(:accounts, Accounts.list(%{}))
     |> assign(:balances, AccountBalances.map_for_date(Date.utc_today()))
@@ -58,6 +65,13 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
   end
 
   @impl true
+  def handle_info({[:budget, :user_role, _], user_role}, socket) do
+    if user_role.user_id == socket.assigns.current_user.id,
+      do: socket |> fetch_can_edit() |> res(),
+      else: socket |> res()
+  end
+
+  @impl true
   def handle_info(:cancel, socket), do: socket |> set_modal(nil, nil) |> res()
 
   @impl true
@@ -67,7 +81,7 @@ defmodule HfgPortalWeb.Budget.Balances.BalancesLive do
   end
 
   @impl true
-  def handle_event("set_balance", %{"id" => id}, socket),
+  def handle_event("set_balance", %{"id" => id}, %{assigns: %{can_edit: true}} = socket),
     do: socket |> set_modal(:balance, String.to_integer(id)) |> res()
 
   @impl true

@@ -33,6 +33,7 @@ defmodule TaskAutomationController.Users.Role do
     |> cast(attrs, [
       :name,
       :description,
+      :admin,
       :created_by_id,
       :updated_by_id,
       :active,

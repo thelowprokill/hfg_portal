@@ -2,7 +2,7 @@ defmodule LoanRepayment.Users.User do
   use Ecto.Schema
 
   prefix = "hfg_portal"
-  prefix = case Application.compile_env(:car_maintenance, :env) do
+  prefix = case Application.compile_env(:loan_repayment, :env) do
     :dev   -> prefix <> "_dev"
     :test  -> prefix <> "_test"
     :trial -> prefix <> "_trial"
@@ -13,7 +13,6 @@ defmodule LoanRepayment.Users.User do
 
   schema "users" do
     field :username,     :string
-    field :email,        :string
     field :first_name,   :string
     field :last_name,    :string
     field :role,         :map, virtual: true

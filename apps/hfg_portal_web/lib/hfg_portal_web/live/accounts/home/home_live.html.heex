@@ -16,7 +16,6 @@
       <:header>
         <.bnw_th sticky={1} pos={1}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:id}>          ID          </.bnw_table_header_filter></.bnw_th>
         <.bnw_th sticky={1} pos={2}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:username}>    Username    </.bnw_table_header_filter></.bnw_th>
-        <.bnw_th sticky={1} pos={3}><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:email}>       Email       </.bnw_table_header_filter></.bnw_th>
         <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:name}>        Name        </.bnw_table_header_filter></.bnw_th>
         <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:active}>      Active      </.bnw_table_header_filter></.bnw_th>
         <.bnw_th><.bnw_table_header_filter f={f} search_stack={@search_stack} sort_stack={@sort_stack} field={:portal_admin}>Portal Admin</.bnw_table_header_filter></.bnw_th>
@@ -30,7 +29,6 @@
         <tr>
           <.bnw_td sticky={1} pos={1}><%= account.id %></.bnw_td>
           <.bnw_td sticky={1} pos={2}><%= account.username %></.bnw_td>
-          <.bnw_td sticky={1} pos={3}><%= account.email %></.bnw_td>
           <.bnw_td><%= account.first_name %> <%= account.last_name %></.bnw_td>
           <.bnw_td><.bnw_button_toggle_active active={account.active}       phx-value-id={account.id} phx-value-key={:active}       /></.bnw_td>
           <.bnw_td><.bnw_button_toggle_active active={account.portal_admin} phx-value-id={account.id} phx-value-key={:portal_admin} /></.bnw_td>

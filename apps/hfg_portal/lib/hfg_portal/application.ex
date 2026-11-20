@@ -12,8 +12,6 @@ defmodule HfgPortal.Application do
       HfgPortal.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: HfgPortal.PubSub},
-      # Start Finch
-      {Finch, name: HfgPortal.Finch}
       # Start a worker by calling: HfgPortal.Worker.start_link(arg)
       # {HfgPortal.Worker, arg}
     ]

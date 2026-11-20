@@ -80,7 +80,7 @@ defmodule TaskAutomationController.Authorize do
     - true if authorized, false otherwise
   """
   def authorize(role, page, dev_admin \\ false)
-  def authorize(%@roles{} = role, page, dev_admin),          do: user_authorize(role, page, dev_admin)
+  def authorize(%@roles{} = role, page, dev_admin),          do: user_authorize([%{role: role}], page, dev_admin)
   def authorize(%@user_role{} = user_role, page, dev_admin), do: authorize(user_role.role, page, dev_admin)
   #def authorize(%@user{} = user, page, _dev_admin),          do: authorize((if Map.get(user, :user_role), do: user.user_role.role, else: "None"), page, user.dev_admin)
   #def authorize(role, page, dev_admin) when is_binary(role), do: authorize(@roles.get(role), page, dev_admin)

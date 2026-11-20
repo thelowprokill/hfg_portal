@@ -137,7 +137,7 @@ defmodule HfgPortalWeb.Apis.LoanRepayment.LoanController do
   end
 
   defp serialize_loan(loan) do
-    repayment = Map.get(loan, :repayment)
+    repayment = with %Ecto.Association.NotLoaded{} <- Map.get(loan, :repayment), do: nil
     %{
       id:                loan.id,
       paid_to:           loan.paid_to,

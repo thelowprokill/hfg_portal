@@ -5,7 +5,8 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   alias HfgPortal.Accounts.User
 
   @scopes [
-    %{name: "hfg_portal",                         module: HfgPortalWeb.Apis.RoutesController},
+    # answered here (the scope list), portal admins only
+    %{name: "hfg_portal"},
 
     %{name: "car_maintenance:cars",               module: HfgPortalWeb.Apis.CarMaintenance.CarController,               require_admin: false},
     %{name: "car_maintenance:service_history",    module: HfgPortalWeb.Apis.CarMaintenance.ServiceHistoryController,    require_admin: false},
@@ -23,6 +24,12 @@ defmodule HfgPortalWeb.Apis.RoutesController do
     %{name: "homm_saves",                         module: HfgPortalWeb.Apis.HommSavesController,                require_admin: false},
   ]
 
+  # login JWT lifetime; clients must log in again after this
+  @token_ttl 30 * 24 * 60 * 60
+
+  defp token_config,
+    do: Joken.Config.default_claims(skip: [:aud, :iss, :jti, :nbf, :iat], default_exp: @token_ttl)
+
   def scopes(conn, _params) do
     json(conn, %{
       "scopes" =>
@@ -37,7 +44,7 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
     case user do
       %User{id: id, username: username} ->
-        token_config = Map.put(%{}, "scope", %Joken.Claim{
+        token_config = Map.put(token_config(), "scope", %Joken.Claim{
           generate: fn -> "user" end,
           validate: fn val, _claims, _context -> val in ["u", "a"] end
         })
@@ -63,18 +70,34 @@ defmodule HfgPortalWeb.Apis.RoutesController do
   end
 
   def call(conn, params) do
-    auth(conn)
-    |> case do
+    case auth(conn) do
+      nil ->
+        send_resp(conn, 401, "")
+
+      {%{name: "hfg_portal"}, _user} ->
+        scopes(conn, params)
+
       {%{module: module}, user} ->
-        conn
-        |> assign(:current_api_user, user)
-        |> module.call(params)
-      _ ->
-        conn
-        |> put_status(401)
-        |> send_resp(:no_content, "")
+        cond do
+          not Map.has_key?(conn.query_params, "route") ->
+            conn |> put_status(:not_found) |> json(%{error: "Route not found"})
+
+          bad_id = Enum.find(conn.params, &bad_id?/1) ->
+            conn |> put_status(:bad_request) |> json(%{error: "#{elem(bad_id, 0)} must be an integer"})
+
+          true ->
+            conn
+            |> assign(:current_api_user, user)
+            |> module.call(params)
+        end
     end
   end
+
+  # controllers String.to_integer "id" / "*_id" params, so reject non-integers here once
+  defp bad_id?({key, val}) when is_binary(val) and val != "" do
+    (key == "id" or String.ends_with?(key, "_id")) and not match?({_, ""}, Integer.parse(val))
+  end
+  defp bad_id?(_), do: false
 
   defp app_role(app_id, user_id) do
     user_roles_mod = case app_id do
@@ -107,15 +130,16 @@ defmodule HfgPortalWeb.Apis.RoutesController do
 
         {_, jwt} = api_key
 
-        case Joken.verify(jwt, signer) do
-          {:ok, %{"user_id" => user_id, "admin" => admin}} ->
-            user          = HfgPortal.Accounts.get_user!(user_id)
-            require_admin = Map.get(scope, :require_admin, true)
+        with {:ok, %{"user_id" => user_id, "admin" => admin, "exp" => exp}} when is_integer(user_id) and is_integer(exp) <-
+               Joken.verify_and_validate(token_config(), jwt, signer),
+             %User{} = user <- HfgPortal.Repo.get_by(User, id: user_id, active: true) do
+          require_admin = Map.get(scope, :require_admin, true)
 
-            cond do
-              require_admin && !admin && !user.portal_admin -> nil
-              true                                          -> {scope, user}
-            end
+          cond do
+            require_admin && !admin && !user.portal_admin -> nil
+            true                                          -> {scope, user}
+          end
+        else
           _ -> nil
         end
     end

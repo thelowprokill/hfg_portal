@@ -11,8 +11,6 @@ defmodule HommSaves.Application do
       HommSaves.Repo,
       {DNSCluster, query: Application.get_env(:homm_saves, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: HommSaves.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: HommSaves.Finch}
       # Start a worker by calling: HommSaves.Worker.start_link(arg)
       # {HommSaves.Worker, arg}
     ]

@@ -17,7 +17,7 @@ defmodule HfgPortalWeb.CarMaintenance.Home.Modals.ChangeMileage do
           phx-submit="save">
           <.bnw_modal_body>
 
-            <%= if @modal.id == :new do %>
+            <%= if is_nil(@modal.changeset.data.id) do %>
               <.bnw_input_hidden f={f} field={:created_by_id} value={@modal.user.id} />
             <% end %>
             <.bnw_input_hidden f={f} field={:updated_by_id} value={@modal.user.id} />

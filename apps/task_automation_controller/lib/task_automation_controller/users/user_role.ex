@@ -13,12 +13,12 @@ defmodule TaskAutomationController.Users.UserRole do
   @schema_prefix prefix
 
   schema "user_roles" do
-    belongs_to :user, BnwPortal.Accounts.User
+    belongs_to :user, TaskAutomationController.Users.User
     belongs_to :role, TaskAutomationController.Users.Role
 
-    belongs_to :created_by, BnwPortal.Accounts.User
-    belongs_to :updated_by, BnwPortal.Accounts.User
-    field :active, :boolean, default: false
+    belongs_to :created_by, TaskAutomationController.Users.User
+    belongs_to :updated_by, TaskAutomationController.Users.User
+    field :active, :boolean, default: true
 
     timestamps()
   end

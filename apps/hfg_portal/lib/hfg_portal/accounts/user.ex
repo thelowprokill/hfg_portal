@@ -14,7 +14,6 @@ defmodule HfgPortal.Accounts.User do
 
   schema "users" do
     field :username,         :string
-    field :email,            :string
     field :first_name,       :string
     field :middle_name,      :string
     field :last_name,        :string
@@ -28,7 +27,6 @@ defmodule HfgPortal.Accounts.User do
     field :password,         :string, virtual: true, redact: true
     field :password_confirm, :string, virtual: true, redact: true
     field :hashed_password,  :string, redact: true
-    field :confirmed_at,     :naive_datetime
     field :start_date,       :date
     field :end_date,         :date
 
@@ -36,34 +34,25 @@ defmodule HfgPortal.Accounts.User do
   end
 
   @doc """
-  It is important to validate the length of both email and password.
-  Otherwise databases may truncate the email without warnings, which
-  could lead to unpredictable or insecure behaviour. Long passwords may
-  also be very expensive to hash for certain algorithms.
+  The admin changeset: users are only ever added and edited by an admin.
+
+  A user must always have a password: it is required until one is stored (`hashed_password`),
+  and must be confirmed (`password_confirm`) to be hashed. Editing a user without one keeps it.
 
   ## Options
 
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
+    * `:hash_password` - Hashes the password. Set to `false` for validation only, as in a
+      LiveView form. Defaults to `true`.
 
-    * `:validate_username` - Validates the uniqueness of the username, in case
-      you don't want to validate the uniqueness of the username (like when
-      using this changeset for validations on a LiveView form before
-      submitting the form), this option can be set to `false`.
-      Defaults to `true`.
+    * `:validate_username` - Validates the username is unique. Defaults to `true`.
   """
   def changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [
-      :username, 
-      :email, 
-      :first_name, 
-      :middle_name, 
-      :last_name, 
+      :username,
+      :first_name,
+      :middle_name,
+      :last_name,
       :active,
       :portal_admin,
       :dev_admin,
@@ -75,7 +64,6 @@ defmodule HfgPortal.Accounts.User do
       :password_confirm
     ])
     |> validate_username(opts)
-    |> validate_email(opts)
     |> validate_password(opts)
   end
 
@@ -86,16 +74,9 @@ defmodule HfgPortal.Accounts.User do
     |> maybe_validate_unique_username(opts)
   end
 
-  defp validate_email(changeset, opts) do
-    changeset
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
-    |> maybe_validate_unique_email(opts)
-  end
-
   defp validate_password(changeset, opts) do
     changeset
-    #|> validate_required([:password])
+    |> require_password()
     |> validate_length(:password, min: 12, max: 72)
     # Examples of additional password validation:
     # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
@@ -103,6 +84,10 @@ defmodule HfgPortal.Accounts.User do
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
   end
+
+  # no stored password yet (a new user): one must be given
+  defp require_password(%{data: %{hashed_password: nil}} = changeset), do: validate_required(changeset, [:password])
+  defp require_password(changeset), do: changeset
 
   defp maybe_hash_password(changeset, opts) do
     hash_password?   = Keyword.get(opts, :hash_password, true)
@@ -127,16 +112,6 @@ defmodule HfgPortal.Accounts.User do
     end
   end
 
-  defp maybe_validate_unique_email(changeset, opts) do
-    if Keyword.get(opts, :validate_email, true) do
-      changeset
-      |> unsafe_validate_unique(:email, HfgPortal.Repo)
-      |> unique_constraint(:email)
-    else
-      changeset
-    end
-  end
-
   defp maybe_validate_unique_username(changeset, opts) do
     if Keyword.get(opts, :validate_username, true) do
       changeset
@@ -147,86 +122,19 @@ defmodule HfgPortal.Accounts.User do
     end
   end
 
-  def self_user_changeset(changeset, attrs, opts \\ []) do
-    changeset
+  @doc """
+  What users may change about themselves: their name and password, never their access.
+  """
+  def self_user_changeset(user, attrs, opts \\ []) do
+    user
     |> cast(attrs, [
-      :email,
       :first_name,
       :middle_name,
       :last_name,
       :password,
       :password_confirm,
     ])
-    |> validate_email(opts)
     |> validate_password(opts)
-  end
-
-  def user_changeset(changeset, attrs, opts \\ []) do
-    changeset
-    |> cast(attrs, [
-      :username,
-      :email,
-      :first_name,
-      :middle_name,
-      :last_name,
-      :active,
-      :portal_admin,
-      :dev_admin,
-      :test_user,
-      :generic_user,
-      :attempted_login,
-      :confirmed_at,
-      :start_date,
-      :end_date,
-      :password,
-      :password_confirm,
-    ])
-    |> validate_email(opts)
-    |> validate_password(opts)
-    |> unsafe_validate_unique(:username, HfgPortal.Repo)
-    |> unique_constraint(:username)
-  end
-
-  @doc """
-  A user changeset for changing the email.
-
-  It requires the email to change otherwise an error is added.
-  """
-  def email_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:email])
-    |> validate_email(opts)
-    |> case do
-      %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
-    end
-  end
-
-  @doc """
-  A user changeset for changing the password.
-
-  ## Options
-
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
-  """
-  def password_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
-    |> validate_password(opts)
-  end
-
-  @doc """
-  Confirms the account by setting `confirmed_at`.
-  """
-  def confirm_changeset(user) do
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-    change(user, confirmed_at: now)
   end
 
   @doc """
@@ -243,16 +151,5 @@ defmodule HfgPortal.Accounts.User do
   def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
-  end
-
-  @doc """
-  Validates the current password otherwise adds an error to the changeset.
-  """
-  def validate_current_password(changeset, password) do
-    if valid_password?(changeset.data, password) do
-      changeset
-    else
-      add_error(changeset, :current_password, "is not valid")
-    end
   end
 end

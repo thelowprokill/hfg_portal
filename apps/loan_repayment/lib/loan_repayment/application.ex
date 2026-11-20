@@ -11,8 +11,6 @@ defmodule LoanRepayment.Application do
       LoanRepayment.Repo,
       {DNSCluster, query: Application.get_env(:loan_repayment, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: LoanRepayment.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: LoanRepayment.Finch}
       # Start a worker by calling: LoanRepayment.Worker.start_link(arg)
       # {LoanRepayment.Worker, arg}
     ]

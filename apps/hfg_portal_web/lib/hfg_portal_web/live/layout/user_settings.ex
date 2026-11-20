@@ -16,13 +16,12 @@ defmodule HfgPortalWeb.Layout.UserSettings do
             phx-submit="save" 
             phx-target={@myself}>
           <.bnw_modal_body>
-            <%= @modal.user.email %>
+            <%= @modal.user.username %>
 
               <.bnw_input       f={f} field={:first_name}       display_name="First Name" />
               <.bnw_input       f={f} field={:middle_name}      display_name="Middle Name" />
               <.bnw_input       f={f} field={:last_name}        display_name="Last Name" />
               <!--
-              <.bnw_input       f={f} field={:email}            display_name="Email" />
               <.bnw_input       f={f} field={:username}         display_name="Username" />
               <.bnw_input_naked f={f} field={:active}           display_name="Active"           type="checkbox" />
               <.bnw_input_naked f={f} field={:portal_admin}     display_name="Portal Admin"     type="checkbox" />
@@ -30,7 +29,6 @@ defmodule HfgPortalWeb.Layout.UserSettings do
               <.bnw_input_naked f={f} field={:test_user}        display_name="Test User"        type="checkbox" />
               <.bnw_input_naked f={f} field={:generic_user}     display_name="Generic User"     type="checkbox" />
               <.bnw_input       f={f} field={:attempted_login}  display_name="Attempted Login"  type="number" />
-              <.bnw_input       f={f} field={:confirmed_at}     display_name="Confirmed At"     type="datetime-local" />
               <.bnw_input       f={f} field={:start_date}       display_name="Start Date"       type="datetime-local" />
               <.bnw_input       f={f} field={:end_date}         display_name="End Date"         type="datetime-local" />
               -->
@@ -97,7 +95,7 @@ defmodule HfgPortalWeb.Layout.UserSettings do
   def handle_event("save", %{"user" => params}, socket) do
     cond do
       socket.assigns.changeset.valid? ->
-        Accounts.create_or_update_user(socket.assigns.changeset.data, params)
+        Accounts.update_self_user(socket.assigns.changeset.data, params)
         |> case do
           {:ok, _} ->
             send(self(), :cancel)

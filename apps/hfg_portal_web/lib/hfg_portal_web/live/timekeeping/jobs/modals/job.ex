@@ -55,7 +55,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.ChangeJob do
   @impl true
   def handle_event("validate", params, socket) do
     %{modal: %{changeset: changeset} = modal} = socket.assigns
-    params = Map.get(params, @key, %{})
+    params = params |> Map.get(@key, %{}) |> Map.put("user_id", modal.user.id)
     changeset = changeset.data |> @module.change(params) |> Map.put(:action, :insert)
     socket |> assign(:modal, %{modal | changeset: changeset}) |> res()
   end
@@ -63,7 +63,7 @@ defmodule HfgPortalWeb.Timekeeping.Jobs.Modals.ChangeJob do
   @impl true
   def handle_event("save", params, socket) do
     %{modal: %{changeset: changeset} = modal} = socket.assigns
-    params = Map.get(params, @key, %{})
+    params = params |> Map.get(@key, %{}) |> Map.put("user_id", modal.user.id)
     changeset = changeset.data |> @module.change(params) |> Map.put(:action, :insert)
     socket |> assign(:modal, %{modal | changeset: changeset}) |> save() |> res()
   end
