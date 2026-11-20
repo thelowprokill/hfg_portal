@@ -58,7 +58,8 @@ RUN mkdir config
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
-RUN mix deps.compile
+# Dependency compile output (their warnings) is hidden; the log is printed only if it fails.
+RUN mix deps.compile > /tmp/deps_compile.log 2>&1 || (cat /tmp/deps_compile.log; exit 1)
 
 COPY . /app/
 

@@ -4,6 +4,8 @@
 set -e
 
 mix deps.get
+# Dependency compile output (their warnings) is hidden; the log is printed only if it fails.
+mix deps.compile > /tmp/deps_compile.log 2>&1 || (cat /tmp/deps_compile.log; exit 1)
 
 # Wait for Postgres to become available
 export PGPASSWORD="$POSTGRES_PASSWORD"

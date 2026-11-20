@@ -21,7 +21,8 @@ RUN mix local.hex --force && \
 
 # Install dependencies
 RUN mix deps.get
-RUN mix deps.compile
+# Dependency compile output (their warnings) is hidden; the log is printed only if it fails.
+RUN mix deps.compile > /tmp/deps_compile.log 2>&1 || (cat /tmp/deps_compile.log; exit 1)
 
 # Compile the project
 RUN mix compile
