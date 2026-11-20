@@ -30,10 +30,18 @@ defmodule HommSaves.SaveFiles do
 
   def root, do: System.get_env("HOMM_SAVES_DIR", "/homm_saves")
 
-  @doc "Most recently updated files in a section first."
-  def list(section, limit) do
+  @doc """
+  Most recently updated files in a section first. `last` is the last file of the previous page:
+  paging by its (updated_at, path) rather than an offset, so uploads that land between pages
+  don't shift rows into a duplicate or a skip.
+  """
+  def list(section, limit, last \\ nil) do
     SaveFile
     |> where(section: ^section)
+    |> then(fn
+      q when is_nil(last) -> q
+      q -> where(q, [f], f.updated_at < ^last.updated_at or (f.updated_at == ^last.updated_at and f.path > ^last.path))
+    end)
     |> order_by(desc: :updated_at, asc: :path)
     |> limit(^limit)
     |> Repo.all()
@@ -76,7 +84,7 @@ defmodule HommSaves.SaveFiles do
         |> where([f], f.section == ^section and (f.path == ^rel or like(f.path, ^children)))
         |> Repo.delete_all()
 
-      Phoenix.PubSub.broadcast(HfgPortal.PubSub, @topic, {[:homm_saves, :save_file, :deleted], rel})
+      Phoenix.PubSub.broadcast(HfgPortal.PubSub, @topic, {[:homm_saves, :save_file, :deleted], {section, rel}})
       {:ok, n}
     else
       {:error, reason, _file} -> {:error, reason}

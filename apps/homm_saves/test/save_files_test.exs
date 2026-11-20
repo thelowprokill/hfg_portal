@@ -29,4 +29,18 @@ defmodule HommSaves.SaveFilesTest do
     assert []                                    = SaveFiles.changed_since("saves", nil, "pc2")
     assert []                                    = SaveFiles.changed_since("saves", again.updated_at, "pc1")
   end
+
+  test "list pages by the last file seen, so an upload between pages doesn't repeat or skip rows" do
+    for n <- 1..5, do: {:ok, _} = SaveFiles.upsert("saves", "#{n}.GM1", "pc1")
+
+    page1 = SaveFiles.list("saves", 2)
+    assert Enum.map(page1, & &1.path) == ["5.GM1", "4.GM1"]
+
+    # a new upload goes to the top; with an offset it would push 4.GM1 onto page 2 again
+    {:ok, _} = SaveFiles.upsert("saves", "6.GM1", "pc1")
+
+    page2 = SaveFiles.list("saves", 2, List.last(page1))
+    assert Enum.map(page2, & &1.path) == ["3.GM1", "2.GM1"]
+    assert Enum.map(SaveFiles.list("saves", 2, List.last(page2)), & &1.path) == ["1.GM1"]
+  end
 end

@@ -7,31 +7,31 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   @section_titles [{"saves", "Save Games"}, {"templates", "RMG Templates"}]
   @per_page 50
 
-  # Each section tracks how many rows it has loaded (`limits`); reloading re-queries that many,
-  # so live updates and deletes stay consistent without merging pages.
-  defp fetch_files(socket) do
-    limits = socket.assigns.limits
+  # Loaded files live in assigns as section -> %{path => file}: load more fetches only the next
+  # page, and each upsert/delete broadcast changes just that file. The tree is built at render.
+  defp init_sections(socket) do
+    socket
+    |> assign(:sections, Enum.map(@section_titles, fn {id, title} -> %{id: id, title: title} end))
+    |> assign(:files,       Map.new(@section_titles, fn {id, _} -> {id, %{}} end))
+    |> assign(:cursor,      %{})
+    |> assign(:has_more,    %{})
+    |> assign(:last_upload, Map.new(@section_titles, fn {id, _} -> {id, SaveFiles.last_upload(id)} end))
+    |> then(fn socket -> Enum.reduce(@section_titles, socket, fn {id, _}, acc -> load_page(acc, id) end) end)
+  end
 
-    sections =
-      for {section, title} <- @section_titles do
-        limit = Map.fetch!(limits, section)
-        # fetch one extra row to know whether there is another page
-        files = SaveFiles.list(section, limit + 1)
+  defp load_page(socket, section) do
+    # fetch one extra row to know whether there is another page
+    rows = SaveFiles.list(section, @per_page + 1, socket.assigns.cursor[section])
+    page = Enum.take(rows, @per_page)
 
-        %{
-          id:          section,
-          title:       title,
-          tree:        files |> Enum.take(limit) |> build_tree(),
-          has_more:    length(files) > limit,
-          last_upload: SaveFiles.last_upload(section),
-        }
-      end
-
-    socket |> assign(:sections, sections)
+    socket
+    |> update(:files,    &Map.update!(&1, section, fn files -> Enum.into(page, files, fn f -> {f.path, f} end) end))
+    |> update(:cursor,   &Map.put(&1, section, List.last(page) || &1[section]))
+    |> update(:has_more, &Map.put(&1, section, length(rows) > @per_page))
   end
 
   # "a/b/c.GM1" -> %{"a" => %{"b" => %{"c.GM1" => %SaveFile{}}}}
-  defp build_tree(files), do: Enum.reduce(files, %{}, &put_in_tree(&2, String.split(&1.path, "/"), &1))
+  def build_tree(files), do: Enum.reduce(files, %{}, &put_in_tree(&2, String.split(&1.path, "/"), &1))
 
   defp put_in_tree(tree, [name], file),       do: Map.put(tree, name, file)
   defp put_in_tree(tree, [dir | rest], file), do: Map.update(tree, dir, put_in_tree(%{}, rest, file), &put_in_tree(&1, rest, file))
@@ -48,6 +48,7 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   attr :tree,    :map,    required: true
   attr :section, :string, required: true
   attr :prefix,  :string, default: ""
+  attr :collapsed, :any,  required: true
   def tree(assigns) do
     ~H"""
     <ul class="pl-4">
@@ -61,12 +62,13 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
               <.bnw_button_delete phx-value-section={@section} phx-value-path={entry.path} item={entry.path} />
             </div>
           <% else %>
-            <details open>
-              <summary class="cursor-pointer font-semibold py-0.5">
+            <%!-- open is server state: a re-render (load more, live update) would otherwise reopen it --%>
+            <details open={not MapSet.member?(@collapsed, {@section, @prefix <> name})}>
+              <summary class="cursor-pointer font-semibold py-0.5" phx-click="toggle" phx-value-section={@section} phx-value-path={@prefix <> name}>
                 <%= name %>/
                 <.bnw_button_delete phx-value-section={@section} phx-value-path={@prefix <> name} data={[{"confirm-delete", "folder #{@prefix <> name}"}, {"confirm-delete-message", "This deletes everything in it."}]} />
               </summary>
-              <.tree tree={entry} section={@section} prefix={@prefix <> name <> "/"} />
+              <.tree tree={entry} section={@section} prefix={@prefix <> name <> "/"} collapsed={@collapsed} />
             </details>
           <% end %>
         </li>
@@ -81,13 +83,29 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
 
     socket
     |> bnw_verify_user_token(session, "HoMM Saves")
-    |> assign(:limits, Map.new(@section_titles, fn {section, _} -> {section, @per_page} end))
-    |> fetch_files()
+    |> assign(:collapsed, MapSet.new())
+    |> init_sections()
     |> res(:ok)
   end
 
   @impl true
-  def handle_info({[:homm_saves, :save_file, _], _file}, socket), do: socket |> fetch_files() |> res()
+  def handle_info({[:homm_saves, :save_file, :upserted], %SaveFile{} = file}, socket) do
+    socket
+    |> update(:files,       &Map.update(&1, file.section, %{}, fn files -> Map.put(files, file.path, file) end))
+    |> update(:last_upload, &Map.put(&1, file.section, file.updated_at))
+    |> res()
+  end
+
+  # a folder delete takes everything under it
+  @impl true
+  def handle_info({[:homm_saves, :save_file, :deleted], {section, path}}, socket) do
+    socket
+    |> update(:files, &Map.update(&1, section, %{}, fn files ->
+      Map.reject(files, fn {p, _} -> p == path or String.starts_with?(p, path <> "/") end)
+    end))
+    |> update(:last_upload, &Map.put(&1, section, SaveFiles.last_upload(section)))
+    |> res()
+  end
 
   @impl true
   def handle_info(info, socket) do
@@ -98,23 +116,26 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
   @impl true
   def handle_event("delete", %{"section" => section, "path" => path}, socket) do
     case SaveFiles.delete(section, path) do
+      # the :deleted broadcast removes it from the list
       {:ok, _n} -> socket
       _error    -> socket |> put_flash(:error, "Could not delete #{path}")
     end
-    |> fetch_files()
+    |> res()
+  end
+
+  # the browser has already toggled the <details>; just remember it
+  @impl true
+  def handle_event("toggle", %{"section" => section, "path" => path}, socket) do
+    key = {section, path}
+    socket
+    |> update(:collapsed, &if(MapSet.member?(&1, key), do: MapSet.delete(&1, key), else: MapSet.put(&1, key)))
     |> res()
   end
 
   @impl true
   def handle_event("load_more", %{"section" => section}, socket) do
-    socket
-    |> update(:limits, &Map.update!(&1, section, fn n -> n + @per_page end))
-    |> fetch_files()
-    |> res()
+    socket |> load_page(section) |> res()
   end
-
-  @impl true
-  def handle_event("refresh", _, socket), do: socket |> fetch_files() |> res()
 
   @impl true
   def handle_event(event, params, socket) do

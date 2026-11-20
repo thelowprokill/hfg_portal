@@ -1,7 +1,6 @@
 <div>
   <div class="flex items-center gap-4">
     <h3 class="text-xl"><%= @page_title %></h3>
-    <!--<.bnw_button_primary phx_click="refresh">Refresh</.bnw_button_primary>-->
   </div>
 
   <%!-- saves left, templates right; stacks on narrow screens. Each column scrolls on its own so a long saves list doesn't push the templates away. --%>
@@ -10,15 +9,15 @@
     <section class="py-4 min-w-0 md:max-h-[80vh] md:overflow-y-auto">
       <div class="flex items-baseline gap-4 border-b pb-1 mb-2">
         <h4 class="text-lg font-semibold"><%= section.title %></h4>
-        <span class="text-sm">Last upload: <strong><%= format_dt(section.last_upload) %></strong></span>
+        <span class="text-sm">Last upload: <strong><%= format_dt(@last_upload[section.id]) %></strong></span>
       </div>
 
-      <%= if section.tree == %{} do %>
+      <%= if @files[section.id] == %{} do %>
         <p class="text-gray-500">Nothing uploaded yet.</p>
       <% else %>
-        <div class="-ml-4"><.tree tree={section.tree} section={section.id} /></div>
+        <div class="-ml-4"><.tree tree={build_tree(Map.values(@files[section.id]))} section={section.id} collapsed={@collapsed} /></div>
         <%!-- infinite scroll: loads the next page of this section when scrolled into view --%>
-        <%= if section.has_more do %>
+        <%= if @has_more[section.id] do %>
           <.bnw_button_load_more id={"load_more_#{section.id}"} phx-value-section={section.id} />
           <p class="text-sm text-gray-500 py-2">Loading more…</p>
         <% end %>
