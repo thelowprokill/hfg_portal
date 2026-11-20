@@ -179,7 +179,7 @@ defmodule HfgPortalWeb.Budget.PagesTest do
   end
 
   describe "transactions" do
-    setup %{conn: conn} = ctx do
+    setup %{conn: conn} do
       ctx = budget_user(conn, "Admin")
       Map.merge(ctx, %{bucket: bucket!(ctx.user)})
     end
@@ -278,7 +278,7 @@ defmodule HfgPortalWeb.Budget.PagesTest do
   end
 
   describe "scheduled expenses" do
-    setup %{conn: conn} = ctx do
+    setup %{conn: conn} do
       ctx = budget_user(conn, "Admin")
       Map.merge(ctx, %{bucket: bucket!(ctx.user)})
     end

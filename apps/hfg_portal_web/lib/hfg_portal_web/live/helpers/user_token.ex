@@ -4,9 +4,11 @@ defmodule HfgPortalWeb.Helpers.UserToken do
 
   def bnw_verify_user_token(socket, session, app \\ "", page \\ "")
   def bnw_verify_user_token(socket, %{"user_token" => user_token} = session, app, page) do
-    user = 
-      HfgPortal.Accounts.get_user_by_session_token(user_token)
-      |> Map.put(:admin_mode, Map.get(session, "admin", "false") == "true")
+    user =
+      case HfgPortal.Accounts.get_user_by_session_token(user_token) do
+        nil  -> nil
+        user -> Map.put(user, :admin_mode, Map.get(session, "admin", "false") == "true")
+      end
     
     cond do
       user && app  != "" && page != "" -> assign(socket, current_user: user) |> assign(:page_title, "#{app} · #{page}")

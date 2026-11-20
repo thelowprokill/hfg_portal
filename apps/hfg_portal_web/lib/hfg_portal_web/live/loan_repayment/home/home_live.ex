@@ -96,47 +96,6 @@ defmodule HfgPortalWeb.LoanRepayment.Home.HomeLive do
     } | modal_stack])
   end
 
-  defp set_modal(socket, :maintenance_items, id) when not is_nil(id) do
-    %{
-      loans:           loans,
-      modal_stack:    modal_stack,
-      current_user:   user
-    } = socket.assigns
-
-    loan = 
-      loans
-      |> Enum.find(&(&1.id == id))
-
-    socket |> assign(:modal_stack, [%Modal{
-      modal:     :maintenance_items,
-      id:        :maintenance_items,
-      module:    ChangeMaintenanceItems,
-      live:      true,
-      user:      user,
-      opts:      %{loan_id: id, loan_name: loan.name}
-    } | modal_stack])
-  end
-
-  defp set_modal(socket, :service_history, id) when not is_nil(id) do
-    %{
-      loans:           loans,
-      modal_stack:    modal_stack,
-      current_user:   user
-    } = socket.assigns
-
-    loan = 
-      loans
-      |> Enum.find(&(&1.id == id))
-
-    socket |> assign(:modal_stack, [%Modal{
-      modal:     :service_history,
-      id:        :service_history,
-      module:    ChangeServiceHistory,
-      live:      true,
-      user:      user,
-      opts:      %{loan: loan}
-    } | modal_stack])
-  end
   #defp set_modal(socket, :reports, id) when not is_nil(id) do
   #  %{ 
   #    modal_stack: modal_stack,

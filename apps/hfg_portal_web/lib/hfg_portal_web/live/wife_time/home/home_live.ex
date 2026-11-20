@@ -95,47 +95,6 @@ defmodule HfgPortalWeb.WifeTime.Home.HomeLive do
     } | modal_stack])
   end
 
-  defp set_modal(socket, :maintenance_items, id) when not is_nil(id) do
-    %{
-      wife_times:           wife_times,
-      modal_stack:    modal_stack,
-      current_user:   user
-    } = socket.assigns
-
-    wife_time = 
-      wife_times
-      |> Enum.find(&(&1.id == id))
-
-    socket |> assign(:modal_stack, [%Modal{
-      modal:     :maintenance_items,
-      id:        :maintenance_items,
-      module:    ChangeMaintenanceItems,
-      live:      true,
-      user:      user,
-      opts:      %{wife_time_id: id, wife_time_name: wife_time.name}
-    } | modal_stack])
-  end
-
-  defp set_modal(socket, :service_history, id) when not is_nil(id) do
-    %{
-      wife_times:           wife_times,
-      modal_stack:    modal_stack,
-      current_user:   user
-    } = socket.assigns
-
-    wife_time = 
-      wife_times
-      |> Enum.find(&(&1.id == id))
-
-    socket |> assign(:modal_stack, [%Modal{
-      modal:     :service_history,
-      id:        :service_history,
-      module:    ChangeServiceHistory,
-      live:      true,
-      user:      user,
-      opts:      %{wife_time: wife_time}
-    } | modal_stack])
-  end
   #defp set_modal(socket, :reports, id) when not is_nil(id) do
   #  %{ 
   #    modal_stack: modal_stack,

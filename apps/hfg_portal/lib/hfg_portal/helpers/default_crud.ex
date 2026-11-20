@@ -96,51 +96,55 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       end
       defp notify_subscribers({:error, reason}, _event), do: {:error, reason}
 
-      @doc """
-      Moves a record up in display order by swapping its order value with the previous record.
-      
-      ## Parameters
-        - id: The ID of the record to move up
+      # Only schemas with an :order field get move_up.
+      if :order in @schema.__schema__(:fields) do
+        @doc """
+        Moves a record up in display order by swapping its order value with the previous record.
+        
+        ## Parameters
+          - id: The ID of the record to move up
 
-      ## Requires
-        - `:order` field in the schema
-      
-      ## Process
-        1. Retrieves the target record
-        2. Finds the previous record (with lower order value in same group)
-        3. Swaps the order values between the two records
-        4. Notifies subscribers of the updates
-      
-      ## Returns
-        - `:ok` on success
-        - `:error` if the transaction fails
-      """
-      def move_up(id) do
-        item = get(id)
-        prev_item = 
-          @schema
-          |> where([r], r.order < ^item.order)
-          |> order_by([r], desc: r.order)
-          |> limit(1)
-          |> Repo.one()
+        ## Requires
+          - `:order` field in the schema
+        
+        ## Process
+          1. Retrieves the target record
+          2. Finds the previous record (with lower order value in same group)
+          3. Swaps the order values between the two records
+          4. Notifies subscribers of the updates
+        
+        ## Returns
+          - `:ok` on success
+          - `:error` if the transaction fails
+        """
+        def move_up(id) do
+          item = get(id)
+          prev_item = 
+            @schema
+            |> where([r], r.order < ^item.order)
+            |> order_by([r], desc: r.order)
+            |> limit(1)
+            |> Repo.one()
 
-        if is_nil(prev_item) do
-          {:ok, item}
-        else
-          Ecto.Multi.new()
-          |> Ecto.Multi.insert_or_update(:item,      item      |> change(%{order: prev_item.order}))
-          |> Ecto.Multi.insert_or_update(:prev_item, prev_item |> change(%{order: item.order}))
-          |> Repo.transaction(timeout: 300_000)
-          |> case do
-            {:ok, data} ->
-              notify_subscribers({:ok, data.item},      @updated)
-              notify_subscribers({:ok, data.prev_item}, @updated)
-            {:error, _, _} ->
-              :error
-            _ ->
-              :error
+          if is_nil(prev_item) do
+            {:ok, item}
+          else
+            Ecto.Multi.new()
+            |> Ecto.Multi.insert_or_update(:item,      item      |> change(%{order: prev_item.order}))
+            |> Ecto.Multi.insert_or_update(:prev_item, prev_item |> change(%{order: item.order}))
+            |> Repo.transaction(timeout: 300_000)
+            |> case do
+              {:ok, data} ->
+                notify_subscribers({:ok, data.item},      @updated)
+                notify_subscribers({:ok, data.prev_item}, @updated)
+              {:error, _, _} ->
+                :error
+              _ ->
+                :error
+            end
           end
         end
+        defoverridable move_up: 1
       end
 
       #Filters query by active status.
@@ -356,7 +360,6 @@ defmodule HfgPortal.Helpers.DefaultCrud do
       # Allow modules to override any of these functions
       defoverridable [
         notify_subscribers: 2,
-        move_up:            1,
         search_stack:       2,
         sort_stack:         2,
         list:               1,

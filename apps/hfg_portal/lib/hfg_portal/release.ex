@@ -20,7 +20,7 @@ defmodule HfgPortal.Release do
 
       for repo <- repos(app) do
         # Create database schema
-        repo.__adapter__.storage_up(repo.config)
+        repo.__adapter__().storage_up(repo.config())
         # Migrate
         {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
       end

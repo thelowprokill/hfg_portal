@@ -108,9 +108,9 @@ defmodule HfgPortal.Helpers.DefaultAuthorize do
       def user_authorize(%@roles{} = role, page, dev_admin) do
         cond do
           dev_admin -> true
-          role && role.admin && page not in ["reports",] -> true
-          role && role.edit  && page     in ["home",] -> true
-          role && role.view  && page     in ["home",] -> true
+          role.admin && page not in ["reports",] -> true
+          role.edit  && page     in ["home",] -> true
+          role.view  && page     in ["home",] -> true
           true -> false
         end
       end

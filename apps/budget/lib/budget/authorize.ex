@@ -51,9 +51,9 @@ defmodule Budget.Authorize do
   def user_authorize(%@roles{} = role, page, dev_admin) do
     cond do
       dev_admin -> true
-      role && role.admin && page not in ["reports"] -> true
-      role && role.edit && page in ["dashboard", "balances"] -> true
-      role && role.view && page in ["dashboard", "balances"] -> true
+      role.admin && page not in ["reports"] -> true
+      role.edit && page in ["dashboard", "balances"] -> true
+      role.view && page in ["dashboard", "balances"] -> true
       true -> false
     end
   end

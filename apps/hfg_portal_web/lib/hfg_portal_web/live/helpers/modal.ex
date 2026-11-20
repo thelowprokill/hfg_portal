@@ -186,7 +186,7 @@ defmodule HfgPortalWeb.Helpers.Modal do
 
   attr :changeset, :map, required: true
   slot :inner_block
-  def bnw_modal_new_or_edit(assigns), do: ~H"<%= if is_nil(@changeset.data.id), do: 'New ', else: 'Edit ' %><%= render_slot(@inner_block) %>"
+  def bnw_modal_new_or_edit(assigns), do: ~H'<%= if is_nil(@changeset.data.id), do: "New ", else: "Edit " %><%= render_slot(@inner_block) %>'
 
   def render(assigns), do: ~H"<div>render</div>"
 end

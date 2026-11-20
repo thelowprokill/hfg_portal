@@ -530,7 +530,7 @@ defmodule HfgPortalWeb.Layout.SidebarLive do
       |> Enum.zip(selected_page)
 
     link = cond do
-      !Enum.any?(temp_link, fn {x, y} -> x != y end) && length(link) <= length(selected_page) && length(selected_page) > 0 -> temp_link |> Enum.unzip() |> fn {x, _} -> x |> Enum.slice(0..-2) end.()
+      !Enum.any?(temp_link, fn {x, y} -> x != y end) && length(link) <= length(selected_page) && length(selected_page) > 0 -> temp_link |> Enum.unzip() |> fn {x, _} -> x |> Enum.slice(0..-2//1) end.()
       true -> link
     end
 

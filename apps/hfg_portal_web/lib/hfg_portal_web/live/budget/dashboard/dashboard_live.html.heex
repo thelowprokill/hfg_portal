@@ -1,5 +1,5 @@
 <div>
-  <%# ── Total money card (always visible) ── %>
+  <%!-- ── Total money card (always visible) ── --%>
   <% total_over = Decimal.compare(@total_money, Decimal.new(0)) == :lt %>
   <div
     phx-click="show_account_history"
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <%# ── Month/year navigator (always visible) ── %>
+  <%!-- ── Month/year navigator (always visible) ── --%>
   <div class="flex items-center gap-3 py-4">
     <button phx-click="prev_month"
             class="px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors text-lg leading-none">
@@ -43,7 +43,7 @@
 
   <%= cond do %>
   <% @selected_bucket -> %>
-    <%# ── Bucket detail view ── %>
+    <%!-- ── Bucket detail view ── --%>
 
     <div class="py-4">
       <button phx-click="back"
@@ -52,7 +52,7 @@
       </button>
     </div>
 
-    <%# Summary card %>
+    <%!-- Summary card --%>
     <% bucket = @selected_bucket %>
     <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 space-y-3 mb-6">
       <%= cond do %>
@@ -188,7 +188,7 @@
     </div>
 
   <% @show_history -> %>
-    <%# ── Account history view ── %>
+    <%!-- ── Account history view ── --%>
 
     <div class="py-4 flex items-center justify-between flex-wrap gap-3">
       <button phx-click="back"
@@ -219,11 +219,11 @@
     </div>
 
   <% true -> %>
-    <%# ── Dashboard grid ── %>
+    <%!-- ── Dashboard grid ── --%>
 
     <h3 class="text-xl"><%= @page_title %></h3>
 
-    <%# ── Totals card ── %>
+    <%!-- ── Totals card ── --%>
     <% budget_buckets          = Enum.filter(@buckets, & &1.monthly_budget) %>
     <% sinking_buckets         = Enum.filter(@buckets, & &1.type == "sinking_fund") %>
     <% total_budgeted          = Enum.reduce(budget_buckets,  Decimal.new(0), fn b, acc -> Decimal.add(acc, b.monthly_budget) end) %>
@@ -274,7 +274,7 @@
 
           <%= cond do %>
             <% bucket.type == "sinking_fund" -> %>
-              <%# Sinking fund card %>
+              <%!-- Sinking fund card --%>
               <% month_balance = Map.get(@month_end_balances, bucket.id, Decimal.new(0)) %>
               <% deposited     = Map.get(@monthly_deposits,   bucket.id, Decimal.new(0)) %>
               <% remaining     = Decimal.sub(bucket.max_balance, month_balance) |> Decimal.max(Decimal.new(0)) %>
@@ -328,7 +328,7 @@
               </div>
 
             <% bucket.type == "emergency_fund" -> %>
-              <%# Emergency fund card %>
+              <%!-- Emergency fund card --%>
               <% month_balance = Map.get(@month_end_balances, bucket.id, Decimal.new(0)) %>
               <% deposited     = Map.get(@monthly_deposits,   bucket.id, Decimal.new(0)) %>
               <% target_met    = Decimal.compare(deposited, bucket.monthly_contribution) != :lt %>
@@ -375,7 +375,7 @@
               </div>
 
             <% bucket.monthly_budget -> %>
-              <%# Regular budget card %>
+              <%!-- Regular budget card --%>
               <% spent = Map.get(@monthly_expenses, bucket.id, Decimal.new(0)) %>
               <% over  = Decimal.compare(spent, bucket.monthly_budget) == :gt %>
 
@@ -404,7 +404,7 @@
               </div>
 
             <% true -> %>
-              <%# Plain balance card %>
+              <%!-- Plain balance card --%>
               <div class="flex justify-between items-center">
                 <span class="font-semibold"><%= bucket.name %></span>
               </div>

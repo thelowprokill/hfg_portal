@@ -33,9 +33,9 @@ defmodule LoanRepayment.Authorize do
     cond do
       #user.dev_admin -> true
       dev_admin -> true
-      role && role.admin -> true
-      role && role.edit  && page     in ["home", "reports"]    -> true
-      role && role.view  && page     in ["home", "reports"]    -> true
+      role.admin -> true
+      role.edit  && page     in ["home", "reports"]    -> true
+      role.view  && page     in ["home", "reports"]    -> true
       true -> false
     end
   end

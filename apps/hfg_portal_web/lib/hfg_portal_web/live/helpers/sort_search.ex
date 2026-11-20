@@ -169,7 +169,7 @@ defmodule HfgPortalWeb.Helpers.SortSearch do
     value = search["val"]
 
     socket
-    |> assign(:search_stack, Enum.map(search_stack, &(if &1.field == field, do: %Search{&1 | val: value}, else: &1)))
+    |> assign(:search_stack, Enum.map(search_stack, &(if &1.field == field, do: %{&1 | val: value}, else: &1)))
     |> assign(:search_map, %{})
     |> assign(:page, 0)
     |> put_search()
@@ -182,7 +182,7 @@ defmodule HfgPortalWeb.Helpers.SortSearch do
     cond do
       Enum.any?(search_stack, &(&1.field == field)) ->
         search = Enum.find(search_stack, &(&1.field == field))
-                      |> fn x -> %Search{x | show: !x.show} end.()
+                      |> fn x -> %{x | show: !x.show} end.()
 
         search_stack = Enum.reject(search_stack, &(&1.field == field))
                        |> Enum.map(&(%{&1 | show: false}))
@@ -216,19 +216,6 @@ defmodule HfgPortalWeb.Helpers.SortSearch do
     |> put_sort()
   end
 
-  def sort(socket, %{"field" => field, "order" => order}) do
-    %{sort_stack: sort_stack} = socket.assigns
-
-    sort_stack = 
-      sort_stack
-      |> Enum.reject(&(&1.field == String.to_existing_atom(field)))
-      |> fn x -> x ++ [%Sort{field: String.to_existing_atom(field), order: String.to_existing_atom(order)}] end.()
-
-    socket
-    |> assign(:sort_stack, sort_stack)
-    |> put_sort()
-  end
-  
   def search_hide_filter(socket) do
     %{search_stack: search_stack} = socket.assigns
 
