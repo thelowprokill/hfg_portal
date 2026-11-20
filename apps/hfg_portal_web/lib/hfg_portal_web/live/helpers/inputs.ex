@@ -35,7 +35,9 @@ defmodule HfgPortalWeb.Helpers.Inputs do
   attr :step,           :any
   attr :list,           :list
   attr :name,           :any
+  attr :id,             :any
   attr :debounce,       :string
+  attr :autocomplete,   :string,  default: nil, doc: ~s(e.g. "off" to stop the browser suggesting past entries)
   def bnw_input(assigns) do
     ~H"""
       <div class="p-2">
@@ -58,8 +60,10 @@ defmodule HfgPortalWeb.Helpers.Inputs do
   attr :step,           :any
   attr :list,           :list
   attr :name,           :any
+  attr :id,             :any
   attr :value,          :any,     default: nil
   attr :debounce,       :string,  default: nil
+  attr :autocomplete,   :string,  default: nil
   def bnw_input_naked(assigns) when assigns.type == "checkbox" do
     assigns = assigns |> assign(:name, Map.get(assigns, :name, "#{assigns.f.name}[#{assigns.field}]"))
 
@@ -280,6 +284,8 @@ defmodule HfgPortalWeb.Helpers.Inputs do
       |> assign(:max,   Map.get(assigns, :max,  nil))
       |> assign(:step,  Map.get(assigns, :step, 1))
       |> assign(:name,  Map.get(assigns, :name, "#{assigns.f.name}[#{assigns.field}]"))
+      |> assign(:id,    Map.get(assigns, :id) || Map.get(assigns, :name, "#{assigns.f.name}[#{assigns.field}]"))
+      |> assign(:autocomplete, Map.get(assigns, :autocomplete))
       |> assign(:value, (if Map.get(assigns, :value) in ["", nil], do: assigns.f |> Map.get(:source, %{}) |> Map.get(:changes, %{}) |> Map.get(assigns.field, Map.get(assigns.f.data, assigns.field, nil)), else: Map.get(assigns, :value)))
     #Map.get(assigns.f.source.changes, assigns.field, Map.get(assigns.f.data, assigns.field, nil)), else: Map.get(assigns, :value)))
 
@@ -292,8 +298,9 @@ defmodule HfgPortalWeb.Helpers.Inputs do
       min={@min}
       max={@max} 
       step={@step} 
-      id={@name}
+      id={@id}
       value={@value}
+      autocomplete={@autocomplete}
       phx-debounce={@debounce}
     />
     """

@@ -292,14 +292,48 @@ defmodule HfgPortalWeb.Helpers.Buttons do
     ~H"<.bnw_button_icon {assigns}/>"
   end
 
+  @doc """
+  A delete icon button that asks first, in a `bnw_confirm_delete/1` box: "Are you sure you want
+  to delete <item>?", or just "Are you sure?" without `item`. `data={[]}` skips the question.
+
+  The box is a single one in the root layout; `app.js` shows it for any `data-confirm-delete`
+  click and only lets the click through on Delete. So the button keeps its own `phx_click`,
+  `phx-value-*` and `phx-target`, and callers don't change.
+  """
   def bnw_button_delete(assigns) do
     assigns =
       assigns
       |> assign(:bnw_icon,  "delete")
       |> assign(:phx_click, Map.get(assigns, :phx_click, :delete))
       |> assign(:class,     "text-danger-main hover:text-danger-hover #{Map.get(assigns, :class, "")}")
-      |> assign(:data,      Map.get(assigns, :data, [confirm: "Are you sure"]))
+      |> assign(:data,      Map.get(assigns, :data, [{"confirm-delete", Map.get(assigns, :item, "")}]))
+      |> Map.delete(:item)
     ~H"<.bnw_button_icon {assigns}/>"
+  end
+
+  @doc """
+  `bnw_button_delete/1` that also makes the person type `key` (default `item`), case-sensitive,
+  before Delete enables, in the same shared box. `label` names the field (default "Name") and
+  `message` is an optional warning shown above it.
+
+      <.bnw_button_delete_confirm_typed phx-value-id={plug.id} item={plug.name} label="Plug name"
+        message="This permanently deletes the plug and everything in it." />
+
+  The event arrives with what was typed added as `"value"`. Check it there before deleting:
+  the disabled button is only a hint.
+  """
+  def bnw_button_delete_confirm_typed(assigns) do
+    item = Map.fetch!(assigns, :item)
+
+    assigns
+    |> assign(:data, [
+      {"confirm-delete",         item},
+      {"confirm-delete-key",     Map.get(assigns, :key, item)},
+      {"confirm-delete-label",   Map.get(assigns, :label, "Name")},
+      {"confirm-delete-message", Map.get(assigns, :message, "")}
+    ])
+    |> Map.drop([:item, :key, :label, :message])
+    |> bnw_button_delete()
   end
 
   # icon buttons

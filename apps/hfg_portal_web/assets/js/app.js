@@ -350,6 +350,84 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+// bnw_button_delete renders data-confirm-delete="<item>". phoenix_html fires phoenix.link.click
+// before any click reaches LiveView; cancelling it stops the click, so ask in the layout's
+// #bnw-confirm-delete box and, on Delete, click the button again and let it through.
+// bnw_button_delete_confirm_typed adds data-confirm-delete-key: Delete stays disabled until that
+// is typed exactly, and the typed text goes along as "value" for the server to check. It is set as
+// the button's own value: LiveView sends a clicked button's value as "value", over phx-value-value.
+{
+  const box     = () => document.getElementById("bnw-confirm-delete")
+  const find    = sel => box().querySelector(sel)
+  const confirm = () => document.getElementById("bnw-confirm-delete-box_confirm")
+  const input   = () => document.getElementById("bnw-confirm-delete-value")
+  let pending = null, confirmed = null
+
+  const close = () => { box().classList.add("hidden"); pending = null }
+
+  window.addEventListener("phoenix.link.click", e => {
+    const el   = e.target
+    const item = el.getAttribute?.("data-confirm-delete")
+    if (item === null || item === undefined || el === confirmed) return
+    e.preventDefault()
+    pending = el
+
+    const key     = el.getAttribute("data-confirm-delete-key")
+    const message = el.getAttribute("data-confirm-delete-message") || ""
+    box().querySelectorAll("[data-confirm-delete-name]").forEach(n => n.textContent = item)
+    find("[data-confirm-delete-named]").classList.toggle("hidden", item === "")
+    find("[data-confirm-delete-unnamed]").classList.toggle("hidden", item !== "")
+    find("[data-confirm-delete-message]").textContent = message
+    find("[data-confirm-delete-message]").classList.toggle("hidden", message === "")
+    find("[data-confirm-delete-ask]").classList.toggle("hidden", key !== null)
+    find("[data-confirm-delete-typed]").classList.toggle("hidden", key === null)
+
+    if (key !== null) {
+      const label = `${el.getAttribute("data-confirm-delete-label") || "Name"} (case-sensitive)`
+      find("[data-confirm-delete-key]").textContent = key
+      find("[data-confirm-delete-typed] label").textContent = label
+      input().placeholder = label
+      input().value = ""
+    }
+    confirm().disabled = key !== null
+    box().classList.remove("hidden")
+    ;(key !== null ? input() : confirm()).focus()
+  }, true)
+
+  const accept = () => {
+    const key = pending.getAttribute("data-confirm-delete-key")
+    if (key !== null && input().value !== key) return
+    confirmed = pending
+    close()
+    const before = confirmed.getAttribute("value")
+    if (key !== null) confirmed.setAttribute("value", input().value)
+    confirmed.click()
+    before === null ? confirmed.removeAttribute("value") : confirmed.setAttribute("value", before)
+    confirmed = null
+  }
+
+  // Clicks, keys and typing in the box stop here: LiveView would read them as a click-away or
+  // Escape on the modal underneath and close it.
+  document.addEventListener("click", e => {
+    if (!pending || !box().contains(e.target)) return
+    e.stopPropagation()
+    if (e.target.closest("#bnw-confirm-delete-box_confirm")) accept()
+    else if (e.target.closest("button") || !e.target.closest("#bnw-confirm-delete-box_modal-container")) close()
+  })
+
+  document.addEventListener("input", e => {
+    if (!pending || e.target !== input()) return
+    e.stopPropagation()
+    confirm().disabled = input().value !== pending.getAttribute("data-confirm-delete-key")
+  }, true)
+
+  window.addEventListener("keydown", e => {
+    if (!pending) return
+    if (e.key === "Escape") { e.stopImmediatePropagation(); close() }
+    else if (e.key === "Enter" && e.target === input()) { e.stopImmediatePropagation(); e.preventDefault(); accept() }
+  }, true)
+}
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

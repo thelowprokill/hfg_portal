@@ -18,5 +18,21 @@
   </head>
   <body class="bg-white antialiased dark:bg-zinc-900 dark:text-white">
     <%= @inner_content %>
+    <%!-- The one box every bnw_button_delete (and _confirm_typed) asks in; app.js fills it in,
+          shows it and answers it. --%>
+    <div id="bnw-confirm-delete" class="hidden">
+      <HfgPortalWeb.Helpers.Modal.bnw_confirm_delete id="bnw-confirm-delete-box" event={nil} cancel={nil}>
+        <p data-confirm-delete-message class="hidden pb-3"></p>
+        <div data-confirm-delete-ask>
+          <span data-confirm-delete-named class="hidden">Are you sure you want to delete <strong data-confirm-delete-name></strong>?</span>
+          <span data-confirm-delete-unnamed>Are you sure?</span>
+        </div>
+        <div data-confirm-delete-typed class="hidden">
+          <p>Type <strong data-confirm-delete-key class="select-all"></strong> to confirm.</p>
+          <HfgPortalWeb.Helpers.Inputs.bnw_input f={Phoenix.Component.to_form(%{}, as: :confirm)} field={:value}
+            id="bnw-confirm-delete-value" name="value" display_name="Name (case-sensitive)" autocomplete="off" />
+        </div>
+      </HfgPortalWeb.Helpers.Modal.bnw_confirm_delete>
+    </div>
   </body>
 </html>

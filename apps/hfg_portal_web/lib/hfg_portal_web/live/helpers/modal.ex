@@ -3,6 +3,7 @@ defmodule HfgPortalWeb.Helpers.Modal do
 
   import HfgPortalWeb.Helpers.Icons
   import HfgPortalWeb.Helpers.Utility
+  import HfgPortalWeb.Helpers.Buttons, only: [bnw_button_cancel: 1, bnw_button_danger: 1]
   #import HfgPortalWeb.Helpers.Reports
 
   attr :modal_stack, :list, required: true
@@ -114,6 +115,72 @@ defmodule HfgPortalWeb.Helpers.Modal do
     <div class="flex justify-end pt-6 pb-0 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
         <%= render_slot(@inner_block) %>
     </div>
+    """
+  end
+
+  @doc """
+  A delete box that only enables Delete once `key` (default `name`) is typed exactly,
+  case-sensitive. The inner content is the warning message.
+
+      <.bnw_confirm_delete_typed id="delete_plug" name={@plug.name} item="Plug name" event="delete">
+        This permanently deletes the plug and everything in it.
+      </.bnw_confirm_delete_typed>
+
+  `event` is sent to the parent (or `target`) with `%{"value" => typed}`. Check the value again
+  there before deleting: the disabled button is only a hint.
+  """
+  attr :id,     :string, required: true
+  attr :name,   :string, required: true, doc: "what is being deleted, shown in the title"
+  attr :key,    :string, default: nil,   doc: "what must be typed, if not the name"
+  attr :item,   :string, default: "Name", doc: ~s(the input's label, e.g. "Plug name")
+  attr :event,  :string, required: true, doc: ~s(called with %{"value" => typed})
+  attr :target, :any,    default: nil,   doc: "phx-target for event, when the parent is a LiveComponent"
+  attr :cancel, :string, default: "cancel"
+  slot :inner_block, required: true
+  def bnw_confirm_delete_typed(assigns) do
+    ~H"""
+    <.live_component module={HfgPortalWeb.Helpers.ConfirmDelete} id={@id} name={@name} key={@key} item={@item}
+      event={@event} target={@target} cancel={@cancel} inner_block={@inner_block} />
+    """
+  end
+
+  @doc """
+  A plain delete box (no typing; for that see `bnw_confirm_delete_typed/1`): "Are you sure you
+  want to delete <name>?", or just "Are you sure?" without a name, with Cancel and Delete.
+  Inner content, if given, replaces the question.
+
+      <.bnw_confirm_delete id="delete_row" name="this row" event="delete" values={%{id: row.id}} />
+
+  Delete sends `event` with `values` as its params (to `target`, if set).
+  """
+  attr :id,     :string, required: true
+  attr :name,   :string, default: nil,  doc: ~s(what is being deleted; without it the box just asks "Are you sure?")
+  attr :event,  :any,    required: true, doc: "the event Delete sends; nil for none (the root layout's shared box, which app.js answers)"
+  attr :values, :map,    default: %{},  doc: ~s(params sent with event, e.g. %{id: 5})
+  attr :target, :any,    default: nil,  doc: "phx-target for event, when the parent is a LiveComponent"
+  attr :cancel, :any,    default: "cancel", doc: "the cancel event; nil for none, as for event"
+  slot :inner_block
+  def bnw_confirm_delete(assigns) do
+    assigns = assign(assigns, :phx_values, Map.new(assigns.values, fn {k, v} -> {"phx-value-#{k}", v} end))
+
+    ~H"""
+    <.bnw_modal id={"#{@id}_modal"} event={@cancel}>
+      <%!-- data-confirm-delete-name: app.js fills these in for the layout's shared box. --%>
+      <.bnw_modal_header>Delete <span data-confirm-delete-name><%= @name %></span></.bnw_modal_header>
+      <.bnw_modal_body>
+        <%= if @inner_block != [] do %>
+          <%= render_slot(@inner_block) %>
+        <% else %>
+          <span data-confirm-delete-named class={@name in [nil, ""] && "hidden"}>Are you sure you want to delete <strong data-confirm-delete-name><%= @name %></strong>?</span>
+          <span data-confirm-delete-unnamed class={@name not in [nil, ""] && "hidden"}>Are you sure?</span>
+        <% end %>
+      </.bnw_modal_body>
+      <.bnw_modal_footer>
+        <.bnw_button_cancel id={"#{@id}_cancel"} phx_click={@cancel} />
+        <.bnw_button_danger id={"#{@id}_confirm"} phx_click={@event} phx-target={@target} {@phx_values}
+          class="disabled:opacity-50 disabled:cursor-not-allowed">Delete</.bnw_button_danger>
+      </.bnw_modal_footer>
+    </.bnw_modal>
     """
   end
 

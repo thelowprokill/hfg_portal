@@ -58,13 +58,13 @@ defmodule HfgPortalWeb.HommSaves.Files.FilesLive do
               <span class="font-mono"><%= name %></span>
               <span class="text-sm text-gray-500"><%= format_dt(entry.updated_at) %></span>
               <span class="text-sm text-gray-500"><%= entry.machine %></span>
-              <.bnw_button_delete phx-value-section={@section} phx-value-path={entry.path} data={[confirm: "Delete #{entry.path}?"]} />
+              <.bnw_button_delete phx-value-section={@section} phx-value-path={entry.path} item={entry.path} />
             </div>
           <% else %>
             <details open>
               <summary class="cursor-pointer font-semibold py-0.5">
                 <%= name %>/
-                <.bnw_button_delete phx-value-section={@section} phx-value-path={@prefix <> name} data={[confirm: "Delete folder #{@prefix <> name} and everything in it?"]} />
+                <.bnw_button_delete phx-value-section={@section} phx-value-path={@prefix <> name} data={[{"confirm-delete", "folder #{@prefix <> name}"}, {"confirm-delete-message", "This deletes everything in it."}]} />
               </summary>
               <.tree tree={entry} section={@section} prefix={@prefix <> name <> "/"} />
             </details>
